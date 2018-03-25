@@ -11,46 +11,10 @@ class Group extends HomeBase
     public function __construct()
     {
         parent::__construct();
-        cookie('test',123456);
-
     }
 
     public function index()
     {
-        $goodsCode = 's0010002';
-
-        $goodsField = "a.show_title,a.on_time,a.off_time";
-        $ticketField = "b.recommend_account,b.class_label";
-        $supplyField = "c.image";
-        $allField = $goodsField.','.$ticketField.','.$supplyField;
-        $join = [
-            ['goods_scenery b','a.code = b.goods_code'],
-            ['syy_goods_supply c','a.code = c.goods_code']
-        ];
-        $where = [
-            "a.code"         => $goodsCode,
-            "a.goods_type"  => 3,
-            "a.is_del"       =>  ["<>","1"]  //未删除
-        ];
-        $data = db('goods')->alias("a")->join($join)->field($allField)->where($where)->find();
-        if(!$data){
-            echo 1;
-        }
-
-        $data["recommend_account"] = json_decode($data["recommend_account"],true);
-        $data["class_label"] = json_decode($data["class_label"],true);
-        //图片处理
-        $imgArray = json_decode($data["image"],true);
-        $data["fileList"] = array();
-        foreach ($imgArray as $k){
-            $newArray = [
-                "name"  => $k ,
-                "url"  => config("img_url") . $k ,
-                "status"  => "success" ,
-            ];
-            $data["fileList"][] = $newArray;
-        }
-       var_dump($data);
 
     }
 
@@ -169,25 +133,23 @@ class Group extends HomeBase
 
     //商品删除
     public function del(){
-        $goodsCode = "g001594519";
         if(empty($goodsCode)){
-            echo json_encode(array("code" => 404,"msg" => "参数错误404"));
-            return;
+            return json(array("code" => 404,"msg" => "参数错误404"));
         }
         $where = [
-            "code"    =>  $goodsCode,
-            "sp_code"     =>  getSpCode(),         //todo 供应商code
+            "code"        =>  $goodsCode,
+            "sp_code"     =>  getSpCode(),         // 供应商code
+            "is_del"      =>  1
         ];
         $res = db('goods')->field("check_type")->where($where)->find();
-        if($res["check_type"] == 0){
-            var_dump($res);
-        }else if($res["check_type"] && $res["check_type"] != 0){
-
-        }else{
-            echo json_encode(array("code" => 405,"msg" => "请求错误，请联系管理员"));
-            return;
+        if(empty($res)){
+            return json(array("code" => 405,"msg" => "商品号找不到或者这条商品不属于你"));
         }
-
+        $output = db('goods')->where(array("code" => $goodsCode))->update(array("is_del"=>1));
+        if(!$output){
+            return json(array("code" => 403,"msg" => "删除失败，请稍后再试一次"));
+        }
+        return json(array('code' => 200,'msg' => '删除成功'));
     }
 
     //分配

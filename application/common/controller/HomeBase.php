@@ -9,13 +9,11 @@ class HomeBase extends Base
     {
         parent::__construct();
 //        if(!IS_WIN){
-            $origin = isset($_SERVER['HTTP_ORIGIN'])? $_SERVER['HTTP_ORIGIN'] : ''; 
-        
+            $origin = isset($_SERVER['HTTP_ORIGIN'])? $_SERVER['HTTP_ORIGIN'] : '';
             $allow_origin = array( 
                 'http://localhost:8080', 
                 'http://qq.kris1945.com' 
-            ); 
-            
+            );
             if(in_array($origin, $allow_origin)){ 
                 header('Access-Control-Allow-Origin:'.$origin); 
                 header("Access-Control-Allow-Methods", "GET,POST");

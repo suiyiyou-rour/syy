@@ -74,14 +74,6 @@ class AddGroup
         return json_encode($output);
     }
 
-
-    /**
-     * todo
-     * todo tab规则  0  1  2  3  4  5  6  7
-     * todo 必须     1  1  1  0  1  0  0  1
-     * todo 页码写入 0  1  3     6        7
-     */
-
     //基本信息添加 0
     public function basicInfo()
     {
@@ -100,36 +92,36 @@ class AddGroup
                 return array("code" => 405, "msg" => $validate->getError());
             }
 
-            $goodsCode = createGoodsCode("g");//产品编号
+            $goodsCode = createGoodsCode("g");  //产品编号
             //主表添加数据
-            $goodsData["code"] = $goodsCode;//产品编号
-            $goodsData["sp_code"] = session("sp.code");//产品编号
-            $goodsData["create_time"] = time();
-            $goodsData["goods_type"] = 1;//跟团游
-            $goodsData["contact_code"] = $data["contact_code"]; //合同编码  （主）必须
-            $goodsData["inside_code"] = $data["inside_code"]; //内部编号   （主）
-            $goodsData["inside_title"] = $data["inside_title"]; //内部显示标题   （主）必须
-            $goodsData["subtitle"] = $data["subtitle"]; //商品副标题     （主）
-            $goodsData["advance_time"] = $data["advance_time"]; //提前预定时间     （主）必须
-            $goodsData["online_type"] = $data["online_type"]; //上线类型   (主)必须
-            $goodsData["on_time"] = $data["on_time"]; //上线时间     （主）
-            $goodsData["off_time"] = $data["off_time"]; //下线时间     （主）
-            $goodsData["rate"] = $data["rate"]; //产品费率     （主）必须
+            $goodsData["code"]              =   $goodsCode;                //产品编号
+            $goodsData["sp_code"]           =   session("sp.code");       //产品编号
+            $goodsData["create_time"]       =   time();
+            $goodsData["goods_type"]        =   1;                         //跟团游
+            $goodsData["contact_code"]      =   $data["contact_code"];   //合同编码    （主）必须
+            $goodsData["inside_code"]       =   $data["inside_code"];    //内部编号    （主）
+            $goodsData["inside_title"]      =   $data["inside_title"];   //内部显示标题（主）必须
+            $goodsData["subtitle"]          =   $data["subtitle"];        //商品副标题  （主）
+            $goodsData["advance_time"]      =   $data["advance_time"];   //提前预定时间（主）必须
+            $goodsData["online_type"]       =   $data["online_type"];    //上线类型     (主)必须
+            $goodsData["on_time"]           =   $data["on_time"];         //上线时间    （主）
+            $goodsData["off_time"]          =   $data["off_time"];        //下线时间    （主）
+            $goodsData["rate"]              =   $data["rate"];             //产品费率    （主）必须
 
             //副表添加数据
-            $groupData["goods_code"] = $goodsCode; //产品编号
-            $groupData["service_type"] = $data["service_type"]; //服务保障      （副）
-            $groupData["line_type"] = $data["line_type"]; //路线类型     （副）
-            $groupData["play_type"] = $data["play_type"]; //游玩类型     （副）
-            $groupData["begin_address"] = $data["begin_address"]; //出发地     （副）必须
-            $groupData["end_address"] = $data["end_address"]; //目的地     （副）必须
-            $groupData["main_place"] = $data["main_place"]; //主要景点     （副）必须
-            $groupData["service_tel"] = $data["service_tel"]; //客服电话     （副）
-            $groupData["refund_type"] = $data["refund_type"]; //退款类型     （副）必须
-            $groupData["refund_info"] = $data["refund_info"];//梯度详细退款     （副）
+            $groupData["goods_code"]        =   $goodsCode;                 //产品编号
+            $groupData["service_type"]      =   $data["service_type"];    //服务保障    （副）
+            $groupData["line_type"]         =   $data["line_type"];       //路线类型    （副）
+            $groupData["play_type"]         =   $data["play_type"];       //游玩类型    （副）
+            $groupData["begin_address"]     =   $data["begin_address"];  //出发地      （副）必须
+            $groupData["end_address"]       =   $data["end_address"];    //目的地      （副）必须
+            $groupData["main_place"]        =   $data["main_place"];     //主要景点    （副）必须
+            $groupData["service_tel"]       =   $data["service_tel"];    //客服电话    （副）
+            $groupData["refund_type"]       =   $data["refund_type"];    //退款类型    （副）必须
+            $groupData["refund_info"]       =   $data["refund_info"];    //梯度详细退款（副）
 
             //补充表
-            $supplyData["goods_code"] = $goodsCode; //产品编号
+            $supplyData["goods_code"]       =   $goodsCode; //产品编号
 
             $goodsRes = db('goods')->insert($goodsData);
             $groupRes = db('goods_group')->insert($groupData);
@@ -148,26 +140,26 @@ class AddGroup
                 // 验证失败 输出错误信息
                 return array("code" => 405, "msg" => $validate->getError());
             }
-            $goodsData["contact_code"] = $data["contact_code"]; //合同编码  （主）必须
-            $goodsData["inside_code"] = $data["inside_code"]; //内部编号   （主）
-            $goodsData["inside_title"] = $data["inside_title"]; //内部显示标题   （主）必须
-            $goodsData["subtitle"] = $data["subtitle"]; //商品副标题     （主）
-            $goodsData["advance_time"] = $data["advance_time"]; //提前预定时间     （主）必须
-            $goodsData["online_type"] = $data["online_type"]; //上线类型   (主)必须
-            $goodsData["on_time"] = $data["on_time"]; //上线时间     （主）
-            $goodsData["off_time"] = $data["off_time"]; //下线时间     （主）
-            $goodsData["rate"] = $data["rate"]; //产品费率     （主）必须
+            $goodsData["contact_code"]      =   $data["contact_code"];  //合同编码     （主）必须
+            $goodsData["inside_code"]       =   $data["inside_code"];   //内部编号     （主）
+            $goodsData["inside_title"]      =   $data["inside_title"];  //内部显示标题 （主）必须
+            $goodsData["subtitle"]          =   $data["subtitle"];      //商品副标题   （主）
+            $goodsData["advance_time"]      =   $data["advance_time"]; //提前预定时间 （主）必须
+            $goodsData["online_type"]       =   $data["online_type"];  //上线类型      (主)必须
+            $goodsData["on_time"]           =   $data["on_time"];       //上线时间     （主）
+            $goodsData["off_time"]          =   $data["off_time"];      //下线时间     （主）
+            $goodsData["rate"]              =   $data["rate"];          //产品费率      （主）必须
 
             //副表添加数据
-            $groupData["service_type"] = $data["service_type"]; //服务保障      （副）
-            $groupData["line_type"] = $data["line_type"]; //路线类型     （副）
-            $groupData["play_type"] = $data["play_type"]; //游玩类型     （副）
-            $groupData["begin_address"] = $data["begin_address"]; //出发地     （副）必须
-            $groupData["end_address"] = $data["end_address"]; //目的地     （副）必须
-            $groupData["main_place"] = $data["main_place"]; //主要景点     （副）必须
-            $groupData["service_tel"] = $data["service_tel"]; //客服电话     （副）
-            $groupData["refund_type"] = $data["refund_type"]; //退款类型     （副）必须
-            $groupData["refund_info"] = $data["refund_info"];//梯度详细退款     （副）
+            $groupData["service_type"]      =   $data["service_type"];   //服务保障   （副）
+            $groupData["line_type"]         =   $data["line_type"];      //路线类型   （副）
+            $groupData["play_type"]         =   $data["play_type"];      //游玩类型   （副）
+            $groupData["begin_address"]     =   $data["begin_address"]; //出发地     （副）必须
+            $groupData["end_address"]       =   $data["end_address"];   //目的地     （副）必须
+            $groupData["main_place"]        =   $data["main_place"];    //主要景点   （副）必须
+            $groupData["service_tel"]       =   $data["service_tel"];   //客服电话   （副）
+            $groupData["refund_type"]       =   $data["refund_type"];   //退款类型   （副）必须
+            $groupData["refund_info"]       =   $data["refund_info"];   //梯度详细退款（副）
             $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
             $groupRes = db('goods_group')->where(array("goods_code" => $goodsCode))->update($groupData);
             if ($goodsRes === false) {
@@ -220,19 +212,13 @@ class AddGroup
             $imageArray[] = $k["name"];
         }
 
-        //首图
-        $goodsData["head_img"] = $fileList[0]["name"];
-        //图片数组
-        $supplyData["image"] = json_encode($imageArray);
-        //推荐理由 feature_reasons
-        $groupData["feature_reasons"] = json_encode($data["feature_reasons"]);
-        $dd["head_img"] = $fileList[0]["name"];
-        $dd["image"] = json_encode($imageArray);
-        $dd["feature_reasons"] = json_encode($data["feature_reasons"]);
+        $goodsData["head_img"]          =  $fileList[0]["name"];                  //首图
+        $supplyData["image"]            =  json_encode($imageArray);               //图片数组
+        $groupData["feature_reasons"]  =  json_encode($data["feature_reasons"]);//推荐理由
 
-        $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
+        $goodsRes  = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
         $supplyRes = db('goods_supply')->where(array("goods_code" => $goodsCode))->update($supplyData);
-        $groupRes = db('goods_group')->where(array("goods_code" => $goodsCode))->update($groupData);
+        $groupRes  = db('goods_group')->where(array("goods_code" => $goodsCode))->update($groupData);
         if ($goodsRes === false) {
             return array("code" => 403, "msg" => "首图保存出错，请稍后再试");
         }
