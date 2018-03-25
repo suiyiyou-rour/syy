@@ -159,13 +159,11 @@ class Group extends HomeBase
         $action  = ucfirst($request->action());
         $state = input('state');
         if($state == null || $state == ""){
-            echo json_encode(array("code" => 404,"msg" => "参数错误404"));
-            return;
+            return json(array("code" => 404,"msg" => "参数错误404"));
         }
         $res = \think\Loader::model('Goods','logic')->dispatcher($controller,$action,$state);
-        echo $res;
-        return ;
-
+        echo json_encode($res);
+        return json($res);
     }
 
 

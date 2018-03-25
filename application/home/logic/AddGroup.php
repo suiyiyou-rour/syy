@@ -71,7 +71,7 @@ class AddGroup
                 $output = array("code" => 404, "msg" => "参数错误");
         }
         $this->endOperation($goodsCode,$state);//后置方法
-        return json_encode($output);
+        return $output;
     }
 
     //基本信息添加 0
@@ -92,8 +92,13 @@ class AddGroup
         $goodsData["subtitle"]          =   $data["subtitle"];      //商品副标题   （主）
         $goodsData["advance_time"]      =   $data["advance_time"]; //提前预定时间 （主）必须
         $goodsData["online_type"]       =   $data["online_type"];  //上线类型      (主)必须
-        $goodsData["on_time"]           =   $data["on_time"];       //上线时间     （主）
-        $goodsData["off_time"]          =   $data["off_time"];      //下线时间     （主）
+        if($goodsData["online_type"] == 1){ //审核通过上线
+            $goodsData["offline_type"] = 3; //最后团期过期下线
+        }else{
+            $goodsData["offline_type"] = 2; //指定下架时间
+            $goodsData["on_time"]        =   $data["on_time"];       //上线时间     （主）
+            $goodsData["off_time"]       =   $data["off_time"];      //下线时间     （主）
+        }
         $goodsData["rate"]              =   $data["rate"];          //产品费率      （主）必须
         //副表添加数据
         $groupData["service_type"]      =   $data["service_type"];   //服务保障   （副）

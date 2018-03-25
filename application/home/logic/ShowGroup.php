@@ -11,40 +11,52 @@ class ShowGroup
         switch ($state) {
             case '0':
                 //基本信息
-                return $this->basicInfo();
+                $output = $this->basicInfo();
+                break;
             case '1':
                 //行程信息
-                return $this->routeInfo();
+                $output = $this->routeInfo();
+                break;
             case '2':
                 //产品特色
-                return $this->sellingPoint();
+                $output = $this->sellingPoint();
+                break;
             case '3':
                 //自费项目
-                return $this->chargedItem();
+                $output = $this->chargedItem();
+                break;
             case '4':
                 //费用包含
-                return $this->includeCost();
+                $output = $this->includeCost();
+                break;
             case '5':
                 //费用不包含
-                return $this->notInCost();
+                $output = $this->notInCost();
+                break;
             case '6':
                 //特殊人群限制
-                return $this->specialPeople();
+                $output = $this->specialPeople();
+                break;
             case '7':
                 //预定须知添加
-                return $this->advanceKnow();
+                $output = $this->advanceKnow();
+                break;
             case '11':
                 //价格库存
-                return $this->ratesInventory();
+                $output = $this->ratesInventory();
+                break;
             case '12':
                 //价格库存列表
-                return $this->priceList();
+                $output = $this->priceList();
+                break;
             case '20':
                 //价格库存列表
-                return $this->goodsHead();
+                $output = $this->goodsHead();
+                break;
             default:
-                return json_encode(array("code" => 404,"msg" => "参数错误"));
+                $output = array("code" => 404,"msg" => "参数错误");
         }
+        return $output;
     }
 
     /**
@@ -74,7 +86,7 @@ class ShowGroup
             ];
             $data = db('goods')->alias($alias)->join($join)->field($allField)->where($where)->find();
             if(!$data){
-                return json_encode(array("code" => 403,"msg" => "商品不存在或者商品被删除，请联系管理员"));
+                return array("code" => 403,"msg" => "商品不存在或者商品被删除，请联系管理员");
             }
             $data["service_type"]      =   json_decode($data["service_type"]); //服务保障      （副）
             $data["main_place"]        =   json_decode($data["main_place"]); //主要景点     （副）必须
@@ -84,7 +96,7 @@ class ShowGroup
             $data["state"] = '0';
             $data["tab"] = $this->getGoodsTab($goodsCode);
             $data["goodsCode"] = $goodsCode;
-            return json_encode(array("code" => 200,"data" => $data));
+            return array("code" => 200,"data" => $data);
         }
         //没有商品code
         $alias = array("syy_goods" => "a","syy_goods_create" => "b");
@@ -104,10 +116,10 @@ class ShowGroup
             foreach ($res as &$k){
                 $k["tab"] = $k["tab"] + 1;
             }
-            return json_encode(array("code" => 203,"data" => $res));
+            return array("code" => 203,"data" => $res);
         }
         //没有 未填完信息
-        return json_encode(array("code" => 202));
+        return array("code" => 202);
     }
 
     //行程信息 1
@@ -116,11 +128,11 @@ class ShowGroup
         //TODO 判断未删除 制作中 填写过 未填写过
         $goodsCode = input('post.goodsCode');
         if(empty($goodsCode)){
-            return json_encode(array("code" => 404,"msg" => "商品号不能为空"));
+            return array("code" => 404,"msg" => "商品号不能为空");
         }
         $tab = $this->getGoodsTab($goodsCode);
         if($tab < 1){
-            return json_encode(array("code" => 201,"data" => array("tab"=>$tab)));
+            return array("code" => 201,"data" => array("tab"=>$tab));
         }
         $field = "play_day,go_trans,back_trans,go_trans_cost,back_trans_cost,gather_place,route_info";
         $where = [
@@ -131,7 +143,7 @@ class ShowGroup
         ];
         $groupInfo = db('goods_group')->field($field)->where($where)->find();
         if(!$groupInfo){
-            return json_encode(array("code" => 403,"msg" => "商品不存在或者商品被删除，请联系管理员"));
+            return array("code" => 403,"msg" => "商品不存在或者商品被删除，请联系管理员");
         }else{
             $groupInfo["gather_place"]      =   json_decode($groupInfo["gather_place"]); //集合地点
             $groupInfo["route_info"]        =   json_decode($groupInfo["route_info"]); //行程详细
@@ -140,7 +152,7 @@ class ShowGroup
             $groupInfo["state"] = '1';
             $groupInfo["tab"] = $tab;
             $groupInfo["goodsCode"] = $goodsCode;
-            return json_encode(array("code" => 200,"data" => $groupInfo));
+            return array("code" => 200,"data" => $groupInfo);
         }
 
     }
@@ -151,11 +163,11 @@ class ShowGroup
         //TODO 判断未删除 制作中 填写过 未填写过
         $goodsCode = input('post.goodsCode');
         if(empty($goodsCode)){
-            return json_encode(array("code" => 404,"msg" => "商品号不能为空"));
+            return array("code" => 404,"msg" => "商品号不能为空");
         }
         $tab = $this->getGoodsTab($goodsCode);
         if($tab < 2){
-            return json_encode(array("code" => 201,"data" => array("tab"=>$tab)));
+            return array("code" => 201,"data" => array("tab"=>$tab));
         }
 
         $Field = "a.feature_reasons,b.image";
@@ -167,7 +179,7 @@ class ShowGroup
         $data = db('goods_group')->alias($alias)->join($join)->field($Field)->where($where)->find();
 
         if(!$data){
-            return json_encode(array("code" => 405,"msg" => "查询失败，请联系管理员"));
+            return array("code" => 405,"msg" => "查询失败，请联系管理员");
         }
 
         $output["feature_reasons"] = json_decode($data["feature_reasons"]);
@@ -184,7 +196,7 @@ class ShowGroup
         $output["state"] = '2';
         $output["tab"] = $tab;
         $output["goodsCode"] = $goodsCode;
-        return json_encode(array("code" => 200,"data" => $output));
+        return array("code" => 200,"data" => $output);
 
     }
 
@@ -193,7 +205,7 @@ class ShowGroup
     {
         $goodsCode = input('post.goodsCode');
         if(empty($goodsCode)){
-            return json_encode(array("code" => 404,"msg" => "商品号不能为空"));
+            return array("code" => 404,"msg" => "商品号不能为空");
         }
         $tab = $this->getGoodsTab($goodsCode);
 
@@ -201,7 +213,7 @@ class ShowGroup
 
 
         if(empty($data["charged_item"])){
-            return json_encode(array("code" => 201,"data" => array("tab"=>$tab)));
+            return array("code" => 201,"data" => array("tab"=>$tab));
         }
         $array = json_decode($data["charged_item"],true);
         if(is_array($array)){
@@ -213,7 +225,7 @@ class ShowGroup
         $output["state"]         = '3';
         $output["tab"]            = $tab;
         $output["goodsCode"]    = $goodsCode;
-        return json_encode(array("code" => 200,"data" => $output));
+        return array("code" => 200,"data" => $output);
 
 
     }
@@ -223,22 +235,22 @@ class ShowGroup
     {
         $goodsCode = input('post.goodsCode');
         if(empty($goodsCode)){
-            return json_encode(array("code" => 404,"msg" => "商品号不能为空"));
+            return array("code" => 404,"msg" => "商品号不能为空");
         }
         $tab = $this->getGoodsTab($goodsCode);
         if($tab < 4){
             $data = db('goods_group')->field("main_place")->where(array("goods_code"=> $goodsCode))->find();
             if(empty($data)){
-                return json_encode(array("code" => 404,"msg" => "查询错误"));
+                return array("code" => 404,"msg" => "查询错误");
             }
             $data["main_place"]             =   json_decode($data["main_place"]); //门票
-            return json_encode(array("code" => 201,"data" => array("tab" => $tab,"main_place"=>$data["main_place"])));
+            return array("code" => 201,"data" => array("tab" => $tab,"main_place"=>$data["main_place"]));
         }
 
         $field = 'main_place,little_traffic,stay,food_server,tick_server,guide_server,safe_server,child_price_type,child_price_info,child_price_supply,give_info';
         $data = db('goods_group')->field($field)->where(array("goods_code"=> $goodsCode))->find();
         if(empty($data)){
-            return json_encode(array("code" => 404,"msg" => "查询错误"));
+            return array("code" => 404,"msg" => "查询错误");
         }
 
         $data["main_place"]             =   json_decode($data["main_place"]); //门票
@@ -246,7 +258,7 @@ class ShowGroup
         $data["tab"] = $tab;
         $data["state"] = '4';
         $data["goodsCode"]    = $goodsCode;
-        return json_encode(array("code" => 200,"data" => $data));
+        return array("code" => 200,"data" => $data);
 
 
     }
@@ -256,23 +268,21 @@ class ShowGroup
     {
         $goodsCode = input('post.goodsCode');
         if(empty($goodsCode)){
-            return json_encode(array("code" => 404,"msg" => "商品号不能为空"));
+            return array("code" => 404,"msg" => "商品号不能为空");
         }
         $tab = $this->getGoodsTab($goodsCode);
 
         $data = db('goods_group')->field("cost_not_include")->where(array("goods_code"=> $goodsCode))->find();
 
         if(empty($data["cost_not_include"])){
-            return json_encode(array("code" => 201,"data" => array("tab"=>$tab)));
+            return array("code" => 201,"data" => array("tab"=>$tab));
         }
         $output["state"]       = '5';
         $output["tab"]         = $tab;
         $output["goodsCode"]    = $goodsCode;
         $output["cost_not_include"] = json_decode($data["cost_not_include"]);
 
-        return json_encode(array("code" => 200,"data" => $output));
-
-
+        return array("code" => 200,"data" => $output);
     }
 
     //特殊人群限制 6
@@ -280,19 +290,19 @@ class ShowGroup
     {
         $goodsCode = input('post.goodsCode');
         if(empty($goodsCode)){
-            return json_encode(array("code" => 404,"msg" => "商品号不能为空"));
+            return array("code" => 404,"msg" => "商品号不能为空");
         }
         $tab = $this->getGoodsTab($goodsCode);
         $data = db('goods_group')->field("crowd_limit")->where(array("goods_code"=> $goodsCode))->find();
         if(empty($data["crowd_limit"])){
-            return json_encode(array("code" => 201,"data" => array("tab"=>$tab)));
+            return array("code" => 201,"data" => array("tab"=>$tab));
         }
         $output["state"]       = '6';
         $output["tab"]         = $tab;
         $output["goodsCode"]    = $goodsCode;
         $output["crowd_limit"] = json_decode($data["crowd_limit"]);
 
-        return json_encode(array("code" => 200,"data" => $output));
+        return array("code" => 200,"data" => $output);
     }
 
     //预定须知 7
@@ -300,26 +310,26 @@ class ShowGroup
     {
         $goodsCode = input('post.goodsCode');
         if(empty($goodsCode)){
-            return json_encode(array("code" => 404,"msg" => "商品号不能为空"));
+            return array("code" => 404,"msg" => "商品号不能为空");
         }
         $tab = $this->getGoodsTab($goodsCode);
         $data = db('goods_group')->field("book_notice")->where(array("goods_code"=> $goodsCode))->find();
         if(empty($data["book_notice"])){
-            return json_encode(array("code" => 201,"data" => array("tab"=>$tab)));
+            return array("code" => 201,"data" => array("tab"=>$tab));
         }
         $output["state"]       = '7';
         $output["tab"]         = $tab;
         $output["goodsCode"]    = $goodsCode;
         $output["book_notice"] = json_decode($data["book_notice"]);
 
-        return json_encode(array("code" => 200,"data" => $output));
+        return array("code" => 200,"data" => $output);
     }
 
     //价格日历显示 11
     public function ratesInventory(){
         $goodsCode = input('post.goodsCode');
         if(empty($goodsCode)){
-            return json_encode(array("code" => 412,"msg" => "商品号不能为空"));
+            return array("code" => 412,"msg" => "商品号不能为空");
         }
         $res = db('group_calendar')
             ->field(['id','date'],true)
@@ -338,7 +348,7 @@ class ShowGroup
                 $k["plat_house_price"] = (float)$k["plat_house_price"];
 //                $k["date"] = date("Y-m-d",$k["date"]);
             }
-            return json_encode(array("code" => 200,"data" => $res));
+            return array("code" => 200,"data" => $res);
         }
         return "";
 
@@ -349,7 +359,7 @@ class ShowGroup
     public function priceList(){
         $goodsCode = input('post.goodsCode');
         if(empty($goodsCode)){
-            return json_encode(array("code" => 404,"data" => "商品号不能为空"));
+            return array("code" => 404,"data" => "商品号不能为空");
         }
         $dateTime = input('post.time/a');
         $page = input('post.page');
@@ -369,7 +379,7 @@ class ShowGroup
 
         $count = db('group_calendar')->field('id')->where($where)->count();
         if(!$count){
-            return json_encode(array("code" => 200,"data" => array("count" => 0)));
+            return array("code" => 200,"data" => array("count" => 0));
         }
         $res = db('group_calendar')
             ->field(['id','date'],true)
@@ -392,14 +402,14 @@ class ShowGroup
         }
         $output["list"]  =  $res;
         $output["count"]  =  $count;
-        return json_encode(array("code" => 200,"data" => $output));
+        return array("code" => 200,"data" => $output);
     }
 
     //商品头部信息显示 20
     public function goodsHead(){
         $goodsCode = input('post.goodsCode');
         if(empty($goodsCode)){
-            return json_encode(array("code" => 404,"data" => "商品号不能为空"));
+            return array("code" => 404,"data" => "商品号不能为空");
         }
         $allField = "code,inside_code,inside_title,show_title,check_type";
         $where = [
@@ -408,9 +418,9 @@ class ShowGroup
         ];
         $res = db('goods')->field($allField)->where($where)->find();
         if(empty($res)){
-            return json_encode(array("code" => 403,"data" => "查询错误,商品号不对或者被删除"));
+            return array("code" => 403,"data" => "查询错误,商品号不对或者被删除");
         }
-        return json_encode(array("code" => 200,"data" => $res));
+        return array("code" => 200,"data" => $res);
     }
 
     //获取商品页面 辅
