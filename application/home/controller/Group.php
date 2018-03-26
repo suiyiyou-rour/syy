@@ -11,11 +11,12 @@ class Group extends HomeBase
     public function __construct()
     {
         parent::__construct();
+        cookie("kk",123);
     }
 
     public function index()
     {
-
+        echo cookie("kk");
     }
 
     //商品添加
@@ -159,11 +160,12 @@ class Group extends HomeBase
         $action  = ucfirst($request->action());
         $state = input('state');
         if($state == null || $state == ""){
-            return json(array("code" => 404,"msg" => "参数错误404"));
+            echo json_encode(array("code" => 404,"msg" => "参数错误404"));
+            return;
         }
         $res = \think\Loader::model('Goods','logic')->dispatcher($controller,$action,$state);
         echo json_encode($res);
-        return json($res);
+        return;
     }
 
 

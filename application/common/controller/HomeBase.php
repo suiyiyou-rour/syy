@@ -10,18 +10,19 @@ class HomeBase extends Base
         parent::__construct();
 //        if(!IS_WIN){
             $origin = isset($_SERVER['HTTP_ORIGIN'])? $_SERVER['HTTP_ORIGIN'] : '';
-            $allow_origin = array( 
-                'http://localhost:8080', 
-                'http://qq.kris1945.com' 
+            $allow_origin = array(
+                'http://ajax.kris1945.com',
+                'http://localhost:8080',
+                'http://qq.kris1945.com'
             );
             if(in_array($origin, $allow_origin)){ 
-                header('Access-Control-Allow-Origin:'.$origin); 
-                header("Access-Control-Allow-Methods", "GET,POST");
-                header('Access-Control-Allow-Headers:x-requested-with,content-type'); 
-                header('Access-Control-Allow-Credentials:true');
-                cookie(['domain' => $origin]);
+                header('Access-Control-Allow-Origin:'.$origin);                          // 指定允许其他域名访问
+                header("Access-Control-Allow-Methods", "GET,POST");                     // 响应类型
+                header('Access-Control-Allow-Headers:x-requested-with,content-type'); // 响应头设置
+                header('Access-Control-Allow-Credentials:true');                        // 是否允许请求带有验证信息
+                cookie(['domain' => $origin]);  //好像没用
             }
-            // header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Access-Token");//没什么用
+//             header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Access-Token");//没什么用
 //        }
         // 权限控制
         $controller = strtolower( request()->controller() );
