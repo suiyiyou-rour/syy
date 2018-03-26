@@ -12,9 +12,11 @@ class Login extends HomeBase
      * 后台登录 /etc/nginx/conf.d/
      */ 
     public function login(){
+        
         $account = input('post.account');
         $password = md5(input('post.password'));
-        //$remember = input('remember');
+        // $account = 'suiyiyou';
+        // $password = md5('123456');
         // 参数 合法性校验
         if($account == '' || $account == null || $password == '' || $password == null){
             return json(array('code' => 404,'msg' => '账号或密码不能为空'));

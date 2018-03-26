@@ -20,8 +20,9 @@ class Auth
         if(empty($data)){
             return array('code'=>404,'msg'=>'菜单获取失败');
         }
-        return  array('code' => 200,'msg' => '登录成功','data' => $data);
+        
         $data = $this->iconData($data); 
+       
         // 菜单数据重构
         $data = $this->recombinData($data);
         return  array('code' => 200,'msg' => '登录成功','data' => $data);
@@ -43,7 +44,7 @@ class Auth
                         $arr1= array(
                             "name" => $v['name'],
                             "hash" => $v['hash'],
-                            'icon' => $val['icon'],
+                            'icon' => $v['icon'],
                             "third" => []
                         ); 
                         foreach($data as $i => $j){
@@ -51,7 +52,7 @@ class Auth
                                 $arr2= array(
                                     "name" => $j['name'],
                                     "hash" => $j['hash'],
-                                    'icon' => $val['icon']
+                                    'icon' => $j['icon']
                                 );
                                 $arr1['third'][] = $arr2; 
                             }
@@ -76,6 +77,7 @@ class Auth
             }
         }
         return $data;
+       
     }
 
     /**
