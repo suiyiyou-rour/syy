@@ -21,7 +21,7 @@ class Auth
             return array('code'=>404,'msg'=>'菜单获取失败');
         }
         return  array('code' => 200,'msg' => '登录成功','data' => $data);
-        $data = $this->iconData($data);
+        $data = $this->iconData($data); 
         // 菜单数据重构
         $data = $this->recombinData($data);
         return  array('code' => 200,'msg' => '登录成功','data' => $data);

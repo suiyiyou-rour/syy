@@ -38,7 +38,6 @@ class Login extends HomeBase
         if($menu['code'] == 404){
             return json($menu);
         }
-        
         // 记录
         session_expire('sp',array('id' => $data['id'], 'code' => $data['code']),60*60*24*7);
         cookie('menu',$menu);
