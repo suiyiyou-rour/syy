@@ -42,7 +42,7 @@ class Login extends HomeBase
         // 记录
         session_expire('sp',array('id' => $data['id'], 'code' => $data['code']),60*60*24*7);
         cookie('menu',$menu);
-        return json(array('code' => 200,'msg' => '登录成功','data' => $menu));
+        return json($menu);
     }
 
     /**
@@ -55,7 +55,7 @@ class Login extends HomeBase
     }    
 
     /**
-     * 测试菜单获取
+     * 测试 菜单获取
      */
     // public function get(){
     //     $auth =  \think\Loader::model('Auth','logic');
