@@ -11,11 +11,12 @@ class Group extends HomeBase
     public function __construct()
     {
         parent::__construct();
-        cookie("kk",123);
+        cookie("kk",444);
     }
 
     public function index()
     {
+//        setcookie("abc","def");
         echo cookie("kk");
     }
 
