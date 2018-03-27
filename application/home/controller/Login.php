@@ -41,7 +41,7 @@ class Login extends HomeBase
             return json($menu);
         }
         // 记录
-        session_expire('sp',array('id' => $data['id'], 'code' => $data['code']),60*60*24*7);
+        session_expire('sp',array('id' => $data['id'], 'code' => $data['code'],'type' => $data['type']),60*60*24*7);
         cookie('menu',$menu);
         return json($menu);
     }
