@@ -110,7 +110,7 @@ class ShowGroup
         $goodsField = "a.code,a.inside_title";
         $createField = "b.tab";
         $allField = $goodsField.','.$createField;
-        $res = db('goods')->alias($alias)->field($allField)->where($where)->join($join)->order('a.id desc')->select();
+        $res = db('goods')->alias($alias)->field($allField)->where($where)->join($join)->order("last_edit_time desc")->select();
         //有 未填完信息
         if($res){
             foreach ($res as &$k){
@@ -125,7 +125,6 @@ class ShowGroup
     //行程信息 1
     public function routeInfo()
     {
-        //TODO 判断未删除 制作中 填写过 未填写过
         $goodsCode = input('post.goodsCode');
         if(empty($goodsCode)){
             return array("code" => 404,"msg" => "商品号不能为空");
@@ -136,31 +135,28 @@ class ShowGroup
         }
         $field = "play_day,go_trans,back_trans,go_trans_cost,back_trans_cost,gather_place,route_info";
         $where = [
-            //todo 供应商code
-//            "check_type"      =>  '0',        //制作中
             "goods_code"        => $goodsCode,
-//            "is_del"            =>  ['<>',"1"]  //未删除
+            "is_del"            =>  ['<>',"1"]  //未删除
         ];
-        $groupInfo = db('goods_group')->field($field)->where($where)->find();
-        if(!$groupInfo){
+        $output = db('goods_group')->field($field)->where($where)->find();
+        if(!$output){
             return array("code" => 403,"msg" => "商品不存在或者商品被删除，请联系管理员");
-        }else{
-            $groupInfo["gather_place"]      =   json_decode($groupInfo["gather_place"]); //集合地点
-            $groupInfo["route_info"]        =   json_decode($groupInfo["route_info"]); //行程详细
-            $groupInfo["go_trans"]          =   (int)$groupInfo["go_trans"];
-            $groupInfo["back_trans"]        =   (int)$groupInfo["back_trans"];
-            $groupInfo["state"] = '1';
-            $groupInfo["tab"] = $tab;
-            $groupInfo["goodsCode"] = $goodsCode;
-            return array("code" => 200,"data" => $groupInfo);
         }
+        $output["gather_place"]      =   json_decode($output["gather_place"]); //集合地点
+        $output["route_info"]        =   json_decode($output["route_info"]); //行程详细
+        $output["go_trans"]          =   (int)$output["go_trans"];
+        $output["back_trans"]        =   (int)$output["back_trans"];
+        $output["state"] = '1';
+        $output["tab"] = $tab;
+        $output["goodsCode"] = $goodsCode;
+        return array("code" => 200,"data" => $output);
+
 
     }
 
     //产品特色 2
     public function sellingPoint()
     {
-        //TODO 判断未删除 制作中 填写过 未填写过
         $goodsCode = input('post.goodsCode');
         if(empty($goodsCode)){
             return array("code" => 404,"msg" => "商品号不能为空");

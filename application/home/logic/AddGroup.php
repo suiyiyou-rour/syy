@@ -92,6 +92,7 @@ class AddGroup
         $goodsData["subtitle"]          =   $data["subtitle"];      //商品副标题   （主）
         $goodsData["advance_time"]      =   $data["advance_time"]; //提前预定时间 （主）必须
         $goodsData["online_type"]       =   $data["online_type"];  //上线类型      (主)必须
+        $goodsData["last_edit_time"]    =   time();                 //最后编辑时间
         if($goodsData["online_type"] == 1){ //审核通过上线
             $goodsData["offline_type"] = 3; //最后团期过期下线
         }else{
@@ -147,6 +148,7 @@ class AddGroup
         $supplyRes = db('goods_supply')->insert($supplyData);
         if ($goodsRes && $groupRes && $supplyRes) {
             db('goods_create')->insert(array('goods_code' => $goodsCode));  //插入页码表
+            $this->delCreateRear();//删除多余的条数
             return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
         } else {
             return array("code" => 403, "msg" => "数据保存出错，请再试一次");
@@ -219,6 +221,9 @@ class AddGroup
         $goodsCode = input('post.goodsCode');
 
         $data = input('post.');
+        if(empty($data["charged_item"])){
+            return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
+        }
         $groupData["charged_item"] = $data["charged_item"];
         if (empty($groupData["charged_item"])) {
             $groupData["charged_item"] = array();
@@ -598,12 +603,13 @@ class AddGroup
             'is_del'      =>  ['<>',"1"]  //未删除
         ];
         $res = db('goods')->field("check_type")->where($where)->find();
-        if($res && $res["check_type"] == 0){
-            $calendarType = db('group_calendar')->field("id")->where(array("goods_code" => $goodsCode))->find();
-            if($calendarType){
-                db('goods')->where(array("code" => $goodsCode))->update(array("check_type"=>1));
-            }
+        if(!$res)return;
+        $calendarRes = db('group_calendar')->field("id")->where(array("goods_code" => $goodsCode))->find();
+        if(!$calendarRes)return;
+        if($res["check_type"] == 0){
+            db('goods')->where(array("code" => $goodsCode))->update(array("check_type"=>1));
         }
+        $this->saveGoodsUpdate($goodsCode); //保存时需要更新的字段
     }
 
     //更新最后一次编辑时间
@@ -619,6 +625,36 @@ class AddGroup
         }
     }
 
+    //删除多余的未保存商品
+    private function delCreateRear(){
+        $where = [
+            "check_type"  =>  "0",        //制作中
+            "goods_type"  =>  "1",        //跟团游
+            "sp_code"     =>  getSpCode(), //供应商code
+            "is_del"      =>  ["<>","1"],  //未删除
+        ];
+        $count = db('goods')->where($where)->count("id");
+        if($count > 5){
+            $code = db('goods')->where($where)->order("last_edit_time asc")->value('code');
+            if($code){
+                db('goods')->where(array("code"=>$code))->delete();
+                db('goods_group')->where(array("goods_code"=>$code))->delete();
+                db('goods_supply')->where(array("goods_code"=>$code))->delete();
+                db('goods_create')->where(array("goods_code"=>$code))->delete();
+            }
+        }
+    }
+
+    //商品保存主要需要更新字段 下线时间 展示平台价格 展示结算价格
+    private function saveGoodsUpdate($goodsCode){
+        $calendarField = "MIN(plat_price) as plat_price ,MAX(date) as deadline_date,MIN(settle_price) as settle_price";
+        $data = db('group_calendar')->field($calendarField)->where(array("goods_code"=>$goodsCode))->find();
+        $res = db('goods')->field('offline_type')->where(array("code" => $goodsCode))->find();
+        if($res["offline_type"] == 3){
+            $data["off_time"] = $data["deadline_date"];
+        }
+        db('goods')->where(array("code" => $goodsCode))->update($data);
+    }
 
 
 }
