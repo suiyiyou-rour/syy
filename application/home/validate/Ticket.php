@@ -21,6 +21,7 @@ class Ticket extends Validate
 
         //购买使用说明
         'advance_time'      =>  'require|max:11|number',    //提前预定时间   （主）必须
+        'advance_time_type'=>  'require|max:1|number',     //提前预定类型   （主）必须
         'contact_need'      =>  'require|max:1|number',     //联系人信息      (副)必须
         'player_info'       =>  'require|max:256',          //游玩人限制信息  (副)必须
         'min_buy_num'       =>  'require|between:0,999',    //最少购买人数   (副)必须
@@ -81,8 +82,11 @@ class Ticket extends Validate
 
         //购买使用说明
         'advance_time.require'      =>  '提前预定时间是必须的',
-        'advance_time.max'          =>  '提前预定时间格式错误',
-        'advance_time.number'       =>  '提前预定时间格式错误',
+        'advance_time.max'          =>  '提前预定时间格式错误1',
+        'advance_time.number'       =>  '提前预定时间格式错误2',
+        'advance_time_type.require'=>  '提前预定时间格式错误3',
+        'advance_time_type.max'    =>  '提前预定时间格式错误4',
+        'advance_time_type.number' =>  '提前预定时间格式错误5',
         'contact_need.require'      =>  '联系人信息是必须的',
         'contact_need.max'          =>  '联系人信息格式错误',
         'contact_need.number'       =>  '联系人信息格式错误',
@@ -151,7 +155,7 @@ class Ticket extends Validate
         //基本信息添加
         'addBasicInfo'   =>  ['contact_code', 'goods_class', 'city', 'place_name', 'ticket_type', 'show_title', 'include_cost', 'include_cost_info', 'not_include_info', 'safe_server', 'service_tel'],
         //购买使用说明
-        'addBuyUsed'     =>  ['advance_time', 'contact_need', 'player_info', 'min_buy_num', 'max_buy_num', 'mobile_limit', 'identity_limit', 'entrance_time', 'entrance_place'],
+        'addBuyUsed'     =>  ['advance_time', 'advance_time_type','contact_need', 'player_info', 'min_buy_num', 'max_buy_num', 'mobile_limit', 'identity_limit', 'entrance_time', 'entrance_place'],
         //价格模式(有效)
         'AddRulesSetIndate'     =>  ['price_type', 'begin_date','end_date','usable_date', 'stock_type','stock_num', 'plat_price', 'settle_price','market_price','refund','refund_info','online_type','offline_type','on_time','off_time'],
         //价格模式(日历)

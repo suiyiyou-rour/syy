@@ -10,22 +10,25 @@ class OptionTicket
         switch ($state) {
             case '0':
                 //基本信息添加
-                return $this->basicInfo();
+                $output = $this->basicInfo();
+                break;
             default:
-                return json_encode(array("code" => 404,"msg" => "参数错误"));
+                $output = array("code" => 404,"msg" => "参数错误");
         }
+        return $output;
     }
 
     //基本信息 0
     public function basicInfo()
     {
-        $contact = db('contact')->field('code,name,rate')->where(array('sp_code' => '1234567'))->select();
+        $sp_code = getSpCode();
+        $contact = db('contact')->field('code,name,rate')->where(array('sp_code' => $sp_code))->select();
         if(!$contact){
-            return json_encode(array("code" => 405,"msg" => "合同加载错误,请联系管理员"));
+            return array("code" => 405,"msg" => "合同加载错误,请联系管理员");
         }
         $data["contact"] = $contact;
         $data["hash"] = getFromHash();
-        return json_encode(array("code" => 200,"data" => $data));
+        return array("code" => 200,"data" => $data);
     }
 
 

@@ -133,7 +133,7 @@ class Group extends HomeBase
             db('goods_create')->where(array("goods_code"=>$goodsCode))->delete();
         }else{
             $output = db('goods')->where(array("code" => $goodsCode))->update(array("is_del"=>1));
-            if(!$output){
+            if($output === false){
                 return json(array("code" => 403,"msg" => "删除失败，请稍后再试一次"));
             }
         }

@@ -14,12 +14,12 @@ class AddTicket
         $goodsCode = input('post.goodsCode');
         if ($state != '0' && $state != '100' && $state != '101') {
             if (empty($goodsCode)) {
-                return json_encode(array("code" => 412, "msg" => "添加商品，商品号不能为空"));
+                return array("code" => 412, "msg" => "添加商品，商品号不能为空");
             }
             //是否有写入状态检测
             $res = $this->checkGoodsType($goodsCode);
             if ($res !== true) {
-                return json_encode(array("code" => 405, "msg" => $res));
+                return array("code" => 405, "msg" => $res);
             }
         }
 
@@ -52,7 +52,7 @@ class AddTicket
                 $output = array("code" => 404, "msg" => "参数错误");
         }
         $this->endOperation($goodsCode,$state);//后置方法
-        return json_encode($output);
+        return $output;
     }
 
     //基本信息添加 0
@@ -71,6 +71,7 @@ class AddTicket
         $goodsData["sp_code"]       =   session("sp.code");     //供应商编号
         $goodsData["contact_code"]  =   $data["contact_code"]; //合同编码  （主）必须
         $goodsData["show_title"]    =   $data["show_title"];    //产品名称(外部标题) （主）必须
+        $goodsData["last_edit_time"]    =   time();                 //最后编辑时间
         //副表添加数据
         $ticketData["goods_class"]       =   $data["goods_class"];          //商品种类  （副）必须
         $ticketData["city"]              =   $data["city"];                  //城市      （副）必须
@@ -132,6 +133,7 @@ class AddTicket
         $supplyRes = db('goods_supply')->insert($supplyData);
         if ($goodsRes && $groupRes && $supplyRes) {
             db('goods_create')->insert(array('goods_code' => $goodsCode));  //插入页码表
+            $this->delCreateRear();//删除多余的条数
             return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
         } else {
             return array("code" => 403, "msg" => "数据保存出错，请再试一次");
@@ -152,14 +154,15 @@ class AddTicket
         //主表添加数据
         $goodsData["advance_time"]      =   $data["advance_time"]; //提前预定时间   （主）必须
         //副表添加数据
-        $ticketData["contact_need"]     =   $data["contact_need"];  //联系人信息      (副)必须
-        $ticketData["player_info"]      =   $data["player_info"];   //游玩人限制信息  (副)必须
-        $ticketData["min_buy_num"]      =   $data["min_buy_num"];   //最少购买人数   (副)必须
-        $ticketData["max_buy_num"]      =   $data["max_buy_num"];   //最多购买人数   (副)必须
-        $ticketData["mobile_limit"]     =   $data["mobile_limit"];  //手机号限制    (副)
-        $ticketData["identity_limit"]   =   $data["identity_limit"];//身份证限制    (副)
-        $ticketData["entrance_time"]    =   $data["entrance_time"]; //入园时间      (副)必须
-        $ticketData["entrance_place"]   =   $data["entrance_place"];//入园地址     (副)必须
+        $ticketData["advance_time_type"] =   $data["advance_time_type"];  //提前预定时间选择 (副)必须
+        $ticketData["contact_need"]      =   $data["contact_need"];        //联系人信息      (副)必须
+        $ticketData["player_info"]       =   $data["player_info"];          //游玩人限制信息  (副)必须
+        $ticketData["min_buy_num"]       =   $data["min_buy_num"];          //最少购买人数   (副)必须
+        $ticketData["max_buy_num"]       =   $data["max_buy_num"];          //最多购买人数   (副)必须
+        $ticketData["mobile_limit"]      =   $data["mobile_limit"];         //手机号限制    (副)
+        $ticketData["identity_limit"]    =   $data["identity_limit"];       //身份证限制    (副)
+        $ticketData["entrance_time"]     =   $data["entrance_time"];        //入园时间      (副)必须
+        $ticketData["entrance_place"]    =   $data["entrance_place"];       //入园地址     (副)必须
 
         $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
         $ticketRes = db('goods_ticket')->where(array("goods_code" => $goodsCode))->update($ticketData);
@@ -383,7 +386,7 @@ class AddTicket
     //购买使用说明 1
     private function buyUsedData()
     {
-        $gain = ['advance_time', 'contact_need', 'player_info', 'min_buy_num', 'max_buy_num', 'mobile_limit', 'identity_limit', 'entrance_time', 'entrance_place'];
+        $gain = ['advance_time','advance_time_type', 'contact_need', 'player_info', 'min_buy_num', 'max_buy_num', 'mobile_limit', 'identity_limit', 'entrance_time', 'entrance_place'];
         $data = Request::instance()->only($gain, 'post');//        $data = input('post.');
         if (empty($data["player_info"])) {
             $data["player_info"] = ""; //游玩人信息
@@ -505,7 +508,7 @@ class AddTicket
         }
     }
 
-    //更改商品保存状态(价格日历) 从已编辑到保存 0 - 1
+    //更改商品保存状态（价格日历）
     private function saveGoodsType($goodsCode){
         $where = [
             "code"        => $goodsCode,
@@ -518,6 +521,7 @@ class AddTicket
                 db('goods')->where(array("code" => $goodsCode))->update(array("check_type"=>1));
             }
         }
+
     }
 
     //更改商品保存状态（有效期）
@@ -548,4 +552,34 @@ class AddTicket
         }
     }
 
+    //删除多余的未保存商品
+    private function delCreateRear(){
+        $where = [
+            "check_type"  =>  "0",        //制作中
+            "goods_type"  =>  "2",        //门票
+            "sp_code"     =>  getSpCode(), //供应商code
+            "is_del"      =>  ["<>","1"],  //未删除
+        ];
+        $count = db('goods')->where($where)->count("id");
+        if($count > 5){
+            $code = db('goods')->where($where)->order("last_edit_time asc")->value('code');
+            if($code){
+                db('goods')->where(array("code"=>$code))->delete();
+                db('goods_ticket')->where(array("goods_code"=>$code))->delete();
+                db('goods_supply')->where(array("goods_code"=>$code))->delete();
+                db('goods_create')->where(array("goods_code"=>$code))->delete();
+            }
+        }
+    }
+
+    //商品保存主要需要更新字段 下线时间 展示平台价格 展示结算价格
+    private function saveGoodsUpdate($goodsCode){
+        $calendarField = "MIN(plat_price) as plat_price ,MAX(date) as deadline_date,MIN(settle_price) as settle_price";
+        $data = db('ticket_calendar')->field($calendarField)->where(array("goods_code"=>$goodsCode))->find();
+        $res = db('goods')->field('offline_type')->where(array("code" => $goodsCode))->find();
+        if($res["offline_type"] == 3){
+            $data["off_time"] = $data["deadline_date"];
+        }
+        db('goods')->where(array("code" => $goodsCode))->update($data);
+    }
 }

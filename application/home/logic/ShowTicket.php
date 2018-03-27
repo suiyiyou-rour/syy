@@ -8,12 +8,6 @@ class ShowTicket
      * 状态分发
      */
     public function dispatcher($state){
-        $goodsCode = input('post.goodsCode');
-        if ($state != '0' && $state != '100' && $state != '101') {
-            if (empty($goodsCode)) {
-                return json_encode(array("code" => 412, "msg" => "添加商品，商品号不能为空"));
-            }
-        }
         switch ($state) {
             case '0':
                 //基本信息
@@ -38,7 +32,7 @@ class ShowTicket
             default:
                 $output = array("code" => 404, "msg" => "参数错误");
         }
-        return json_encode($output);
+        return $output;
 
     }
 
@@ -100,7 +94,7 @@ class ShowTicket
         $goodsField = "a.code,a.show_title";
         $createField = "b.tab";
         $allField = $goodsField.','.$createField;
-        $res = db('goods')->alias("a")->field($allField)->where($where)->join($join)->order('a.id desc')->select();
+        $res = db('goods')->alias("a")->field($allField)->where($where)->join($join)->order("a.last_edit_time desc")->select();
         //有 未填完信息
         if($res){
             foreach ($res as &$k){
@@ -124,7 +118,7 @@ class ShowTicket
             return array("code" => 201,"data" => array("tab"=>$tab));
         }
         $goodsField = "a.advance_time";
-        $ticketField = "b.contact_need,b.player_info,b.min_buy_num,b.max_buy_num,b.mobile_limit,b.identity_limit,b.entrance_time,b.entrance_place";
+        $ticketField = "b.advance_time_type,b.contact_need,b.player_info,b.min_buy_num,b.max_buy_num,b.mobile_limit,b.identity_limit,b.entrance_time,b.entrance_place";
         $allField = $goodsField.','.$ticketField;
         $join = [['syy_goods_ticket b','a.code = b.goods_code']];
         $where = [
@@ -298,8 +292,6 @@ class ShowTicket
         $res = db('goods_create')->field("tab")->where(array("goods_code" => $goodsCode))->find();
         return $res["tab"];
     }
-
-
 
     //数据库图片转显示格式
     public function showImage($str){
