@@ -53,7 +53,8 @@ class OptionGroup
     //基本信息 0
     public function basicInfo()
     {
-        $contact = db('contact')->field('code,name,rate')->where(array('sp_code' => 1234567))->select();
+        $sp_code = getSpCode();
+        $contact = db('contact')->field('code,name,rate')->where(array('sp_code' => $sp_code))->select();
         if(!$contact){
             return array("code" => 405,"msg" => "合同加载错误,请联系管理员");
         }

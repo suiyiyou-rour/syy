@@ -14,12 +14,12 @@ class AddGroup
         $goodsCode = input('post.goodsCode');
         if ($state != '0' && $state != '11') {
             if (empty($goodsCode)) {
-                return json_encode(array("code" => 412, "msg" => "添加商品，商品号不能为空"));
+                return array("code" => 412, "msg" => "添加商品，商品号不能为空");
             }
             //是否有写入状态检测
             $res = $this->checkGoodsType($goodsCode);
             if ($res !== true) {
-                return json_encode(array("code" => 405, "msg" => $res));
+                return array("code" => 405, "msg" => $res);
             }
         }
         switch ($state) {

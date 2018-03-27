@@ -110,7 +110,7 @@ class ShowGroup
         $goodsField = "a.code,a.inside_title";
         $createField = "b.tab";
         $allField = $goodsField.','.$createField;
-        $res = db('goods')->alias($alias)->field($allField)->where($where)->join($join)->order("last_edit_time desc")->select();
+        $res = db('goods')->alias($alias)->field($allField)->where($where)->join($join)->order("a.last_edit_time desc")->select();
         //有 未填完信息
         if($res){
             foreach ($res as &$k){
