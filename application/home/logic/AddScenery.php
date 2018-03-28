@@ -13,12 +13,12 @@ class AddScenery
         $goodsCode = input('post.goodsCode');
         if ($state != '0' && $state != '100' && $state != '101') {
             if (empty($goodsCode)) {
-                return json_encode(array("code" => 412, "msg" => "添加商品，商品号不能为空"));
+                return array("code" => 412, "msg" => "添加商品，商品号不能为空");
             }
             //是否有写入状态检测
             $res = $this->checkGoodsType($goodsCode);
             if ($res !== true) {
-                return json_encode(array("code" => 405, "msg" => $res));
+                return array("code" => 405, "msg" => $res);
             }
         }
         switch ($state) {
@@ -58,7 +58,7 @@ class AddScenery
                 $output = array("code" => 404, "msg" => "参数错误");
         }
         $this->endOperation($goodsCode,$state);//后置方法
-        return json_encode($output);
+        return $output;
     }
 
     //基本信息添加 0
@@ -74,9 +74,10 @@ class AddScenery
         }
 
         //主表添加数据
-        $goodsData["sp_code"]       =   session("sp.code");     //供应商编号
-        $goodsData["contact_code"]  =   $data["contact_code"]; //合同编码  （主）必须
-        $goodsData["inside_code"]  =   $data["inside_code"];    //供应商内部编号  （主）必须
+        $goodsData["sp_code"]            =   session("sp.code");       //供应商编号
+        $goodsData["contact_code"]      =   $data["contact_code"];   //合同编码  （主）必须
+        $goodsData["inside_code"]       =   $data["inside_code"];    //供应商内部编号  （主）必须
+        $goodsData["last_edit_time"]    =   time();                   //最后编辑时间
 
         //副表添加数据
         $sceneryData["add_type"]            =   $data["add_type"];          //添加产品类型 0手动
@@ -117,6 +118,7 @@ class AddScenery
 
         if ($goodsRes && $sceneryRes && $supplyRes) {
             db('goods_create')->insert(array('goods_code' => $goodsCode));  //插入页码表
+            $this->delCreateRear(); //删除多余的未保存商品
             return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
         } else {
             return array("code" => 403, "msg" => "数据保存出错，请再试一次");
@@ -192,6 +194,7 @@ class AddScenery
         if (!$bol) {
             return array("code" => 403, "msg" => "保存日期错误，错误的日期为" . $error . "请再试一次或者联系管理员");
         }
+        $this->saveGoodsUpdate($goodsCode); //最低价格更新到主表
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
     }
 
@@ -249,6 +252,7 @@ class AddScenery
         $goodsData["head_img"]      =  $fileList[0]["name"];         //首图
         $goodsData["show_title"]    =  $data["show_title"];         //外部显示标题
         $goodsData["online_type"]   =  2;                            //默认指定日期上下线
+        $goodsData["offline_type"]  =  2;                            //默认指定下架时间
         $goodsData["on_time"]       =  $data["on_time"];            //上线日期
         $goodsData["off_time"]      =  $data["off_time"];           //下线日期
         //副表  'recommend_account','class_label'
@@ -269,10 +273,12 @@ class AddScenery
         if ($sceneryRes === false) {
             return array("code" => 403, "msg" => "保存错误，请稍后再试003");
         }
+        $this->saveGoodsUpdate($goodsCode);     //价格日历字段 更新主表
         db('goods')->where(array("code" => $goodsCode))->update(array("check_type"=>1));
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
     }
 
+    //----  图片处理
 
     //异步上传图片 100
     private function imageUpload()
@@ -301,6 +307,8 @@ class AddScenery
         $goodsCode = input("post.goodsCode");
         return array("code" => 200, "data" => $name);
     }
+
+    //----  数据接收
 
     //打包内容数据 1
     private function packDetailsData(){
@@ -361,11 +369,7 @@ class AddScenery
 
     }
 
-
-
-
-
-
+    //----  辅助函数
 
     //处理图片数组(前端对象转字符串)
     private function imageSetStr($imageObj){
@@ -437,5 +441,31 @@ class AddScenery
         }
     }
 
+    //删除多余的未保存商品
+    private function delCreateRear(){
+        $where = [
+            "check_type"  =>  "0",        //制作中
+            "goods_type"  =>  "3",        //景酒
+            "sp_code"     =>  getSpCode(), //供应商code
+            "is_del"      =>  ["<>","1"],  //未删除
+        ];
+        $count = db('goods')->where($where)->count("id");
+        if($count > 5){
+            $code = db('goods')->where($where)->order("last_edit_time asc")->value('code');
+            if($code){
+                db('goods')->where(array("code"=>$code))->delete();
+                db('goods_scenery')->where(array("goods_code"=>$code))->delete();
+                db('goods_supply')->where(array("goods_code"=>$code))->delete();
+                db('goods_create')->where(array("goods_code"=>$code))->delete();
+            }
+        }
+    }
+
+    //商品保存主要需要更新字段 下线时间 展示平台价格 展示结算价格
+    private function saveGoodsUpdate($goodsCode){
+        $calendarField = "MIN(plat_price) as plat_price ,MAX(date) as deadline_date,MIN(settle_price) as settle_price";
+        $data = db('scenery_calendar')->field($calendarField)->where(array("goods_code"=>$goodsCode))->find();
+        db('goods')->where(array("code" => $goodsCode))->update($data);
+    }
 
 }

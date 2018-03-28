@@ -30,6 +30,98 @@ class Scenery extends HomeBase
         $this->dispatcher();
     }
 
+    //列表显示
+    public function goodsList(){
+        $where["a.goods_type"] = "3";       //景酒
+
+        $show_title = input("post.show_title");         //随意游产品名称
+        if($show_title){
+            $where["a.show_title"] = ['like',"%".$show_title."%"];
+        }
+
+        $code = input("post.code");         //产品编号
+        if($code){
+            $where["a.code"] = $code;
+        }
+
+        $check_type = input("post.check_type");        //审核状态
+        if($check_type){    //0全查
+            $where["a.check_type"] = $check_type;
+        }else{
+            $where["a.check_type"] = ['<>',0];
+        }
+
+        if(session("sp.type") != 1){                    //超级管理
+            $where["a.sp_code"] = session("sp.code");   //供应商
+        }
+
+        $page = input("post.page");        //页码
+        if(empty($page)){
+            $page = 1;
+        }
+
+        $join = [['goods_scenery b','a.code = b.goods_code']];
+        $goodsField = "a.code,a.show_title,a.on_time,a.off_time,a.check_type";
+        $sceneryField = "b.hotel_code";
+        $allField = $goodsField.','.$sceneryField;
+
+        $count = db('goods')->alias("a")->where($where)->join($join)->count('a.id');
+        if(!$count){
+            echo json_encode(array("code" => 200,"data" => array("count" =>0)));
+            return;
+        }
+//
+        $res = db('goods')->alias("a")->field($allField)->where($where)->join($join)->order('a.id desc')->page($page,10)->select();
+        foreach ($res as &$k){
+            $end_date  = db('scenery_calendar')->where(array("goods_code" => $k["code"]))->max('date');
+            if(empty($end_date)){
+                $k["end_date"] = "";
+            }else{
+                $k["end_date"] = $end_date;
+            }
+            $k["hotel_code"] = json_decode($k["hotel_code"],true);
+            $k["end_date"] = date("Y-m-d",$k["end_date"]);
+            $k["on_time"] = date("Y-m-d",$k["on_time"]);
+            $k["off_time"] = date("Y-m-d",$k["off_time"]);
+        }
+
+        $output["list"]  =  $res;
+        $output["count"]  =  $count;
+        echo json_encode(array("code" => 200,"data" => $output));
+        return;
+
+    }
+
+    //商品删除
+    public function del(){
+        $goodsCode = input('post.goodsCode');
+        if(empty($goodsCode)){
+            return json(array("code" => 404,"msg" => "参数错误404"));
+        }
+        $where = [
+            "code"        =>  $goodsCode,
+            "sp_code"     =>  getSpCode(),         // 供应商code
+            "is_del"      =>  ["<>","1"],          //未删除
+            "goods_type" =>   '3'                  //景酒
+        ];
+        $res = db('goods')->field("check_type")->where($where)->find();
+        if(empty($res)){
+            return json(array("code" => 405,"msg" => "商品号找不到或者这条商品不属于你"));
+        }
+        if($res["check_type"] == 0){
+            db('goods')->where(array("code"=>$goodsCode))->delete();
+            db('goods_scenery')->where(array("goods_code"=>$goodsCode))->delete();
+            db('goods_supply')->where(array("goods_code"=>$goodsCode))->delete();
+            db('goods_create')->where(array("goods_code"=>$goodsCode))->delete();
+        }else{
+            $output = db('goods')->where(array("code" => $goodsCode))->update(array("is_del"=>1));
+            if($output === false){
+                return json(array("code" => 403,"msg" => "删除失败，请稍后再试一次"));
+            }
+        }
+        return json(array('code' => 200,'msg' => '删除成功'));
+    }
+
     //分配
     private function dispatcher(){
         $request = request();
@@ -41,7 +133,8 @@ class Scenery extends HomeBase
             return;
         }
         $res = \think\Loader::model('Goods','logic')->dispatcher($controller,$action,$state);
-        echo $res;
+        echo json_encode($res);
+        return;
     }
 
 
@@ -169,65 +262,6 @@ class Scenery extends HomeBase
             return json_encode(array("code" => 403, "msg" => "保存出错，请再保存一次"));
         }
         return json_encode(array("code" => 200,"data"=>array("code"=>$data["code"])));
-    }
-
-    //列表显示
-    public function goodsList(){
-        $where["a.goods_type"] = "3";       //景酒
-
-        $show_title = input("post.show_title");         //随意游产品名称
-        if($show_title){
-            $where["a.show_title"] = ['like',"%".$show_title."%"];
-        }
-
-        $code = input("post.code");         //产品编号
-        if($code){
-            $where["a.code"] = $code;
-        }
-
-        $check_type = input("post.check_type");        //审核状态
-        if($check_type){    //0全查
-            $where["a.check_type"] = $check_type;
-        }else{
-            $where["a.check_type"] = ['<>',0];
-        }
-
-        $where["a.sp_code"] = session("sp.code");   //供应商
-        $page = input("post.page");        //页码
-        if(empty($page)){
-            $page = 1;
-        }
-
-        $join = [['goods_scenery b','a.code = b.goods_code']];
-        $goodsField = "a.code,a.show_title,a.on_time,a.off_time,a.check_type";
-        $sceneryField = "b.hotel_code";
-        $allField = $goodsField.','.$sceneryField;
-
-        $count = db('goods')->alias("a")->where($where)->join($join)->count('a.id');
-        if(!$count){
-            echo json_encode(array("code" => 200,"data" => array("count" =>0)));
-            return;
-        }
-//
-        $res = db('goods')->alias("a")->field($allField)->where($where)->join($join)->order('a.id desc')->page($page,10)->select();
-        foreach ($res as &$k){
-            $end_date  = db('scenery_calendar')->where(array("goods_code" => $k["code"]))->max('date');
-            if(empty($end_date)){
-                $k["end_date"] = "";
-            }else{
-                $k["end_date"] = $end_date;
-            }
-            $k["hotel_code"] = json_decode($k["hotel_code"],true);
-            $k["end_date"] = date("Y-m-d",$k["end_date"]);
-            $k["on_time"] = date("Y-m-d",$k["on_time"]);
-            $k["off_time"] = date("Y-m-d",$k["off_time"]);
-        }
-
-        $output["list"]  =  $res;
-        $output["count"]  =  $count;
-        echo json_encode(array("code" => 200,"data" => $output));
-        return;
-
     }
 
 
