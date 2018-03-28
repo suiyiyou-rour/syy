@@ -204,11 +204,23 @@ class AddTicket
         }
         //主表添加数据
         $goodsData["online_type"]       =   $data["online_type"];   //上线类型    (主)
-        $goodsData["offline_type"]      =   $data["offline_type"];  //上线类型    (主)
-        $goodsData["on_time"]           =   $data["on_time"];       //上线时间     (主)
-        $goodsData["off_time"]          =   $data["off_time"];       //下线时间     (主)
+        $goodsData["offline_type"]      =   $data["offline_type"];  //下线类型    (主)
         $goodsData["price_type"]        =   $data["price_type"];    //价格类型  (主)必须
         $goodsData["stock_type"]        =   $data["stock_type"];    //库存模式  (主)必须
+        //有效期直接更新主表显示数据
+        if($data["online_type"] == 4){                              //4有效期开始上线
+            $goodsData["on_time"]       = $data["begin_date"];
+        }else{
+            $goodsData["on_time"]       = $data["on_time"];         //上线时间     (主)
+        }
+        if($data["offline_type"] == 1){                             //1有效期已过自动下架
+            $goodsData["off_time"]      = $data["end_date"];
+        }else{
+            $goodsData["off_time"]      = $data["off_time"];       //下线时间     (主)
+        }
+        $goodsData["deadline_date"]    =   $data["end_date"];      //最后团期 有效期结束
+        $goodsData["plat_price"]       =   $data["plat_price"];    //展示价格
+        $goodsData["settle_price"]     =   $data["settle_price"];  //展示结算价格
         //副表添加数据
         $ticketData["usable_date"]      =   $data["usable_date"];   //可用日期  (副)必须        --价格日历没有
         $ticketData["disabled_date"]    =   $data["disabled_date"];   //不可用日期  (副)        --价格日历没有
@@ -216,7 +228,7 @@ class AddTicket
         $ticketData["refund_info"]      =   $data["refund_info"];   //退款设置   (副)
         //有效期表数据
         $indateData["begin_date"]       =   $data["begin_date"];    //有效期开始时间 (indate)必须 --有效期模式没有
-        $indateData["end_date"]         =   $data["end_date"];      //有效期开始时间 (indate)必须 --有效期模式没有
+        $indateData["end_date"]         =   $data["end_date"];      //有效期结束时间 (indate)必须 --有效期模式没有
         $indateData["stock_num"]        =   $data["stock_num"];     //库存 必须 （indate）有效期  （价-主）总库存
         $indateData["plat_price"]       =   $data["plat_price"];    //价格       （indate）必须
         $indateData["settle_price"]     =   $data["settle_price"];  //结算价格   （indate）必须
@@ -515,12 +527,13 @@ class AddTicket
             'is_del'      =>  ['<>',"1"]  //未删除
         ];
         $res = db('goods')->field("check_type")->where($where)->find();
-        if($res && $res["check_type"] == 0){
-            $calendarType = db('ticket_calendar')->field("id")->where(array("goods_code" => $goodsCode))->find();
-            if($calendarType){
-                db('goods')->where(array("code" => $goodsCode))->update(array("check_type"=>1));
-            }
+        if(!$res)return;
+        $calendarType = db('ticket_calendar')->field("id")->where(array("goods_code" => $goodsCode))->find();
+        if(!$calendarType)return;
+        if($res["check_type"] == 0){
+            db('goods')->where(array("code" => $goodsCode))->update(array("check_type"=>1));
         }
+        $this->saveGoodsUpdateP($goodsCode);//商品保存主要需要更新字段
 
     }
 
@@ -572,12 +585,16 @@ class AddTicket
         }
     }
 
-    //商品保存主要需要更新字段 下线时间 展示平台价格 展示结算价格
-    private function saveGoodsUpdate($goodsCode){
-        $calendarField = "MIN(plat_price) as plat_price ,MAX(date) as deadline_date,MIN(settle_price) as settle_price";
+    //商品保存主要需要更新字段 价格日历模式
+    private function saveGoodsUpdateP($goodsCode){
+        //下线时间 展示平台价格 展示结算价格 上线日期 下线日期
+        $res = db('goods')->field('online_type,offline_type')->where(array("code" => $goodsCode))->find();
+        $calendarField = "MIN(plat_price) as plat_price,MAX(date) as deadline_date,MIN(settle_price) as settle_price";
+        if($res["online_type"] == 4){   //上线类型  4有效期开始上线
+            $calendarField .= ",MIN(date) as on_time";
+        }
         $data = db('ticket_calendar')->field($calendarField)->where(array("goods_code"=>$goodsCode))->find();
-        $res = db('goods')->field('offline_type')->where(array("code" => $goodsCode))->find();
-        if($res["offline_type"] == 3){
+        if($res["offline_type"] == 3){  //下线类型  3最后团期过期下线
             $data["off_time"] = $data["deadline_date"];
         }
         db('goods')->where(array("code" => $goodsCode))->update($data);
