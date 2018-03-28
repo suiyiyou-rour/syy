@@ -11,12 +11,11 @@ class Auth
      * 提取菜单列表
      */
     public function menuList($userCode,$type){
-        if($type == 0){
+        if($type == 1){
             $data = $this->adminData();
         }else{
             $data = $this->supplyData($userCode,$type); 
         }
-
         if(empty($data)){
             return array('code'=>404,'msg'=>'菜单获取失败');
         }
@@ -85,7 +84,7 @@ class Auth
      * @return array    $data   菜单数据
      */
     private function adminData(){
-        $data = db('syy_function')
+        $data = db('function')
                 ->order('pid asc,id asc')
                 ->select();
         return $data;
@@ -126,7 +125,8 @@ class Auth
                 ->where($where)
                 ->order('b.pid asc,b.id asc')   
                 ->select();
-        
+
+        $indexArr =array();
         foreach($data as $k=>$v){
             $indexArr[] = $v['controller'];
         }

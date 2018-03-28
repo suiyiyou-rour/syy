@@ -24,17 +24,18 @@ class HomeBase extends Base
         // 权限控制
         $controller = strtolower( request()->controller() );
 
-        $sp = array("id" => '1' , "code" => '1234567' ,"type" => '1');
-        session('sp',$sp);
-//        $sp = session('sp');
-//        if(!empty($sp)){
-//            if( $controller == 'login' ) return false;
-//
-//            $auth =  \think\Loader::model('Auth','logic');
-//            $res = $auth->checkAuth($sp['code'],$controller);
-//
-//            if(!$res) return false;
-//        }
+        // $sp = array("id" => '1' , "code" => '1234567' ,"type" => '1');
+        // session('sp',$sp);
+       $sp = session('sp');
+       if(!empty($sp)){
+           if( $controller == 'login' ) return false;
+           if($sp['type']==1) return false;
+
+           $auth =  \think\Loader::model('Auth','logic');
+           $res = $auth->checkAuth($sp['code'],$controller);
+
+           if(!$res) return false;
+       }
 
     }
 }

@@ -25,7 +25,7 @@ class Login extends HomeBase
         $data = db('sp')
                 ->field(['id','code','type','account_num','com_name','open'])
                 ->where(array('account_num' => $account,'pwd' => $password))
-                ->where('type','in','0,1')
+                ->where('type','in','1,2')
                 ->find();
         if(empty($data)){
             return json(array('code' => 404,'msg' => '账号或密码错误'));
