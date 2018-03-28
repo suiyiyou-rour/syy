@@ -15,6 +15,14 @@ class Group extends HomeBase
 
     public function index()
     {
+        $goodsCode = 's0010013';
+        $calendarField = "MIN(plat_price) as plat_price ,MAX(date) as deadline_date,MIN(settle_price) as settle_price";
+        $data = db('scenery_calendar')->field($calendarField)->where(array("goods_code"=>$goodsCode))->find();
+        var_dump($data);
+        $res = db('goods')->field("plat_price,deadline_date,settle_price")->where(array("code" => $goodsCode))->find();
+//        db('goods')->where(array("code" => $goodsCode))->update($data);
+        var_dump($res);
+//        db('goods')->where(array("code" => $goodsCode))->update($data);
 
     }
 
@@ -120,7 +128,8 @@ class Group extends HomeBase
         $where = [
             "code"        =>  $goodsCode,
             "sp_code"     =>  getSpCode(),         // 供应商code
-            "is_del"      =>  ["<>","1"]          //未删除
+            "is_del"      =>  ["<>","1"],          //未删除
+            "goods_type" =>   '1'                  //跟团
         ];
         $res = db('goods')->field("check_type")->where($where)->find();
         if(empty($res)){

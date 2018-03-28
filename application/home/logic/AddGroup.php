@@ -222,14 +222,9 @@ class AddGroup
 
         $data = input('post.');
         if(empty($data["charged_item"])){
-            return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
+            $data["charged_item"] = array();
         }
-        $groupData["charged_item"] = $data["charged_item"];
-        if (empty($groupData["charged_item"])) {
-            $groupData["charged_item"] = array();
-        }
-
-        $groupData["charged_item"] = json_encode($groupData["charged_item"]); //自费项目
+        $groupData["charged_item"] = json_encode($data["charged_item"]);    //自费项目
         $res = db('goods_group')->where(array("goods_code" => $goodsCode))->update($groupData);
         if ($res === false) {
             return array("code" => 403, "msg" => "推荐理由保存错误，请稍后再试");
