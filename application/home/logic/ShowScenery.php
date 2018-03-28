@@ -46,8 +46,7 @@ class ShowScenery
             default:
                 $output = array("code" => 404, "msg" => "参数错误");
         }
-//        $this->endOperation($goodsCode,$state);//后置方法
-        return json_encode($output);
+        return $output;
     }
 
     //基本信息添加 0
@@ -64,7 +63,7 @@ class ShowScenery
             ];
             $where = [
                 "a.code"         => $goodsCode,
-                "a.goods_type"  => 3,
+                "a.goods_type"  =>  '3',
                 "a.is_del"       =>  ["<>","1"]  //未删除
             ];
             $data = db('goods')->alias("a")->join($join)->field($allField)->where($where)->find();
@@ -89,7 +88,7 @@ class ShowScenery
         $goodsField = "a.code,a.show_title,a.inside_code";
         $createField = "b.tab";
         $allField = $goodsField.','.$createField;
-        $res = db('goods')->alias("a")->field($allField)->where($where)->join($join)->order('a.id desc')->select();
+        $res = db('goods')->alias("a")->field($allField)->where($where)->join($join)->order('a.last_edit_time desc')->select();
         //有 未填完信息
         if($res){
             foreach ($res as &$k){

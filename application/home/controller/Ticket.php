@@ -108,7 +108,8 @@ class Ticket extends HomeBase
         $where = [
             "code"        =>  $goodsCode,
             "sp_code"     =>  getSpCode(),         // 供应商code
-            "is_del"      =>  ["<>","1"]          //未删除
+            "is_del"      =>  ["<>","1"],          //未删除
+            "goods_type" =>   '2'                  //门票
         ];
         $res = db('goods')->field("check_type")->where($where)->find();
         if(empty($res)){

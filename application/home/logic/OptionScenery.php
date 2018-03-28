@@ -38,8 +38,7 @@ class OptionScenery
             default:
                 $output = array("code" => 404, "msg" => "参数错误");
         }
-//        $this->endOperation($goodsCode,$state);//后置方法
-        return json_encode($output);
+        return $output;
     }
 
     //基本信息添加 0
