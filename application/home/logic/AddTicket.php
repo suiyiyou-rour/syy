@@ -68,7 +68,7 @@ class AddTicket
         }
 
         //主表添加数据
-        $goodsData["sp_code"]       =   session("sp.code");     //供应商编号
+        $goodsData["sp_code"]       =   getSpCode();               //供应商编号
         $goodsData["contact_code"]  =   $data["contact_code"]; //合同编码  （主）必须
         $goodsData["show_title"]    =   $data["show_title"];    //产品名称(外部标题) （主）必须
         $goodsData["last_edit_time"]    =   time();                 //最后编辑时间

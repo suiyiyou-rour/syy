@@ -74,7 +74,7 @@ class AddScenery
         }
 
         //主表添加数据
-        $goodsData["sp_code"]            =   session("sp.code");       //供应商编号
+        $goodsData["sp_code"]            =   getSpCode();               //供应商编号
         $goodsData["contact_code"]      =   $data["contact_code"];   //合同编码  （主）必须
         $goodsData["inside_code"]       =   $data["inside_code"];    //供应商内部编号  （主）必须
         $goodsData["last_edit_time"]    =   time();                   //最后编辑时间
