@@ -4,7 +4,7 @@
  * 获取商户id
  */
 function getSpId(){
-    $id = session("sp.id");
+    $id = session('sp.id');
     return $id;
 }
 
@@ -12,7 +12,7 @@ function getSpId(){
  * 获取商户code
  */
 function getSpCode(){
-    $code = session("sp.code");
+    $code = session('sp.code');
     return $code;
 }
 
@@ -125,8 +125,8 @@ function testGroupPage1(){
  */
 function session_expire($session_name,$val,$time=''){
     session($session_name,$val);
-    if(session($session_name)){
-        $session_id = session_id($session_name);
-        cookie('PHPSESSID',$session_id,$time);
-    }
+//    if(session($session_name)){
+//        $session_id = session_id($session_name);
+//        cookie('PHPSESSID',$session_id,time()+$time);
+//    }
 }
