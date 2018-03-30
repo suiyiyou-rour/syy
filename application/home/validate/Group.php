@@ -23,7 +23,7 @@ class Group extends Validate
         'service_tel'       =>  'max:200',//客服电话     （副）
         'refund_type'       =>  'require|max:1|number',//退款类型     （副）必须
 //        'refund_info'       =>  '',//梯度详细退款     （副）
-        'rate'               =>  'require|max:3|number',//产品费率     （主）必须
+        'rate'               =>  'require|between:0,100|number',//产品费率     （主）必须
 
         //行程信息添加
         'play_day'          =>  'require|number|max:3',//行程天数  int长度3  （副）必须
@@ -84,8 +84,8 @@ class Group extends Validate
         'refund_type.max'       => '退款类型格式错误',
         'refund_type.number'    => '退款类型格式错误',
         'rate.require'          => '产品费率是必须的',
-        'rate.max'              => '产品费率格式错误',
-        'rate.number'           => '产品费率格式错误',
+        'rate.between'          => '产品费率格式错误1',
+        'rate.number'           => '产品费率格式错误2',
 
         //行程信息添加
         'play_day.require'          => '行程天数是必须的',

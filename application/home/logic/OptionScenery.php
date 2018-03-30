@@ -45,11 +45,11 @@ class OptionScenery
     public function basicInfo()
     {
         $sp_code = getSpCode();
-        $contact = db('contact')->field('code,name,rate')->where(array('sp_code' => $sp_code))->select();
-        if(!$contact){
+        $contract = db('contract')->field('code,name,rate')->where(array('sp_code' => $sp_code))->select();
+        if(!$contract){
             return json_encode(array("code" => 405,"msg" => "合同加载错误,请联系管理员"));
         }
-        $data["contact"] = $contact;
+        $data["contact"] = $contract;
         $data["hash"] = getFromHash();
         return array("code" => 200,"data" => $data);
     }
