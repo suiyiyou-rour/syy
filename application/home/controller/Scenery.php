@@ -52,7 +52,7 @@ class Scenery extends HomeBase
         }
 
         if(session("sp.type") != 1){                    //超级管理
-            $where["a.sp_code"] = session("sp.code");   //供应商
+            $where["a.sp_code"] = getSpCode();   //供应商
         }
 
         $page = input("post.page");        //页码
@@ -153,7 +153,7 @@ class Scenery extends HomeBase
         unset($data["fileList"]);
 
         $data["code"]       =  mt_rand(100000,999999);//编号
-        $data["sp_code"]    =  session("sp.code");  //供应商编号
+        $data["sp_code"]    =  getSpCode();  //供应商编号
 
         //数据验证
         $validate = new \app\home\validate\Hotel();
@@ -186,7 +186,7 @@ class Scenery extends HomeBase
         unset($data["fileList"]);
 
         $data["code"]       =  mt_rand(100000,999999);//编号
-        $data["sp_code"]    =  session("sp.code");  //供应商编号
+        $data["sp_code"]    =  getSpCode();  //供应商编号
 
         //数据验证
         $validate = new \app\home\validate\View();
@@ -216,7 +216,7 @@ class Scenery extends HomeBase
         unset($data["fileList"]);
 
         $data["code"]       =  mt_rand(100000,999999);//编号
-        $data["sp_code"]    =  session("sp.code");  //供应商编号
+        $data["sp_code"]    =  getSpCode();  //供应商编号
 
         //数据验证
         $validate = new \app\home\validate\Meal();
@@ -246,7 +246,7 @@ class Scenery extends HomeBase
         unset($data["fileList"]);
 
         $data["code"]       =  mt_rand(100000,999999);//编号
-        $data["sp_code"]    =  session("sp.code");  //供应商编号
+        $data["sp_code"]    =  getSpCode();  //供应商编号
 
         //数据验证
         $validate = new \app\home\validate\Vehicle();
