@@ -17,6 +17,17 @@ function getSpCode(){
 }
 
 /**
+ * 判断是不是超级管理
+ */
+function getSpType(){
+    $type = session('sp.type');
+    if($type == 1){
+        return true;
+    }
+    return false;
+}
+
+/**
  * 生成随机商品code
  * @return string
  */
@@ -40,6 +51,7 @@ function createGoodsCode($type = "x")
 //    $goods_code = $type . getSpId() .mt_rand(100000,999999);
     return $goods_code;
 }
+
 
 /**
  * 防止表单重复提交hash值
@@ -71,50 +83,6 @@ function checkFromHash($data){
     return 1;
 }
 
-
-/**
- * 跟团page0测试参数
- */
-function testGroupPage0(){
-    //主表添加数据
-    $data["contact_code"] = "12345678"; //合同编码  （主）必须
-    $data["inside_code"] = "2" ;//内部编号   （主）
-    $data["inside_title"] = "3"; //内部显示标题   （主）必须
-    $data["subtitle"] = "1"; //商品副标题     （主）
-    $data["advance_time"] = 169200; //提前预定时间     （主）必须
-    $data["online_type"] = "1"; //上线类型   (主)必须
-    $data["on_time"] = ""; //上线时间     （主）
-    $data["off_time"] = ""; //下线时间     （主）
-    $data["rate"] = "2"; //产品费率     （主）必须
-
-    //副表添加数据
-    $data["service_type"] = "json"; //服务保障      （副）
-    $data["line_type"] = "1"; //路线类型     （副）
-    $data["play_type"] = "1"; //游玩类型     （副）
-    $data["begin_address"] = "2"; //出发地     （副）必须
-    $data["end_address"] = "2"; //目的地     （副）必须
-    $data["main_place"] = "json"; //主要景点     （副）必须
-    $data["service_tel"] = "json"; //客服电话     （副）
-    $data["refund_type"] = "1"; //退款类型     （副）必须
-    $data["refund_info"] = "json";//梯度详细退款     （副）
-
-    return $data;
-}
-
-/**
- * 跟团page1测试参数
- */
-function testGroupPage1(){
-    //副表添加数据
-    $data["play_day"] = "2";//行程天数  int长度3  必须
-    $data["go_trans"] = "2";//交通方式（去） int长度2  必须
-    $data["back_trans"] = "2";//交通方式（回） int长度2  必须
-    $data["go_trans_cost"] = "111";//交通费用说明（去） varchar长度256
-    $data["back_trans_cost"] = "111";//交通费用说明（回） varchar长度256
-    $data["gather_place"] = "json";//集合地点    必须
-    $data["route_info"] = "json";//行程详细  必须
-    return $data;
-}
 
 /**
  * 用cookie设置session有效期
