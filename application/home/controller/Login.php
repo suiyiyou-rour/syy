@@ -40,9 +40,10 @@ class Login extends HomeBase
         if($menu['code'] == 404){
             return json($menu);
         }
+
         // 记录
-        session_expire('sp',array('id' => $data['id'], 'code' => $data['code'],'type' => $data['type']),60*60*24*7);
-        cookie('menu',$menu);
+        session('sp',array('id' => $data['id'], 'code' => $data['code'],'type' => $data['type']));
+        session('menu',$menu);
         return json($menu);
     }
 
@@ -51,7 +52,7 @@ class Login extends HomeBase
      */
     public function logout(){
         session('sp',null);
-        cookie('menu',null);
+        session('menu',null);
         return json(array('code' => 200,'msg' => '注销成功'));
     }    
 
