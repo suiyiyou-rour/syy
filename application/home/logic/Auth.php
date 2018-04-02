@@ -76,7 +76,7 @@ class Auth
             }
         }
         return $data;
-       
+
     }
 
     /**
@@ -134,4 +134,54 @@ class Auth
         $res = in_array($action,$indexArr);
         return $res;
     }
+
+    /**
+     * 供应商权限控制     
+     * @return array    $data       菜单数据
+     */
+    public function spAuth(){
+        $data = $this->adminData();
+        $data = $this->reSpData($data);
+        return $data;
+    } 
+
+    /**
+     * 供应商权限重构
+     * @param  array    $data       菜单数据
+     * @return array    $data       菜单数据
+     */
+    public function reSpData($data){
+        foreach($data as $key=>$val){
+            if($val['pid'] == 0){
+                $arr= array(
+                    "id" => $val['id'],
+                    "label" => $val['name'],
+                    "children" => []
+                );   
+                foreach($data as $k => $v){
+                    if($v['pid'] == $val['id']){
+                        $arr1= array(
+                            "id" => $v['id'],
+                            "label" => $v['name'],
+                            "children" => []
+                        ); 
+                        foreach($data as $i => $j){
+                            if($j['pid'] == $v['id']){
+                                $arr2= array(
+                                    "id" => $j['id'],
+                                    "label" => $j['name'],
+                                    "children" => []
+                                );
+                                $arr1['children'][] = $arr2; 
+                            }
+                        }
+                        $arr['children'][] = $arr1;
+                    }
+                }
+                $array[] = $arr;
+            }
+        }
+        return $array;
+    }
+
 }
