@@ -152,7 +152,7 @@ class Scenery extends HomeBase
         $data["end_time"]       = json_encode($data["end_time"]);        //退房时间
         unset($data["fileList"]);
 
-        $data["code"]       =  mt_rand(100000,999999);//编号
+        $data["code"]       =  $this->createHVMVCode("hotel");//编号
         $data["sp_code"]    =  getSpCode();  //供应商编号
 
         //数据验证
@@ -185,7 +185,7 @@ class Scenery extends HomeBase
         $data["ticket_type"]    = json_encode($data["ticket_type"]);     //票种类型
         unset($data["fileList"]);
 
-        $data["code"]       =  mt_rand(100000,999999);//编号
+        $data["code"]       =  $this->createHVMVCode("view");//编号
         $data["sp_code"]    =  getSpCode();  //供应商编号
 
         //数据验证
@@ -215,7 +215,7 @@ class Scenery extends HomeBase
         $data["instruction"]    = json_encode($data["instruction"]);     //使用说明
         unset($data["fileList"]);
 
-        $data["code"]       =  mt_rand(100000,999999);//编号
+        $data["code"]       =  $this->createHVMVCode("meal");//编号
         $data["sp_code"]    =  getSpCode();  //供应商编号
 
         //数据验证
@@ -245,7 +245,7 @@ class Scenery extends HomeBase
         $data["instruction"]    = json_encode($data["instruction"]);     //使用说明
         unset($data["fileList"]);
 
-        $data["code"]       =  mt_rand(100000,999999);//编号
+        $data["code"]       =  $this->createHVMVCode("vehicle");//编号
         $data["sp_code"]    =  getSpCode();  //供应商编号
 
         //数据验证
@@ -313,6 +313,20 @@ class Scenery extends HomeBase
             $imageArray[] = $k["name"];
         }
         return json_encode($imageArray);
+    }
+
+
+    /**
+     * 生成随机 酒店 景点 餐饮 车队 code
+     */
+    private function createHVMVCode($type){
+        $array = array('hotel','view','meal','vehicle');
+        if(!in_array($type,$array)){
+            return "";
+        }
+        $id = db($type)->order("id desc")->value('id');
+        $id += 10001;
+        return $id;
     }
 
 }
