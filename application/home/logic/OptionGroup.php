@@ -53,8 +53,11 @@ class OptionGroup
     //基本信息 0
     public function basicInfo()
     {
-        $sp_code = getSpCode();
-        $contract = db('contract')->field('code,name,rate')->where(array('sp_code' => $sp_code))->select();
+        $where = [
+            "sp_code"   =>  getSpCode(), //供应商code
+            'is_del'    =>  ['<>', "1"]  //未删除
+        ];
+        $contract = db('contract')->field('code,name,rate')->where($where)->select();
         if(!$contract){
             return array("code" => 405,"msg" => "合同加载错误,请联系管理员");
         }

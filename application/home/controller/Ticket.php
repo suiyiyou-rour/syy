@@ -37,30 +37,31 @@ class Ticket extends HomeBase
 
     //列表显示
     public function goodsList(){
-        $where["a.goods_type"] = "2";//门票
+        $where["a.goods_type"]  =    "2";               //门票
+        $where["a.is_del"]      =    ["<>","1"];        //未删除
+
+        if(!getSpType()){                                 //超级管理
+            $where["a.sp_code"] = getSpCode();           //供应商
+        }
 
         $show_title = input("post.show_title");         //随意游产品名称
         if($show_title){
             $where["a.show_title"] = ['like',"%".$show_title."%"];
         }
 
-        $code = input("post.code");         //产品编号
+        $code = input("post.code");                     //产品编号
         if($code){
             $where["a.code"] = $code;
         }
 
         $check_type = input("post.check_type");        //审核状态
-        if($check_type){    //0全查
+        if($check_type){
             $where["a.check_type"] = $check_type;
         }else{
-            $where["a.check_type"] = ['<>',0];
+            $where["a.check_type"] = ['<>',0];         //0全查
         }
 
-        if(session("sp.type") != 1){                    //超级管理
-            $where["a.sp_code"] = session("sp.code");   //供应商
-        }
-
-        $page = input("post.page");        //页码
+        $page = input("post.page");                     //页码
         if(empty($page)){
             $page = 1;
         }

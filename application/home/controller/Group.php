@@ -15,15 +15,9 @@ class Group extends HomeBase
 
     public function index()
     {
-        $goodsCode = 's0010013';
-        $calendarField = "MIN(plat_price) as plat_price ,MAX(date) as deadline_date,MIN(settle_price) as settle_price";
-        $data = db('scenery_calendar')->field($calendarField)->where(array("goods_code"=>$goodsCode))->find();
-        var_dump($data);
-        $res = db('goods')->field("plat_price,deadline_date,settle_price")->where(array("code" => $goodsCode))->find();
-//        db('goods')->where(array("code" => $goodsCode))->update($data);
-        var_dump($res);
-//        db('goods')->where(array("code" => $goodsCode))->update($data);
-
+        $id = db("contract")->order("id desc")->value('id');
+        $id += 100001;
+        var_dump($id);
     }
 
     //商品添加
@@ -43,7 +37,12 @@ class Group extends HomeBase
 
     //商品列表显示
     public function goodsList(){
-        $where["a.goods_type"] = "1";//跟团游
+        $where["a.goods_type"]  = "1";                  //跟团游
+        $where["a.is_del"]      =    ["<>","1"];        //未删除
+
+        if(!getSpType()){                                 //超级管理
+            $where["a.sp_code"] = getSpCode();           //供应商
+        }
 
         $show_title = input("post.show_title");         //随意游产品名称
         if($show_title){
@@ -55,25 +54,21 @@ class Group extends HomeBase
             $where["a.inside_title"] = ['like',"%".$inside_title."%"];
         }
 
-        $begin_address = input("post.begin_address");  //出发地
+        $begin_address = input("post.begin_address");   //出发地
         if($begin_address){
             $where["b.begin_address"] = $begin_address;
         }
 
-        $end_address = input("post.end_address");         //目的地
+        $end_address = input("post.end_address");        //目的地
         if($end_address){
             $where["b.end_address"] = $end_address;
         }
 
         $check_type = input("post.check_type");        //审核状态
-        if($check_type){    //0全查
+        if($check_type){
             $where["a.check_type"] = $check_type;
         }else{
-            $where["a.check_type"] = ['<>',0];
-        }
-
-        if(session("sp.type") != 1){                    //超级管理
-            $where["a.sp_code"] = session("sp.code");   //供应商
+            $where["a.check_type"] = ['<>',0];          //0全查
         }
 
         $page = input("post.page");        //页码
