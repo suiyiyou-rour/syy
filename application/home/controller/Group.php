@@ -11,13 +11,25 @@ class Group extends HomeBase
     public function __construct()
     {
         parent::__construct();
+        cookie("name",335);
     }
 
     public function index()
     {
-        $id = db("contract")->order("id desc")->value('id');
-        $id += 100001;
-        var_dump($id);
+
+
+        $where = [
+            "a.order_sn"      =>  "1234567",
+            'a.is_del'    =>  ['<>', "1"]  //未删除
+        ];
+        $join = [['group_order b','a.order_sn = b.order_sn']];
+        $res = db('order')->alias("a")->join($join)->where($where)->find();
+        if(!$res){
+            return json(array("code" => 404,"data"=>"找不到这条订单"));
+        }
+        $res["charged_item"] = json_decode($res["charged_item"],true);
+        $res["identity_array"] = json_decode($res["identity_array"],true);
+        var_dump($res);
     }
 
     //商品添加

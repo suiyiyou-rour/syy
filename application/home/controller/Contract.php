@@ -74,21 +74,23 @@ class contract extends HomeBase
 
     //列表显示
     public function showList(){
-        $where['is_del'] = array("<>", "1");  //未删除
-        if(!getSpType()){                       //超级管理
-            $where["sp_code"] = getSpCode();   //供应商
+        $where['a.is_del']      = array("<>", "1");  //未删除
+        if(!getSpType()){                              //超级管理
+            $where["a.sp_code"] = getSpCode();        //供应商
         }
 
-        $page = input("post.page");            //页码
+        $page = input("post.page");                   //页码
         if(empty($page)){
             $page = 1;
         }
 
-        $count = db('contract')->where($where)->count('id');
+        $field = "a.code,a.sp_code,a.name,a.create_time,a.rate,b.com_name";
+        $join = [['sp b','a.sp_code = b.code']];
+        $count = db('contract')->alias("a")->where($where)->join($join)->count('a.id');
         if(!$count){
             return json(array("code" => 200,"data" => array("count" =>0)));
         }
-        $res = db("contract")->field("code,sp_code,name,create_time,rate")->where($where)->order('id desc')->page($page,10)->select();
+        $res = db('contract')->alias("a")->join($join)->field($field)->where($where)->order('a.id desc')->page($page,10)->select();
         $output["list"]  =  $res;
         $output["count"]  =  $count;
         return json(array("code" => 200,"data"=>$output));

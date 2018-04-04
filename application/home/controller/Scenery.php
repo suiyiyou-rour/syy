@@ -61,35 +61,32 @@ class Scenery extends HomeBase
             $page = 1;
         }
 
-        $join = [['goods_scenery b','a.code = b.goods_code']];
-        $goodsField = "a.code,a.show_title,a.on_time,a.off_time,a.check_type";
-        $sceneryField = "b.hotel_code";
-        $allField = $goodsField.','.$sceneryField;
+        $join           =  [['goods_scenery b','a.code = b.goods_code']];
+        $goodsField     =  "a.code,a.show_title,a.on_time,a.off_time,a.check_type";
+        $sceneryField   =  "b.hotel_code";
+        $allField       =  $goodsField.','.$sceneryField;
 
         $count = db('goods')->alias("a")->where($where)->join($join)->count('a.id');
         if(!$count){
-            echo json_encode(array("code" => 200,"data" => array("count" =>0)));
-            return;
+            return json(array("code" => 200,"data" => array("count" =>0)));
         }
 //
         $res = db('goods')->alias("a")->field($allField)->where($where)->join($join)->order('a.id desc')->page($page,10)->select();
         foreach ($res as &$k){
             $end_date  = db('scenery_calendar')->where(array("goods_code" => $k["code"]))->max('date');
             if(empty($end_date)){
-                $k["end_date"] = "";
+                $k["end_date"]  = "";
             }else{
-                $k["end_date"] = $end_date;
+                $k["end_date"]  = $end_date;
             }
-            $k["hotel_code"] = json_decode($k["hotel_code"],true);
-            $k["end_date"] = date("Y-m-d",$k["end_date"]);
-            $k["on_time"] = date("Y-m-d",$k["on_time"]);
-            $k["off_time"] = date("Y-m-d",$k["off_time"]);
+            $k["hotel_code"]    =  json_decode($k["hotel_code"],true);
+            $k["end_date"]      =  date("Y-m-d",$k["end_date"]);
+            $k["on_time"]       =  date("Y-m-d",$k["on_time"]);
+            $k["off_time"]      =  date("Y-m-d",$k["off_time"]);
         }
-
-        $output["list"]  =  $res;
-        $output["count"]  =  $count;
-        echo json_encode(array("code" => 200,"data" => $output));
-        return;
+        $output["list"]     =  $res;
+        $output["count"]    =  $count;
+        return json(array("code" => 200,"data" => $output));
 
     }
 

@@ -11,15 +11,7 @@ class Index extends HomeBase
 
     public function index()
     {
-//        echo "home/index/base";
-        $k =array("id"=>"k","name"=>"k");
-        $v =array("name"=>"v","id"=>"x");
-        $kk = array_merge($k,$v);
-        echo  1;
-        var_dump($kk);
-
+        echo "common/homeBase/index";
+        echo "home/index/index";
     }
-
-
-
 }
