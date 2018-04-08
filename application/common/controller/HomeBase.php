@@ -26,7 +26,7 @@ class HomeBase extends Base
 
         // $sp = array("id" => '1' , "code" => '1234567' ,"type" => '1');
         // session('sp',$sp);
-//       $sp = session('sp');
+//       $sp = session('sp','home');
 //       if(!empty($sp)){
 //           if( $controller == 'login' ) return false;
 //           if($sp['type']==1) return false;
