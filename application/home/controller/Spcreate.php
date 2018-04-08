@@ -3,6 +3,13 @@ namespace app\home\controller;
 use app\common\controller\HomeBase;
 class Spcreate extends HomeBase
 {
+    public function __constract(){
+        parent::__constract();
+        if(!getSpType()){
+            echo json(array("code" => 404, "msg" => "只有超级管理才有权限"));
+            die;
+        }
+    }
     /**
      *   供应商  凭证图片上传
      */
@@ -21,6 +28,18 @@ class Spcreate extends HomeBase
             return \json(array('code'=>404,'msg' => $file->getError()));
          }
          return \json(array('code'=>200,'msg' => '上传成功' , 'data' => array('name' =>'spImage'.DS.$info->getSaveName()) ));
+    }
+
+    /**
+     * 重名验证
+     */
+    public function reName(){
+        $name = input('post.name');
+        $data = db('sp')->where(array('account_num' => $name))->find();
+        if(!empty($data)){
+            return \json(array("code" => 404, "msg" => '该账号已存在！'));
+        }
+        return \json(array("code" => 200, "msg" => '此账号可以使用！'));
     }
 
     /**
@@ -118,6 +137,7 @@ class Spcreate extends HomeBase
         foreach($data as $k =>$v){
             $imgPath = json_decode($v['file']);
             $temp = array(
+                'code'              =>   $v['code'],
                 'account'           =>   $v['account_num'],   //账号  
                 'password'          =>   '',   //密码   
                 'name'              =>   $v['name'],//供应商名字   
@@ -150,11 +170,12 @@ class Spcreate extends HomeBase
       public function spOpen(){
             $spCode = input('post.code');
             $type = input('post.type');
-            // open 1 开启 2 关闭
+            // open 1 开启 0 关闭
             $updateArr = ['open' => 1];
             $str = '开启';
-            if($type == 'close'){
-                $updateArr['open'] = 2;
+            // $type 0 禁用 1 开启
+            if($type == 0){
+                $updateArr['open'] = 0;
                 $str = '禁用';
             }
 
@@ -168,9 +189,10 @@ class Spcreate extends HomeBase
        * 编辑修改
        */
       public function spChange(){
+
             $data = input('post.');
             $validate = \validate('Spcreate');
-            $res = $validate->check($data);
+            $res = $validate->scene('change')->check($data);
             if (true !== $res) {
                 return \json(array("code" => 404, "msg" => $validate->getError()));
             }
@@ -182,12 +204,13 @@ class Spcreate extends HomeBase
             if(empty($data['code'])){
                 return \json(array("code" => 404, "msg" => '修改失败，参数code缺失！'));
             }
+            
             $user_code = $data['code'];
+
             $insertData=array(
                 'code'          => $user_code,
                 'type'          => 2,
                 'account_num'   => $data['account'],
-                'pwd'           => md5($data['password']),
                 'com_name'      => $data['company'],
                 'address'       => $data['address'],
                 'name'          => $data['name'],
@@ -196,6 +219,11 @@ class Spcreate extends HomeBase
                 'email'         => $data['email_address'],
                 'file'          => json_encode(array($data['y_image_path'],$data['z_image_path'],$data['s_image_path']))
             );
+            // 密码检验
+            if(!empty($data['password'])){
+                $insertData['pwd']  = md5($data['password']);
+            }
+
             // 数据更新
             $res1 = db('sp')->where(['code' => $user_code])->update($insertData);
             // 删除原权限

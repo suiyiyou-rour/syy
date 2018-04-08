@@ -40,7 +40,7 @@ class Login extends HomeBase
         if($menu['code'] == 404){
             return json($menu);
         }
-
+        $menu['spInfo'] = array('id' => $data['id'], 'code' => $data['code'],'type' => $data['type']);
         // 记录
         session('sp',array('id' => $data['id'], 'code' => $data['code'],'type' => $data['type']));
         session('menu',$menu);

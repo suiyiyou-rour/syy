@@ -49,7 +49,20 @@ class Spcreate extends Validate
                 'y_image_path' ,
                 'z_image_path',
                 's_image_path' ,
-                'email_address')
+                'email_address'
+            ),
+        'change' => array(
+            'account'  ,   
+            'name'  ,
+            'mobile' ,
+            'company'  ,
+            'address'  ,
+            'auth',
+            'y_image_path' ,
+            'z_image_path',
+            's_image_path' ,
+            'email_address'
+        )
         ];
 
 
