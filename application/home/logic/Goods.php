@@ -18,7 +18,7 @@ class Goods
         }
     }
 
-    //跟团游 操作分发
+    //跟团游 操作分发0
     public function group($operation,$state){
         $array = array('Add','Show','Option');
         if(in_array($operation,$array)){

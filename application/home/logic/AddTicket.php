@@ -496,7 +496,8 @@ class AddTicket
         if (!$res) {
             return "没有商品或者商品被删除";
         }
-        if ($res["check_type"] !== 0 && $res["check_type"] !== 1) {
+        $array = array(0,1,4,6);
+        if(!in_array($res["check_type"],$array)){
             return "商品不在编辑状态";
         }
         return true;

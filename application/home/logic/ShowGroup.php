@@ -135,8 +135,7 @@ class ShowGroup
         }
         $field = "play_day,go_trans,back_trans,go_trans_cost,back_trans_cost,gather_place,route_info";
         $where = [
-            "goods_code"        => $goodsCode,
-            "is_del"            =>  ['<>',"1"]  //未删除
+            "goods_code"        => $goodsCode
         ];
         $output = db('goods_group')->field($field)->where($where)->find();
         if(!$output){
