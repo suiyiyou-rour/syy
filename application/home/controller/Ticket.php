@@ -33,8 +33,6 @@ class Ticket extends HomeBase
         $this->dispatcher();
     }
 
-
-
     //列表显示
     public function goodsList(){
         $where["a.goods_type"]  =    "2";               //门票
@@ -130,6 +128,31 @@ class Ticket extends HomeBase
         return json(array('code' => 200,'msg' => '删除成功'));
     }
 
+    //提交审核
+    public function goodsAudit(){
+        $goodsCode = input('post.goodsCode');
+        if(empty($goodsCode)){
+            return json(array("code" => 404,"msg" => "参数错误404"));
+        }
+        $where = [
+            "code"        =>  $goodsCode,
+            "is_del"      =>  ["<>","1"],          //未删除
+            "goods_type" =>   '2'                  //门票
+        ];
+        $res = db('goods')->field("check_type")->where($where)->find();
+        if(empty($res)){
+            return json(array("code" => 405,"msg" => "商品号找不到"));
+        }
+        if($res["check_type"] != 1 ){
+            return json(array("code" => 405,"msg" => "商品不在保存状态"));
+        }
+        $output = db('goods')->where(array("code" => $goodsCode))->update(array("check_type"=>2));
+        if($output){
+            return json(array("code" => 200,"msg" => "提交审核成功"));
+        }else{
+            return json(array("code" => 403,"msg" => "提交审核失败，请再试一次"));
+        }
+    }
 
     //分配
     private function dispatcher(){

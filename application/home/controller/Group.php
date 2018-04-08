@@ -16,20 +16,14 @@ class Group extends HomeBase
 
     public function index()
     {
+        $str = '[{"beginPlace":"123","routes":[{"type":"\u706b\u8f66","place":"123"}],"traffic":"123123","meals":{"bf":{"bool":"false","mark":"123"},"lunch":{"bool":"false","mark":"123"},"dinner":{"bool":"false","mark":"123"}},"stay":"\u9732\u8425\/\u5176\u4ed6","trips":[{"time":"123123","des":"12312312312","place":["123"],"free":"0"}]}]';
+//        $obj = json_decode($str,true);
+//        foreach ($obj as $key){
+//            var_dump($key["trips"]);
+//        }
+//        var_dump($obj[0]["trips"]);
+        echo  strtotime(date('Y-m-d', time()));
 
-
-        $where = [
-            "a.order_sn"      =>  "1234567",
-            'a.is_del'    =>  ['<>', "1"]  //未删除
-        ];
-        $join = [['group_order b','a.order_sn = b.order_sn']];
-        $res = db('order')->alias("a")->join($join)->where($where)->find();
-        if(!$res){
-            return json(array("code" => 404,"data"=>"找不到这条订单"));
-        }
-        $res["charged_item"] = json_decode($res["charged_item"],true);
-        $res["identity_array"] = json_decode($res["identity_array"],true);
-        var_dump($res);
     }
 
     //商品添加
@@ -93,13 +87,13 @@ class Group extends HomeBase
         $goodsField = "a.code,a.inside_code,a.inside_title,a.show_title,a.check_type,plat_price,deadline_date as date,settle_price";
         $groupField = "b.play_type,b.begin_address,b.child_price_type";
         $allField = $goodsField.','.$groupField;
-        $count = db('goods')->alias($alias)->where($where)->join($join)->order("last_edit_time desc")->count('a.id');
+        $count = db('goods')->alias($alias)->where($where)->join($join)->count('a.id');
 
         if(!$count){
             return json(array("code" => 200,"data" => array("count"=>0)));
         }
 
-        $res = db('goods')->alias($alias)->field($allField)->where($where)->join($join)->order('a.id desc')->page($page,10)->select();
+        $res = db('goods')->alias($alias)->field($allField)->where($where)->join($join)->order("a.last_edit_time desc")->page($page,10)->select();
         foreach ($res as &$k){
             $calendarWhere["goods_code"] = $k["code"];
             //儿童价格 单房差
@@ -156,6 +150,32 @@ class Group extends HomeBase
         return json(array('code' => 200,'msg' => '删除成功'));
     }
 
+    //提交审核
+    public function goodsAudit(){
+        $goodsCode = input('post.goodsCode');
+        if(empty($goodsCode)){
+            return json(array("code" => 404,"msg" => "参数错误404"));
+        }
+        $where = [
+            "code"        =>  $goodsCode,
+            "is_del"      =>  ["<>","1"],          //未删除
+            "goods_type" =>   '1'                  //跟团
+        ];
+        $res = db('goods')->field("check_type")->where($where)->find();
+        if(empty($res)){
+            return json(array("code" => 405,"msg" => "商品号找不到"));
+        }
+        if($res["check_type"] != 1){
+            return json(array("code" => 405,"msg" => "商品不在保存状态"));
+        }
+        $output = db('goods')->where(array("code" => $goodsCode))->update(array("check_type"=>2));
+        if($output){
+            return json(array("code" => 200,"msg" => "提交审核成功"));
+        }else{
+            return json(array("code" => 403,"msg" => "提交审核失败，请再试一次"));
+        }
+    }
+
     //分配
     private function dispatcher(){
         $request = request();
@@ -170,5 +190,7 @@ class Group extends HomeBase
         echo json_encode($res);
         return;
     }
+
+
     
 }
