@@ -86,6 +86,11 @@ class AddScenery
         //有商品号（更新）
         $goodsCode = input('post.goodsCode');
         if ($goodsCode) {
+            //是否有写入状态检测
+            $checkRes = $this->checkGoodsType($goodsCode);
+            if ($checkRes !== true) {
+                return array("code" => 405, "msg" => $checkRes);
+            }
             $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
             $sceneryRes = db('goods_scenery')->where(array("goods_code" => $goodsCode))->update($sceneryData);
             if ($goodsRes === false) {

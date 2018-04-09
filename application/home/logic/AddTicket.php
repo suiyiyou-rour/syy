@@ -102,6 +102,11 @@ class AddTicket
 
         //有商品号（更新）
         if ($goodsCode) {
+            //是否有写入状态检测
+            $checkRes = $this->checkGoodsType($goodsCode);
+            if ($checkRes !== true) {
+                return array("code" => 405, "msg" => $checkRes);
+            }
             $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
             $groupRes = db('goods_ticket')->where(array("goods_code" => $goodsCode))->update($ticketData);
             if ($goodsRes === false) {

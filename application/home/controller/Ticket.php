@@ -165,6 +165,7 @@ class Ticket extends HomeBase
         if(empty($goodsCode)){
             return json(array("code" => 404,"msg" => "参数错误404"));
         }
+
         $where = [
             "code"        =>  $goodsCode,
             "is_del"      =>  ["<>","1"],          //未删除
