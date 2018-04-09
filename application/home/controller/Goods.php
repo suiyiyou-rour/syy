@@ -20,22 +20,24 @@ class Goods extends HomeBase
 
     //已经上线的商品列表
     public function goodsList(){
-        $goodsCode = input("post.goodsCode");         //产品编号
-        if($goodsCode){
-            $where["code"] = $goodsCode;
-        }
         $page = input("post.page");                    //页码
         if(empty($page)){
             $page = 1;
         }
-        $date = strtotime(date("Y-m-d", time()));
 
+        $date = strtotime(date("Y-m-d", time()));
         $where = [
             "check_type"   =>  "5",             //上线
             "is_del"       =>  ["<>","1"],      //未删除
             "on_time"      =>  ["<=",$date],
             "off_time"     =>  [">=",$date]
         ];
+
+        $goodsCode = input("post.goodsCode");         //产品编号
+        if($goodsCode){
+            $where["code"] = $goodsCode;
+        }
+
         $count = db('goods')->where($where)->count('id');
 
         if(!$count){
