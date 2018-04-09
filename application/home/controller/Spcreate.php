@@ -84,6 +84,7 @@ class Spcreate extends HomeBase
             $authData[]=['user_code'=> $user_code,'fid' => $v];
         }
         $res2 = db('auth')->insertAll($authData);
+        db('sp_money')->insert(['sp_code' => $user_code]);
         // 插入返回
         if($res1 && $res2){
             return \json(array("code" => 200, "msg" => '添加成功'));
@@ -124,7 +125,6 @@ class Spcreate extends HomeBase
         if(empty($auth)){
             return \json(array('code' => 404 , 'msg' => '无权限访问'));
         }
-
         $page = input('post.page');
         if(empty($page)){
             $page = 1;
