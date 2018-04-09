@@ -170,14 +170,18 @@ class Ticket extends HomeBase
             "is_del"      =>  ["<>","1"],          //未删除
             "goods_type" =>   '2'                  //门票
         ];
-        $res = db('goods')->field("check_type")->where($where)->find();
+        $res = db('goods')->field("check_type,online_type")->where($where)->find();
         if(empty($res)){
             return json(array("code" => 405,"msg" => "商品号找不到"));
         }
         if($res["check_type"] != 3){
             return json(array("code" => 405,"msg" => "商品只有通过审核才能上线"));
         }
-        $output = db('goods')->where($where)->update(array("check_type"=>5));
+        if($res["online_type"] == 3){                           //手动上线处理时间
+            $data["on_time"] = strtotime(date('Y-m-d',time())); //上线时间
+        }
+        $data["check_type"] = 5;    //上线
+        $output = db('goods')->where($where)->update($data);
         if($output){
             return json(array("code" => 200,"msg" => "上线成功"));
         }else{
