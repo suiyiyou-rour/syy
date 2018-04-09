@@ -16,13 +16,6 @@ class Group extends HomeBase
 
     public function index()
     {
-        $str = '[{"beginPlace":"123","routes":[{"type":"\u706b\u8f66","place":"123"}],"traffic":"123123","meals":{"bf":{"bool":"false","mark":"123"},"lunch":{"bool":"false","mark":"123"},"dinner":{"bool":"false","mark":"123"}},"stay":"\u9732\u8425\/\u5176\u4ed6","trips":[{"time":"123123","des":"12312312312","place":["123"],"free":"0"}]}]';
-//        $obj = json_decode($str,true);
-//        foreach ($obj as $key){
-//            var_dump($key["trips"]);
-//        }
-//        var_dump($obj[0]["trips"]);
-        echo  strtotime(date('Y-m-d', time()));
 
     }
 
@@ -39,6 +32,21 @@ class Group extends HomeBase
     //商品页面选择显示
     public function option(){
         $this->dispatcher();
+    }
+
+    //add show option 统一处理
+    private function dispatcher(){
+        $request = request();
+        $controller  = ucfirst($request->controller());
+        $action  = ucfirst($request->action());
+        $state = input('state');
+        if($state == null || $state == ""){
+            echo json_encode(array("code" => 404,"msg" => "参数错误404"));
+            return;
+        }
+        $res = \think\Loader::model('Goods','logic')->dispatcher($controller,$action,$state);
+        echo json_encode($res);
+        return;
     }
 
     //商品列表显示
@@ -165,10 +173,10 @@ class Group extends HomeBase
         if(empty($res)){
             return json(array("code" => 405,"msg" => "商品号找不到"));
         }
-        if($res["check_type"] != 1){
-            return json(array("code" => 405,"msg" => "商品不在保存状态"));
+        if($res["check_type"] != 1 && $res["check_type"] != 4 && $res["check_type"] != 6){
+            return json(array("code" => 405,"msg" => "商品只有在保存状态，驳回状态，下线状态才能提交审核"));
         }
-        $output = db('goods')->where(array("code" => $goodsCode))->update(array("check_type"=>2));
+        $output = db('goods')->where($where)->update(array("check_type"=>2));
         if($output){
             return json(array("code" => 200,"msg" => "提交审核成功"));
         }else{
@@ -176,21 +184,57 @@ class Group extends HomeBase
         }
     }
 
-    //分配
-    private function dispatcher(){
-        $request = request();
-        $controller  = ucfirst($request->controller());
-        $action  = ucfirst($request->action());
-        $state = input('state');
-        if($state == null || $state == ""){
-            echo json_encode(array("code" => 404,"msg" => "参数错误404"));
-            return;
+    //上线
+    public function online(){
+        $goodsCode = input('post.goodsCode');
+        if(empty($goodsCode)){
+            return json(array("code" => 404,"msg" => "参数错误404"));
         }
-        $res = \think\Loader::model('Goods','logic')->dispatcher($controller,$action,$state);
-        echo json_encode($res);
-        return;
+        $where = [
+            "code"        =>  $goodsCode,
+            "is_del"      =>  ["<>","1"],          //未删除
+            "goods_type" =>   '1'                  //跟团
+        ];
+        $res = db('goods')->field("check_type")->where($where)->find();
+        if(empty($res)){
+            return json(array("code" => 405,"msg" => "商品号找不到"));
+        }
+        if($res["check_type"] != 3){
+            return json(array("code" => 405,"msg" => "商品只有通过审核才能上线"));
+        }
+        $output = db('goods')->where($where)->update(array("check_type"=>5));
+        if($output){
+            return json(array("code" => 200,"msg" => "上线成功"));
+        }else{
+            return json(array("code" => 403,"msg" => "上线失败，请再试一次"));
+        }
+    }
+
+    //下线
+    public function offline(){
+        $goodsCode = input('post.goodsCode');
+        if(empty($goodsCode)){
+            return json(array("code" => 404,"msg" => "参数错误404"));
+        }
+        $where = [
+            "code"        =>  $goodsCode,
+            "is_del"      =>  ["<>","1"],          //未删除
+            "goods_type" =>   '1'                  //跟团
+        ];
+        $res = db('goods')->field("check_type")->where($where)->find();
+        if(empty($res)){
+            return json(array("code" => 405,"msg" => "商品号找不到"));
+        }
+        if($res["check_type"] != 5){
+            return json(array("code" => 405,"msg" => "商品只有上线状态才能下线"));
+        }
+        $output = db('goods')->where($where)->update(array("check_type"=>6));
+        if($output){
+            return json(array("code" => 200,"msg" => "下线成功"));
+        }else{
+            return json(array("code" => 403,"msg" => "下线失败，请再试一次"));
+        }
     }
 
 
-    
 }
