@@ -7,6 +7,10 @@ class Goods extends HomeBase
     public function __construct()
     {
         parent::__construct();
+        if(!getSpType()){
+            echo json_encode(array("code"=>405,"msg"=>"只有超级管理员才有权限"));
+            die;
+        }
     }
 
     public function index()
@@ -37,7 +41,7 @@ class Goods extends HomeBase
         if(!$count){
             return json(array("code" => 200,"data" => array("count"=>0)));
         }
-        $res = db('goods')->field("code,show_title,sales")->where($where)->order("last_edit_time desc")->page($page,10)->select();
+        $res = db('goods')->field("code,show_title,level,sales")->where($where)->order("level desc,sales desc")->page($page,10)->select();
         $output["list"]  =  $res;
         $output["count"]  =  $count;
         return json(array("code" => 200,"data" => $output));
@@ -52,6 +56,14 @@ class Goods extends HomeBase
         if(empty($goodsCode) || empty($sales)){
             return json(array("code" => 404,"msg" => "参数错误404"));
         }
+        $level     = (int)input("post.level");         //等级
+        if($level){
+            if(!in_array($level,array(1,2,3))){
+                return json(array("code" => 405,"msg" => "等级不正确"));
+            }
+            $data["level"] = $level;
+        }
+        $data["sales"] = $sales;
 
         $date = strtotime(date("Y-m-d", time()));
         $where = [
@@ -65,7 +77,7 @@ class Goods extends HomeBase
         if(empty($goods)){
             return json(array("code" => 405,"msg" => "不在线上或者没有这个商品"));
         }
-        $res = db('goods')->where($where)->update(array("sales"=>$sales));
+        $res = db('goods')->where($where)->update($data);
         if($res !== false){
             return json(array("code" => 200,"msg" => "保存成功"));
         }
