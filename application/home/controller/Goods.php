@@ -55,12 +55,12 @@ class Goods extends HomeBase
     public function alterSale(){
         $goodsCode = input("post.goodsCode");         //产品编号
         $sales     = (int)input("post.sales");         //销量
-        if(empty($goodsCode) || empty($sales)){
+        if(empty($goodsCode)){
             return json(array("code" => 404,"msg" => "参数错误404"));
         }
         $level     = (int)input("post.level");         //等级
         if($level){
-            if(!in_array($level,array(1,2,3))){
+            if(!in_array($level,array(1,2,3,4))){
                 return json(array("code" => 405,"msg" => "等级不正确"));
             }
             $data["level"] = $level;

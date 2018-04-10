@@ -72,6 +72,7 @@ class Audit extends HomeBase
         }else{
             $data["check_type"] = 3;                            //改为审核通过
         }
+        $data["confirm_time"] = time(); //确认时间
         $output = db('goods')->where(array("code" => $goodsCode))->update($data);
         if($output){
             return json(array("code" => 200,"msg" => "审核成功"));
