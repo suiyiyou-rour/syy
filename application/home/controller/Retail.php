@@ -41,6 +41,7 @@ class Retail extends HomeBase
         if(!$res){
             return \json(array('code' => 404 ,'msg' => '操作失败！'));
         }
+        db('retail_money')->insert(['retail_code' => $code]);
         return \json(array('code' => 200 ,'msg' => '操作成功！'));
     }
 
@@ -73,7 +74,7 @@ class Retail extends HomeBase
             return \json(array('code' => 404 ,'msg' => '出错啦！请重新刷新'));
         }
 
-        $res = db('retail')->field('pwd',true)->where(['code' => $code])->find();
+        $res = db('retail')->field('file')->where(['code' => $code])->find();
         return \json(array('code' => 200 ,'data' => $res));
     }
 }

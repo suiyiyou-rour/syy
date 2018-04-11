@@ -22,7 +22,7 @@ class Spcreate extends HomeBase
         if(!$file){
             return \json(array('code'=>404,'msg' => '上传失败！'));
         }
-        $info = $file->validate(array('size' => 5242880,'ext' => 'jpg,png,gif'))->move(ROOT_PATH . 'public' . DS .'image'.DS. 'spImage');
+        $info = $file->validate(array('size' => 5242880,'ext' => 'jpg,png,gif,jpeg'))->move(ROOT_PATH . 'public' . DS .'image'.DS. 'spImage');
 
         if(!$info){ 
             return \json(array('code'=>404,'msg' => $file->getError()));
