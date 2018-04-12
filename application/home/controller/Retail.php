@@ -19,8 +19,8 @@ class Retail extends HomeBase
         $page = input('post.page')?1:input('post.page');
         $page = ($page-1)*10;
         // 查找申请的和通过的
-        $count = db('retail')->where('type','in','0,1')->count();
-        $retailData = db('retail')->where('type','in','0,1')->limit($page.',10')->order('reg_time','desc')->select();
+        $count = db('retail')->where('type','in','1,3')->count();
+        $retailData = db('retail')->where('type','in','1,3')->limit($page.',10')->order('reg_time','desc')->select();
         return \json(array('code' => 200 ,'data' => $retailData ,'count' => $count));
     }
 
@@ -77,4 +77,21 @@ class Retail extends HomeBase
         $res = db('retail')->field('file')->where(['code' => $code])->find();
         return \json(array('code' => 200 ,'data' => $res));
     }
+
+    /**
+     *  分销商类型
+     */
+    public function typeChange(){
+        $code = input('post.code');
+        $type = input('post.type');
+        if(empty($code)){
+            return \json(array('code' => 404 ,'msg' => '出错啦！请重新刷新'));
+        }
+
+        $res = db('retail')->where(['code' => $code])->update(['type' => $type]);
+        if(!$res){
+            return \json(array('code' => 404 ,'data' => '修改失败！'));
+        }
+        return \json(array('code' => 200 ,'data' => '修改成功！'));
+    } 
 }
