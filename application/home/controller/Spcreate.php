@@ -6,7 +6,7 @@ class Spcreate extends HomeBase
     public function __constract(){
         parent::__constract();
         if(!getSpType()){
-            echo json(array("code" => 404, "msg" => "只有超级管理才有权限"));
+            echo json_encode(array("code" => 404, "msg" => "只有超级管理才有权限"));
             die;
         }
     }
