@@ -70,9 +70,9 @@ class Ticket extends HomeBase
         }
 
         $join = [['syy_goods_ticket b','a.code = b.goods_code']];
-        $goodsField = "a.code,a.show_title,a.check_type,a.price_type,a.sales,a.plat_price";
-        $groupField = "b.goods_class,b.place_name,b.ticket_type";
-        $allField = $goodsField.','.$groupField;
+        $goodsField = "a.code,a.show_title,a.check_type,a.price_type,a.sales,a.plat_price,a.on_time,a.off_time,a.online_type";
+        $ticketField = "b.goods_class,b.place_name,b.ticket_type";
+        $allField = $goodsField.','.$ticketField;
 
         $count = db('goods')->alias("a")->where($where)->join($join)->count('a.id');
         if(!$count){
@@ -96,7 +96,30 @@ class Ticket extends HomeBase
                 }
             }
             $k["place_name"] = json_decode($k["place_name"],true);
+            //上线时间显示处理
+            if(empty($k["on_time"])){
+                if($k["online_type"] == 1){
+                    $k["on_time"] = "上线时间为审核通过当天";
+                }else if($k["online_type"] == 3){
+                    $k["on_time"] = "上线时间为手动上线当天";
+                }
+            }else{
+                if($k["check_type"] == 5){
+                    //显示 0是预上线  1是上线  2不显示
+                    if(time() > $k["on_time"]){
+                        $k["checkOnlie"] = 1;
+                    }else{
+                        $k["checkOnlie"] = 0;
+                    }
+                }else{
+                    $k["checkOnlie"] = 2;
+                }
+                $k["on_time"] = date("Y-m-d",$k["on_time"]);
+            }
+            $k["off_time"] = date("Y-m-d",$k["off_time"]);
         }
+
+
 
         $output["list"]  =  $res;
         $output["count"]  =  $count;
