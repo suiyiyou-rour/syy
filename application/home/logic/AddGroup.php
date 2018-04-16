@@ -342,12 +342,12 @@ class AddGroup
             return array("code" => 403, "msg" => "产品查询失败，请联系管理员");
         }
         if($groupRes["child_price_type"] == 0){//无儿童价格
-            $data["child_is_opne"] = 0;
+            $data["child_is_open"] = 0;
             $data["market_child_price"] = 0;
             $data["plat_child_price"] = 0;
             $data["settle_child_price"] = 0;
         }else if($groupRes["child_price_type"] == 1){//与成人同价
-            $data["child_is_opne"] = 1;
+            $data["child_is_open"] = 1;
             $data["market_child_price"] = $data["market_price"];
             $data["plat_child_price"] = $data["plat_price"];
             $data["settle_child_price"] = $data["settle_price"];
