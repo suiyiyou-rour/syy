@@ -133,6 +133,8 @@ class Detail extends WeixinBase
                 $newIndate["date"]    =  date('Y-m-d',$i);         //每天
                 array_push($calendar,$newIndate);
             }
+            $info["begin_date"]     =  $indate["begin_date"];
+            $info["end_date"]       =  $indate["end_date"];
         };
         $output["info"] = $info;
         $output["date"] = $calendar;
