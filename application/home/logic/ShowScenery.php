@@ -203,7 +203,7 @@ class ShowScenery
     public function productInfo(){
         $goodsCode = input('post.goodsCode');
         $tab = $this->getGoodsTab($goodsCode);
-        if($tab < 4){
+        if($tab < 5){
             return array("code" => 203,"data" => array("tab"=>$tab));
         }
 
