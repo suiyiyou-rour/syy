@@ -17,7 +17,7 @@ class Index extends WeixinBase
         foreach ($res as &$k){
             $k["head_img"] = config("img_url").$k["head_img"];
         }
-        return json(array("code"=>200,"date"=>$res));
+        return json(array("code"=>200,"list"=>$res));
     }
 
     //首页轮播图

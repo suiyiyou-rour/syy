@@ -212,6 +212,10 @@ class AddTicket
         $goodsData["offline_type"]      =   $data["offline_type"];  //下线类型    (主)
         $goodsData["price_type"]        =   $data["price_type"];    //价格类型  (主)必须
         $goodsData["stock_type"]        =   $data["stock_type"];    //库存模式  (主)必须
+        if($goodsData["stock_type"] == 1){
+            $data["stock_num"] = -1;    //无限库存
+        }
+
         //有效期直接更新主表显示数据
         if($data["online_type"] == 4){                              //4有效期开始上线
             $goodsData["on_time"]       = $data["begin_date"];
@@ -228,8 +232,8 @@ class AddTicket
         $goodsData["settle_price"]     =   $data["settle_price"];  //展示结算价格
         //副表添加数据
         $ticketData["usable_date"]      =   $data["usable_date"];   //可用日期  (副)必须        --价格日历没有
-        $ticketData["disabled_date"]    =   $data["disabled_date"];   //不可用日期  (副)        --价格日历没有
-        $ticketData["refund"]           =   $data["refund"];        //退款设置   (副)必须
+        $ticketData["disabled_date"]    =   $data["disabled_date"]; //不可用日期  (副)        --价格日历没有
+        $ticketData["refund"]           =   $data["refund"];         //退款设置   (副)必须
         $ticketData["refund_info"]      =   $data["refund_info"];   //退款设置   (副)
         //有效期表数据
         $indateData["begin_date"]       =   $data["begin_date"];    //有效期开始时间 (indate)必须 --有效期模式没有
