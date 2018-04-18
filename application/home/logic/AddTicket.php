@@ -466,10 +466,10 @@ class AddTicket
         $data = Request::instance()->only($gain, 'post');//        $data = input('post.');
         //有效期时间段没接收 online_time
         if (empty($data["usable_date"])) {
-            $data["usable_date"] = ""; //可以用日期
+            $data["usable_date"] = []; //可以用日期
         }
         if (empty($data["disabled_date"])) {
-            $data["disabled_date"] = ""; //不可用日期
+            $data["disabled_date"] = []; //不可用日期
         }
         if(empty($data["refund_info"])){
             $data["refund_info"] = "";

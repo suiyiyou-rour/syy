@@ -50,7 +50,7 @@ class OptionScenery
         ];
         $contract = db('contract')->field('code,name,rate')->where($where)->select();
         if(!$contract){
-            return json_encode(array("code" => 405,"msg" => "合同加载错误,请联系管理员"));
+            return array("code" => 405,"msg" => "合同加载错误,请联系管理员");
         }
         $data["contact"] = $contract;
         $data["hash"] = getFromHash();
