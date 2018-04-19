@@ -336,7 +336,7 @@ class AddGroup
         $data = json_decode(json_encode($price), true);//对象转数组
         //todo 数据验证
 
-        //todo 儿童和成人同价
+        //todo 儿童和成人同价 0无儿童价 1与成人同价 1年龄 2身高
         $groupRes = db('goods_group')->field("child_price_type")->where(array("goods_code" => $goodsCode))->find();
         if(empty($groupRes)){
             return array("code" => 403, "msg" => "产品查询失败，请联系管理员");
@@ -351,6 +351,8 @@ class AddGroup
             $data["market_child_price"] = $data["market_price"];
             $data["plat_child_price"] = $data["plat_price"];
             $data["settle_child_price"] = $data["settle_price"];
+        }else{
+            $data["child_is_open"] = 1; //儿童价开启
         }
 
 
