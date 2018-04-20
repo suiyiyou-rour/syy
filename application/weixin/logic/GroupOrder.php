@@ -119,35 +119,36 @@ class GroupOrder extends Order
 
     //跟团数据接收
     private function data(){
-//        $gain = ['goodsCode','man_num','child_num','house_num','mobile','user_name','go_time','retail_code','user_code',"identification","charged_item","zfprice","identity_array","remark"];
-//        $data = Request::instance()->only($gain, 'post');//        $data = input('post.');
-//        $data['man_num']         = empty($data['man_num']) ? 0 : (int)$data['man_num']; //成人数量
-//        $data['child_num']       = empty($data['child_num']) ? 0 : (int)$data['child_num']; //儿童数量
-//        $data['house_num']       = empty($data['house_num']) ? 0 : (int)$data['house_num']; //单房差数量
-//        $data['zfprice']         = empty($data['zfprice']) ? 0 : (int)$data['zfprice']; //自费价格
-//        $data['identity_array'] = empty($data['identity_array']) ? "[]" : json_encode($data["identity_array"]); //身份数组
-//        $data['charged_item']   = empty($data['charged_item']) ? "[]" : json_encode($data["charged_item"]); //自费项目
-//        $data['go_time']         =  strtotime($data['go_time']);            //出发时间
-//        if(empty($data['remark'])) $data['remark'] = "";    //备注信息
-//        if(empty($data['retail_code'])) $data['retail_code'] = "54";    //经销商编码 默认54 小游
+        $gain = ['goodsCode','man_num','child_num','house_num','mobile','user_name','go_time','retail_code','user_code',"identification","charged_item","zfprice","identity_array","remark"];
+        $data = Request::instance()->only($gain, 'post');//        $data = input('post.');
+        $data['man_num']         = empty($data['man_num']) ? 0 : (int)$data['man_num']; //成人数量
+        $data['child_num']       = empty($data['child_num']) ? 0 : (int)$data['child_num']; //儿童数量
+        $data['house_num']       = empty($data['house_num']) ? 0 : (int)$data['house_num']; //单房差数量
+        $data['zfprice']         = empty($data['zfprice']) ? 0 : (int)$data['zfprice']; //自费价格
+        $data['identity_array'] = empty($data['identity_array']) ? "[]" : json_encode($data["identity_array"]); //身份数组
+        $data['charged_item']   = empty($data['charged_item']) ? "[]" : json_encode($data["charged_item"]); //自费项目
+        $data['go_time']         =  strtotime($data['go_time']);            //出发时间
+        if(empty($data['remark'])) $data['remark'] = "";    //备注信息
+        if(empty($data['retail_code'])) $data['retail_code'] = "54";    //经销商编码 默认54 小游
 
-        // 模拟数据
-        $data['goodsCode']      =  "g0020001";           //产品code
-        $data['man_num']        =  2;                   //成人数量
-        $data['child_num']      =  1;                   //儿童数量
-        $data['house_num']      =  1;                   //单房差数量
-        $data['mobile']         =  "18060481803";        //主要联系人电话
-        $data['user_name']      =  "刘祖梁";              //主要联系人名称
-        $data['go_time']        =  "2018-04-19";         //出发日期
-        $data['retail_code']    =  "54";                 //经销商编码
+//        // 模拟数据
+//        $data['goodsCode']      =  "g0020001";           //产品code
+//        $data['man_num']        =  2;                   //成人数量
+//        $data['child_num']      =  1;                   //儿童数量
+//        $data['house_num']      =  1;                   //单房差数量
+//        $data['mobile']         =  "18060481803";        //主要联系人电话
+//        $data['user_name']      =  "刘祖梁";              //主要联系人名称
+//        $data['go_time']        =  "2018-04-19";         //出发日期
+//        $data['retail_code']    =  "54";                 //经销商编码
         $data['user_code']      =  "100001";             //下单用户
-        $data["identification"] = "352201199303141637"; //主要联系人身份证
-        $data["charged_item"]   =   "[]";                   //自费项目
-        $data["zfprice"]        =   0;                     //自费价格
-        $data["identity_array"] = "[]";                     //身份数组 每个人的身份证
-        $data["remark"]          = "";                     //备注信息 100
+//        $data["identification"] = "352201199303141637"; //主要联系人身份证
+//        $data["charged_item"]   =   "[]";                   //自费项目
+//        $data["zfprice"]        =   0;                     //自费价格
+//        $data["identity_array"] = "[]";                     //身份数组 每个人的身份证
+//        $data["route_price"] = "111";
+//        $data["remark"]          = "";                     //备注信息 100
 
-        $data['go_time'] = strtotime($data['go_time']);
+//        $data['go_time'] = strtotime($data['go_time']);
 
         return $data;
     }

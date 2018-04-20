@@ -50,7 +50,7 @@ class Index extends WeixinBase
 
         $count = db('goods')->where($where)->count('id');
         if(!$count){
-            return json(array("code" => 200,"data" => array("count"=>0)));
+            return json(array("code" => 200,"data" => array("count" => 0,"list" => array())));
         }
 
         $res = db('goods')

@@ -215,6 +215,7 @@ class AddTicket
         if($goodsData["stock_type"] == 1){
             $data["stock_num"] = -1;    //无限库存
         }
+        $goodsData["stock_num"]        =   $data["stock_num"];     //库存 (主)总库存
 
         //有效期直接更新主表显示数据
         if($data["online_type"] == 4){                              //4有效期开始上线

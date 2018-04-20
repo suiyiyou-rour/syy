@@ -1,5 +1,5 @@
 <?php
-namespace app\index\controller;
+namespace app\weixin\controller;
 use app\common\controller\Base;
 class Test extends Base
 {

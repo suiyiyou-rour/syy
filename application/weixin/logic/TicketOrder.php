@@ -19,9 +19,12 @@ class TicketOrder extends Order
             return array("code" => 403,"msg" => "产品查询出错，请联系小游");
         }
 
-        if($data['man_num'] > $ticketInfo["max_buy_num"]){
-            return array("code" => 403,"msg" => "每单最多购买人数,不能超过" . $ticketInfo["max_buy_num"] . "人");
+        if($ticketInfo["max_buy_num"] != 0){
+            if($data['man_num'] > $ticketInfo["max_buy_num"]){
+                return array("code" => 403,"msg" => "每单最多购买人数,不能超过" . $ticketInfo["max_buy_num"] . "人");
+            }
         }
+
         if ($data['man_num'] < $ticketInfo["min_buy_num"]) {
             return array('code' => 403, "msg" => "每单最少购买人数,不能小于" . $ticketInfo["min_buy_num"] . "人");
         }
@@ -39,8 +42,14 @@ class TicketOrder extends Order
 
         //库存判断
         if($info["stock_type"] == 2){   //库存类型为总库存
-            if ($data['man_num'] > $info["stock_num"]) {    //主表判断
-                return (array('code' => 403, "msg" => "库存已经不够，目前最多还剩" . $info["stock_num"] . "人"));
+            if($info["price_type"] == 1){   //价格日历
+                if ($data['man_num'] > $info["stock_num"]) {    //主表判断
+                    return (array('code' => 403, "msg" => "库存已经不够，目前最多还剩" . $info["stock_num"] . "人"));
+                }
+            }else{                          //有效期
+                if ($data['man_num'] > $price["stock_num"]) {    //有效期表判断
+                    return (array('code' => 403, "msg" => "库存已经不够，目前最多还剩" . $info["stock_num"] . "人"));
+                }
             }
         }else if($info["stock_type"] == 3 && $info["price_type"] == 1){     //日库存 价格日历才有
             if ($data['man_num'] > $price["stock_num"]) {    //日历表
@@ -106,27 +115,27 @@ class TicketOrder extends Order
 
     //跟团数据接收
     private function data(){
-//        $gain = ['goodsCode','man_num','child_num','house_num','mobile','user_name','go_time','retail_code','user_code',"identification","charged_item","zfprice","identity_array","remark"];
-//        $data = Request::instance()->only($gain, 'post');//        $data = input('post.');
-//        $data['man_num']         = empty($data['man_num']) ? 0 : (int)$data['man_num']; //成人数量
-//        $data['identity_array'] = empty($data['identity_array']) ? "[]" : json_encode($data["identity_array"]); //身份数组
-//        $data['go_time']         =  strtotime($data['go_time']);            //出发时间
-//        if(empty($data['remark'])) $data['remark'] = "";    //备注信息
-//        if(empty($data['retail_code'])) $data['retail_code'] = "54";    //经销商编码 默认54 小游
+        $gain = ['goodsCode','man_num','child_num','house_num','mobile','user_name','go_time','retail_code','user_code',"identification","charged_item","zfprice","identity_array","remark"];
+        $data = Request::instance()->only($gain, 'post');//        $data = input('post.');
+        $data['man_num']         = empty($data['man_num']) ? 0 : (int)$data['man_num']; //成人数量
+        $data['identity_array'] = empty($data['identity_array']) ? "[]" : json_encode($data["identity_array"]); //身份数组
+        $data['go_time']         =  strtotime($data['go_time']);            //出发时间
+        if(empty($data['remark'])) $data['remark'] = "";    //备注信息
+        if(empty($data['retail_code'])) $data['retail_code'] = "54";    //经销商编码 默认54 小游
 
         // 模拟数据
-        $data['goodsCode']      =  "t0020002";           //产品code
-        $data['man_num']        =  1;                     //成人数量
-        $data['mobile']         =  "18060481803";        //主要联系人电话
-        $data['user_name']      =  "刘祖梁";              //主要联系人名称
-        $data['go_time']        =  "2018-04-19";         //出发日期
-        $data['retail_code']    =  "54";                 //经销商编码
+//        $data['goodsCode']      =  "t0020002";           //产品code
+//        $data['man_num']        =  1;                     //成人数量
+//        $data['mobile']         =  "18060481803";        //主要联系人电话
+//        $data['user_name']      =  "刘祖梁";              //主要联系人名称
+//        $data['go_time']        =  "2018-04-19";         //出发日期
+//        $data['retail_code']    =  "54";                 //经销商编码
         $data['user_code']      =  "100001";             //下单用户
-        $data["identification"] = "352201199303141637"; //主要联系人身份证
-        $data["identity_array"] = "[]";                   //身份数组 每个人的身份证
-        $data["remark"]          = "";                     //备注信息 100
-
-        $data['go_time'] = strtotime($data['go_time']);
+//        $data["identification"] = "352201199303141637"; //主要联系人身份证
+//        $data["identity_array"] = "[]";                   //身份数组 每个人的身份证
+//        $data["remark"]          = "";                     //备注信息 100
+//
+//        $data['go_time'] = strtotime($data['go_time']);
 
         return $data;
     }
@@ -145,8 +154,10 @@ class TicketOrder extends Order
         if (empty($data['user_code'])) {
             return "你还没有登录";
         }
-        if (empty($data['identification']) || !is_Identification_card($data['identification'])) {
-            return "身份证错误";
+        if (!empty($data['identification'])) {
+            if(!is_Identification_card($data['identification'])){
+                return "身份证错误";
+            }
         }
         if(mb_strlen($data["remark"],"UTF8") > 100){
             return "备注信息不能大于100个字符";

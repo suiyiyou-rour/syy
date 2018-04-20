@@ -128,100 +128,105 @@ class Paynotify extends Base
         return array("bool" => 1);
     }
 
-    //门票
+    //门票 todo 待测试
     private function ticket($orderInfo){
         $goods = db('goods')->field("price_type,stock_type,stock_num")->where(array("code"=>$orderInfo['goods_code']))->find();
-        if (empty($goods)) {
-            return array("bool" =>0,"error_info"=>"没有商品数据");
-        }
-        //价格查询
-        if($goods["price_type"] == 1){
-            //价格日历
-            $price = db("ticket_calendar")->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))->find();
-        }else{
-            //有效期
-            $price = db("ticket_indate")->where(array("goods_code"=>$orderInfo['goodsCode'], "begin_date"=>["<=",$orderInfo['go_time']],"end_date"=>[">=",$orderInfo['go_time']]))->find();
-        }
+        if (!$goods) return array("bool" =>0,"error_info"=>"没有商品数据");
 
+        $orderDate["pay_time"]      = time();      //支付时间
+        $orderDate["order_type"]    = 2;           // 2已付款
+        //修改订单
+        $orderRes = db('order')->where(array("order_sn" => $orderInfo["order_sn"]))->update($orderDate);
 
+        $num          = $orderInfo["total_num"];  //总人数
+        //库存
+        if($goods["price_type"] == 1){//价格日历
+            $calendar = db("ticket_calendar")->field("stock_num,sales_num")->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))->find();
+            if (!$calendar) return array("bool" =>0,"error_info"=>"没有价格日历数据");
 
-
-
-        $tickInfo = M('tick')
-            ->field('t_tick_date,t_tick_sell,t_tick_kc')
-            ->where(array('t_code' => $orderInfo['t_tick_code']))
-            ->find();
-        if (empty($tickInfo)) {
-            return array("code" =>0,"msg"=>"没有商品价格数据");
-        }
-
-        $o_data['t_pay_time']           =   date("Y-m-d H:i:s", time());            //付款时间
-        $o_data['t_tick_order_type']   =    2;                                      //订单状态
-        $Model = M();
-//        $Model->startTrans(); // 开启事务
-        //todo 更新 销量 库存 改变订单状态
-        $om = $Model->table('lf_tick_order')->where(array('t_order_sn' => $orderSn))->save($o_data);
-
-        $ck_errorinfo = 1;
-        if ($tickInfo['t_tick_date'] == 1 ) {       //有效期
-            $ywhere['unix_timestamp(y_b_time)']     =       array('elt', strtotime($orderInfo['t_go_date']));
-            $ywhere['unix_timestamp(y_e_time)']     =       array('egt', strtotime($orderInfo['t_go_date']));
-            $ywhere['y_code']                         =       $orderInfo['t_tick_code'];
-            $ywhere['y_user_code']                   =       $orderInfo['t_tick_id'];
-            if (is_numeric($tickInfo['t_tick_kc'])) {
-                if($tickInfo['t_tick_kc'] != -1){//库存
-                    if(($tickInfo['t_tick_kc'] - $orderInfo['t_tick_num']) >= 0){
-                        $tsdata['t_tick_kc'] = $tickInfo['t_tick_kc'] - $orderInfo['t_tick_num'];       //有效期库存
-                    }else{
-                        $tsdata['t_tick_kc'] = 0;           //有效期库存
-                    }
-                }
-            }else{
-                $ck_errorinfo = 0;
+            $cData["sales_num"] = $calendar["sales_num"] + $num;    //价格日历销量
+            if($goods["stock_type"] == 2){//总库存
+                $gData["stock_num"] = $goods["stock_num"] - $num >= 0 ? $goods["stock_num"] - $num : 0;//主表库存
+            }else if($goods["stock_type"] == 3){ //3日库存
+                $cData["stock_num"] = $calendar["stock_num"] - $num >= 0 ? $calendar["stock_num"] - $num : 0;//价格日历库存
             }
-            //有效期表跟更新销量
-            $ym = $Model->table('lf_tick_y')->where(array($ywhere))->setInc('y_sell_num', $orderInfo['t_tick_num']);
-        } else {
-            $pwhere['p_code'] = $orderInfo['t_tick_code'];
-            $pwhere['unix_timestamp(p_date)'] = array('eq', strtotime($orderInfo['t_go_date']));
-            $priceInfo = M('tick_price')->where($pwhere)->find();
-            if(!$priceInfo){
-                $ck_errorinfo = 0;
-            }else{
-                if( $priceInfo['p_ck'] !== null && $priceInfo['p_ck'] != -1 ){
-                    if(($priceInfo['p_ck'] - $orderInfo['t_tick_num']) >= 0){
-                        $data['p_ck'] = $priceInfo['p_ck'] - $orderInfo['t_tick_num'];      //价格日历库存
-                    }else{
-                        $data['p_ck'] = 0;      //价格日历库存
-                    }
-                }
+            $subRes = db("ticket_calendar")->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))->update($cData);
+
+        }else{//有效期
+            $indate = db("ticket_indate")->field("stock_num,sales_num")->where(array("goods_code"=>$orderInfo['goodsCode']))->find();
+            if (!$indate) return array("bool" =>0,"error_info"=>"有效期没有数据");
+
+            $iData["sales_num"] = $indate["sales_num"] + $num;    //有效期表销量
+            if($goods["stock_type"] == 2){ //总库存
+                $gData["stock_num"] =  $goods["stock_num"] - $num >= 0 ? $goods["stock_num"] - $num : 0;    //主表库存
+                $iData["stock_num"] = $indate["stock_num"] - $num >= 0 ? $indate["stock_num"] - $num : 0;    //有效期表销量
             }
-            $data['p_sell_num'] = $priceInfo['p_sell_num'] + $orderInfo['t_tick_num'];       //价格日历销量
-            //更新价格日历
-            $ym = $Model->table('lf_tick_price')->where($pwhere)->save($data);
+            $subRes =db("ticket_indate")->where(array("goods_code"=>$orderInfo['goodsCode']))->update($iData);
+
         }
+
         //主表销量
-        $tsdata['t_tick_sell'] = $tickInfo['t_tick_sell'] + $orderInfo['t_tick_num'];
-        $pm = $Model->table('lf_tick')->where(array('t_code' => $orderInfo['t_tick_code'], 't_user_id' => $orderInfo['t_tick_id']))->save($tsdata);
+        $gData["sales_num"] = $goods["sales_num"] + $num;    //主表销量
+        db('goods')->where(array("code"=>$orderInfo['goods_code']))->update($gData);
 
-        if(!$om){
-            return array("code" => 0, "msg" => "订单状态保存失败" ,"num"=>$orderInfo['t_tick_num']);
+        if($orderRes === false){
+            return array("bool" => 2, "error_info" => "订单状态保存失败");
         }
-        if($ck_errorinfo == 0){
-            return array("code" => 2, "msg" => "价格日历或者有效期字段不是数字" ,"num"=>$orderInfo['t_tick_num']);
+        if($subRes === false){
+            return array("bool" => 3, "error_info" => "价格日历或者有效期数据异常");
         }
-        if(!$pm){
-            return array("code" => 2,"msg" => "总销量库存保存异常","num"=>$orderInfo['t_tick_num']);
-        }
-        if(!$ym){
-            return array("code" => 2,"msg" => "价格日历或者有效期数据保存异常","num"=>$orderInfo['t_tick_num']);
-        }
-        return array("code" => 1,"msg" => "","num"=>$orderInfo['t_tick_num']);
+        return array("bool" => 1);
     }
 
-    //景酒
+    //景酒 todo 待测试
     private function scenery($orderInfo){
-        return 1;
+        $price = db("scenery_calendar")
+            ->field("stock_is_open,stock_num,reserve_is_open,reserve_time,reserve_num,sales_num")
+            ->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))
+            ->find();
+        if(!$price){
+            return array("bool" => 0, "error_info" => "没有价格日历数据");
+        }
+        $num          = $orderInfo["total_num"];  //总人数
+        $stockNum     = $price["stock_num"];       //库存
+        if($num <= $stockNum){       //正常库存判断
+            $priceDate["stock_num"] = $stockNum - $num;
+            $orderDate["order_type"] = 2;                               // 2已付款，未出行(正常订单)
+        }else{
+            $priceDate["stock_num"] = 0;
+            //库存保留房库存判断
+            if($price["reserve_is_open"] == 1){ //保留房库存
+                $priceDate["reserve_num"] = $price - ($num - $stockNum);
+
+                $todayTime = strtotime(date("Y-m-d"),time());
+                if($orderInfo['go_time'] == $todayTime && (time() - $todayTime) > $price["reserve_time"]){  //保留房时间不够
+                    $orderDate["order_type"] = 3;                               // 3待确认订单
+                }else{
+                    $orderDate["order_type"] = 2;                               // 2已付款，未出行(正常订单)
+                }
+            }else{
+                $orderDate["order_type"] = 3;                                    // 3待确认订单
+            }
+        }
+
+        $priceDate["sales_num"] = $price["sales_num"] + $num;                          //价格日历销量
+        $orderDate["pay_time"]  = time();                                      //支付时间
+
+        //修改订单
+        $orderRes = db('order')->where(array("order_sn" => $orderInfo["order_sn"]))->update($orderDate);
+        //价格日历
+        $price = db("scenery_calendar")->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))->update($priceDate);
+        //主表销量
+        $this->addGoodsSales($orderInfo['goods_code'],$num);
+        if($orderRes === false){
+            return array("bool" => 2, "error_info" => "订单状态保存失败");
+        }
+        if($price === false){
+            return array("bool" => 3,"error_info" => "价格日历数据保存异常");
+        }
+        return array("bool" => 1);
+
+
     }
 
     //添加商品主表销量

@@ -19,7 +19,7 @@ class Detail extends WeixinBase
         ];
 
         $join           =  [['sp b','a.sp_code = b.code']];
-        $goodsField     =  "a.code,a.show_title,a.advance_time,a.goods_type,a.price_type";
+        $goodsField     =  "a.code,a.show_title,a.advance_time,a.goods_type,a.price_type,stock_type,stock_num";
         $sceneryField   =  "b.com_name";
         $allField       =  $goodsField.','.$sceneryField;
 
@@ -29,13 +29,13 @@ class Detail extends WeixinBase
         }
         switch ($res["goods_type"]){
             case 1:     //1跟团
-                $info = $this->groupInfo($goodsCode);
+                $info = $this->groupInfo($res);
                 break;
             case 2:     //2门票
-                $info = $this->ticketInfo($goodsCode,$res["price_type"]);
+                $info = $this->ticketInfo($res);
                 break;
             case 3:     //3酒景
-                $info = $this->sceneryInfo($goodsCode);
+                $info = $this->sceneryInfo($res);
                 break;
             default:
                 return json(array("code" => 404, "msg" => "查询出错，请联系随意游小游"));
@@ -46,10 +46,10 @@ class Detail extends WeixinBase
     }
 
     //跟团游
-    private function groupInfo($goodsCode){
+    private function groupInfo($goods){
         //副表 补充表
         $join           =  [['goods_supply b','a.goods_code = b.goods_code']];
-        $where          =  array("a.goods_code"=>$goodsCode);
+        $where          =  array("a.goods_code" => $goods["code"]);
         $info = db('goods_group')->alias("a")->field("a.*,b.image")->where($where)->join($join)->find();
         $info["service_type"]       =  json_decode($info["service_type"],true);
         $info["main_place"]         =  json_decode($info["main_place"],true);
@@ -69,7 +69,7 @@ class Detail extends WeixinBase
         }
 
         //价格日历
-        $calendar = db('group_calendar')->field(['id','goods_code'],true)->where(array("goods_code" => $goodsCode))->order("date asc")->select();
+        $calendar = db('group_calendar')->field(['id','goods_code'],true)->where(array("goods_code" => $goods["code"]))->order("date asc")->select();
         if($calendar){
             foreach ($calendar as &$k){
                 $k["plat_price"]            = (float)$k["plat_price"];
@@ -88,9 +88,9 @@ class Detail extends WeixinBase
     }
 
     //门票
-    private function ticketInfo($goodsCode,$type){
+    private function ticketInfo($goods){
         $join           =  [['goods_supply b','a.goods_code = b.goods_code']];
-        $where          =  array("a.goods_code"=>$goodsCode);
+        $where          =  array("a.goods_code" => $goods["code"]);
         $info = db('goods_ticket')->alias("a")->field("a.*,b.image")->where($where)->join($join)->find();
         $info["place_name"]         =  json_decode($info["place_name"],true);
         $info["include_cost"]       =  json_decode($info["include_cost"],true);
@@ -107,20 +107,25 @@ class Detail extends WeixinBase
         foreach ($info["image"] as &$k){
             $k = config("img_url").$k;
         }
-        if ($type == 1){
+        if ($goods["price_type"] == 1){
             //价格日历
-            $calendar = db('ticket_calendar')->field(['id','goods_code'],true)->where(array("goods_code" => $goodsCode))->order("date asc")->select();
+            $calendar = db('ticket_calendar')->field(['id','goods_code'],true)->where(array("goods_code" => $goods["code"]))->order("date asc")->select();
             if($calendar){
                 foreach ($calendar as &$k){
                     $k["plat_price"]    = (float)$k["plat_price"];
                     $k["settle_price"]  = (float)$k["settle_price"];
                     $k["market_price"]  = (float)$k["market_price"];
                     $k["date"]           =  date("Y-m-d",$k["date"]);
+                    if($goods["stock_type"] == 1){//1无限库存 2总库存 3日库存
+                        $k["stock_num"] = -1;
+                    }else if($goods["stock_type"] == 2){
+                        $k["stock_num"] = $goods["stock_num"];
+                    }
                 }
             }
         }else{
             //有效期
-            $indate = db('ticket_indate')->field(['id','goods_code'],true)->where(array("goods_code" => $goodsCode))->find();
+            $indate = db('ticket_indate')->field(['id','goods_code'],true)->where(array("goods_code" => $goods["code"]))->find();
             $newIndate["plat_price"]      =   (float)$indate["plat_price"];
             $newIndate["settle_price"]    =   (float)$indate["settle_price"];
             $newIndate["market_price"]    =   (float)$indate["market_price"];
@@ -143,9 +148,9 @@ class Detail extends WeixinBase
     }
 
     //景酒
-    private function sceneryInfo($goodsCode){
+    private function sceneryInfo($goods){
         $join           =  [['goods_supply b','a.goods_code = b.goods_code']];
-        $where          =  array("a.goods_code"=>$goodsCode);
+        $where          =  array("a.goods_code"=>$goods["code"]);
         $info = db('goods_scenery')->alias("a")->field("a.*,b.image")->where($where)->join($join)->find();
         $info["hotel_code"]             =  json_decode($info["hotel_code"],true);
         $info["view_code"]              =  json_decode($info["view_code"],true);
@@ -161,7 +166,7 @@ class Detail extends WeixinBase
             $k = config("img_url").$k;
         }
 
-        $calendar = db('scenery_calendar')->field(['id','goods_code'],true)->where(array("goods_code" => $goodsCode))->order("date asc")->select();
+        $calendar = db('scenery_calendar')->field(['id','goods_code'],true)->where(array("goods_code" => $goods["code"]))->order("date asc")->select();
         if($calendar){
             foreach ($calendar as &$k){
                 $k["plat_price"] = (float)$k["plat_price"];

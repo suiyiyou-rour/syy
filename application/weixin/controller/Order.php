@@ -7,35 +7,47 @@ class Order extends WeixinBase
     {
 //        $res = is_Date("2018-01-021");
 //        var_dump($res);
-        $data = array("identity_array"=>array("k"=>1));
-        if($data["remark"]){
-            echo 1;
-        }
+//        $data = array("identity_array"=>array("k"=>1));
+//        if($data["remark"]){
+//            echo 1;
+//        }
+        $calendar["stock_num"] = 33;
+        $num = 31;
+//        if($calendar["stock_num"] - $num >= 0){
+//            $gData["stock_num"]  = $calendar["stock_num"] - $num;
+//        }else{
+//            $gData["stock_num"] = 0;
+//        }
+
+        $gData["stock_num"] = $calendar["stock_num"] - $num >= 0 ? $calendar["stock_num"] - $num : 0;
+        var_dump($gData["stock_num"]);
 //        $data['man_num'] = empty($data['man_num']) ? 0 : (int)$data['man_num'];
 //
 //
 //        $data['identity_array'] = empty($data['identity_array']) ? "[]" : json_encode($data["identity_array"]); //身份数组
 //        var_dump($data);
 
-//        $model = model("");
-//        $model->startTrans();   // 开启事务
+//        $db = db("");
+//        $db->startTrans();   // 开启事务
 //        try{
-//            $model->table("order")->insert(array("num"=>"1"));
-//            $model->table("syy_test2")->insert(array("name"=>112));
+//            $db->table("order")->insert(array("num"=>"1"));
+//            $db->table("syy_test2")->insert(array("name"=>112));
 //            // 提交事务
-//            $model->commit();
+//            $db->commit();
 //            return 1;
 //        } catch (\Exception $e) {
 //            // 回滚事务
-//            $model->rollBack();
+//            $db->rollBack();
 //            return 2;
 //        }
     }
 
     //添加订单
     public function add(){
-        $goodsCode = "t0020002";
-        $goTime = "2018-04-19";
+//        $goodsCode = "t0020002";
+//        $goTime = "2018-04-19";
+        $goodsCode = input("post.goodsCode");
+        $goTime = input("post.go_time");
         if(empty($goodsCode) || empty($goTime) || !is_Date($goTime)){
             return json(array("code" => 404,"msg" => "商品号或者出发日期出错"));
         }
@@ -84,6 +96,10 @@ class Order extends WeixinBase
         return json($info);
     }
 
+    //订单删除
+    public function del(){
+
+    }
 
 
 
