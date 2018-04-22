@@ -113,18 +113,21 @@ class Paynotify extends Base
         $priceDate["sales_num"] = $salesNum + $sell;                          //价格日历销量
         $orderDate["pay_time"]  = time();                                      //支付时间
 
-        //修改订单
-        $orderRes = db('order')->where(array("order_sn" => $orderInfo["order_sn"]))->update($orderDate);
-        //价格日历
-        $price = db("group_calendar")->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))->update($priceDate);
-        //主表销量
-        $this->addGoodsSales($orderInfo['goods_code'],$sell);
-//
-        if($orderRes === false){
+
+        try{
+            //修改订单
+            db('order')->where(array("order_sn" => $orderInfo["order_sn"]))->update($orderDate);
+        } catch (\Exception $e) {
             return array("bool" => 2, "error_info" => "订单状态保存失败");
         }
-        if($price === false){
+        try{
+            db("group_calendar")->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))->update($priceDate);
+        } catch (\Exception $e) {
             return array("bool" => 3,"error_info" => "价格日历数据保存异常");
+        }
+        $goodsSell = $this->addGoodsSales($orderInfo['goods_code'],$sell);
+        if(!$goodsSell){
+            return array("bool" => 4,"error_info" => "主表销量数据保存异常");
         }
         return array("bool" => 1);
     }
@@ -137,7 +140,11 @@ class Paynotify extends Base
         $orderDate["pay_time"]      = time();      //支付时间
         $orderDate["order_type"]    = 2;           // 2已付款
         //修改订单
-        $orderRes = db('order')->where(array("order_sn" => $orderInfo["order_sn"]))->update($orderDate);
+        try{
+            db('order')->where(array("order_sn" => $orderInfo["order_sn"]))->update($orderDate);
+        } catch (\Exception $e) {
+            return array("bool" => 2, "error_info" => "订单状态保存失败");
+        }
 
         $num          = $orderInfo["total_num"];  //总人数
         //库存
@@ -151,8 +158,11 @@ class Paynotify extends Base
             }else if($goods["stock_type"] == 3){ //3日库存
                 $cData["stock_num"] = $calendar["stock_num"] - $num >= 0 ? $calendar["stock_num"] - $num : 0;//价格日历库存
             }
-            $subRes = db("ticket_calendar")->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))->update($cData);
-
+            try{
+                db("ticket_calendar")->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))->update($cData);
+            } catch (\Exception $e) {
+                return array("bool" => 3, "error_info" => "价格日历数据异常");
+            }
         }else{//有效期
             $indate = db("ticket_indate")->field("stock_num,sales_num")->where(array("goods_code"=>$orderInfo['goodsCode']))->find();
             if (!$indate) return array("bool" =>0,"error_info"=>"有效期没有数据");
@@ -162,19 +172,19 @@ class Paynotify extends Base
                 $gData["stock_num"] =  $goods["stock_num"] - $num >= 0 ? $goods["stock_num"] - $num : 0;    //主表库存
                 $iData["stock_num"] = $indate["stock_num"] - $num >= 0 ? $indate["stock_num"] - $num : 0;    //有效期表销量
             }
-            $subRes =db("ticket_indate")->where(array("goods_code"=>$orderInfo['goodsCode']))->update($iData);
-
+            try{
+                db("ticket_indate")->where(array("goods_code"=>$orderInfo['goodsCode']))->update($iData);
+            } catch (\Exception $e) {
+                return array("bool" => 3, "error_info" => "有效期数据异常");
+            }
         }
 
-        //主表销量
-        $gData["sales_num"] = $goods["sales_num"] + $num;    //主表销量
-        db('goods')->where(array("code"=>$orderInfo['goods_code']))->update($gData);
-
-        if($orderRes === false){
-            return array("bool" => 2, "error_info" => "订单状态保存失败");
-        }
-        if($subRes === false){
-            return array("bool" => 3, "error_info" => "价格日历或者有效期数据异常");
+        //主表数据
+        try{
+            $gData["sales_num"] = $goods["sales_num"] + $num;
+            db('goods')->where(array("code"=>$orderInfo['goods_code']))->update($gData);
+        } catch (\Exception $e) {
+            return array("bool" => 4,"error_info" => "主表库存-销量数据保存异常");
         }
         return array("bool" => 1);
     }
@@ -213,27 +223,30 @@ class Paynotify extends Base
         $priceDate["sales_num"] = $price["sales_num"] + $num;                          //价格日历销量
         $orderDate["pay_time"]  = time();                                      //支付时间
 
-        //修改订单
-        $orderRes = db('order')->where(array("order_sn" => $orderInfo["order_sn"]))->update($orderDate);
-        //价格日历
-        $price = db("scenery_calendar")->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))->update($priceDate);
-        //主表销量
-        $this->addGoodsSales($orderInfo['goods_code'],$num);
-        if($orderRes === false){
+        try{
+            //修改订单
+            db('order')->where(array("order_sn" => $orderInfo["order_sn"]))->update($orderDate);
+        } catch (\Exception $e) {
             return array("bool" => 2, "error_info" => "订单状态保存失败");
         }
-        if($price === false){
+        try{
+            //价格日历
+            db("scenery_calendar")->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))->update($priceDate);
+        } catch (\Exception $e) {
             return array("bool" => 3,"error_info" => "价格日历数据保存异常");
         }
+        $goodsSell = $this->addGoodsSales($orderInfo['goods_code'],$num);
+        if(!$goodsSell){
+            return array("bool" => 4,"error_info" => "价格日历数据保存异常");
+        }
         return array("bool" => 1);
-
-
     }
 
     //添加商品主表销量
     private function addGoodsSales($goodsCode,$num){
-        $goodsRes = db('goods')->where(array("code"=>$goodsCode))->setInc('sales', $num);
-        if(!$goodsRes){
+        try{
+            db('goods')->where(array("code"=>$goodsCode))->setInc('sales', $num);
+        } catch (\Exception $e) {
             return false;
         }
         return true;
