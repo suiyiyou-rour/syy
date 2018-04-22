@@ -98,11 +98,12 @@ class Rebate extends HomeBase
 
         $view = model('Rebate');
         $view->data($data);
-        $res = $view->allowField(true)->save();// 过滤post数组中的非数据表字段数据
-        if(!$res){
-            return json_encode(array("code" => 403, "msg" => "保存出错，请再保存一次"));
+        try{
+            $view->allowField(true)->save();// 过滤post数组中的非数据表字段数据
+        } catch (\Exception $e) {
+            return json(array("code" => 403, "msg" => "保存出错，请再保存一次"));
         }
-        return json_encode(array("code" => 200));
+        return json(array("code" => 200));
     }
 
     //修改
@@ -122,10 +123,11 @@ class Rebate extends HomeBase
         //todo 验证
 
         $view = model('Rebate');
-        $res = $view->save($data,['id' => $id]);
-        if(!$res){
-            return json_encode(array("code" => 403, "msg" => "保存出错，请再保存一次"));
+        try{
+            $view->save($data,['id' => $id]);
+        } catch (\Exception $e) {
+            return json(array("code" => 403, "msg" => "保存出错，请再保存一次"));
         }
-        return json_encode(array("code" => 200));
+        return json(array("code" => 200));
     }
 }

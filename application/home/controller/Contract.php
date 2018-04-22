@@ -41,7 +41,7 @@ class contract extends HomeBase
         }
 
         //数据验证
-        $validate = new \app\home\validate\contract();
+        $validate = new \app\home\validate\Contract();
         $result = $validate->scene('add')->check($data);
         if (true !== $result) {
             return json(array("code" => 405, "msg" => $validate->getError()));
@@ -50,9 +50,10 @@ class contract extends HomeBase
         $data["code"]       =  $this->creatrCode();//编号
         $view = model('contract');
         $view->data($data);
-        $res = $view->allowField(true)->save();// 过滤post数组中的非数据表字段数据
-        if(!$res){
-            return json_encode(array("code" => 403, "msg" => "保存出错，请再保存一次"));
+        try{
+            $view->allowField(true)->save();// 过滤post数组中的非数据表字段数据
+        } catch (\Exception $e) {
+            return json(array("code" => 403, "msg" => "保存出错，请再保存一次"));
         }
         return json(array("code" => 200,"data"=>array("code"=>$data["code"])));
     }
@@ -124,18 +125,16 @@ class contract extends HomeBase
     //异步上传图片
     public function imageUpload()
     {
-
-
         $imgLimit = config("imageUpLimit");
         $file = request()->file('file');
         if (empty($file)) {
-            return json_encode(array("code" => 404, "msg" => "参数错误"));
+            return json(array("code" => 404, "msg" => "参数错误"));
         }
         $info = $file->validate($imgLimit)->move(ROOT_PATH . 'public' . DS . 'image' . DS . '');
         if ($info) {
-            return json_encode(array("code" => 200, "data" => array("name" => '' . DS . $info->getSaveName())));
+            return json(array("code" => 200, "data" => array("name" => '' . DS . $info->getSaveName())));
         } else {
-            return json_encode(array("code" => 403, "msg" => $file->getError()));
+            return json(array("code" => 403, "msg" => $file->getError()));
         }
     }
 
@@ -146,7 +145,7 @@ class contract extends HomeBase
         foreach ($fileList as $k) {
             $imageArray[] = $k["name"];
         }
-        return json_encode($imageArray);
+        return json($imageArray);
     }
 
     private function creatrCode(){

@@ -226,17 +226,18 @@ class Scenery extends HomeBase
         $validate = new \app\home\validate\Hotel();
         $result = $validate->scene('add')->check($data);
         if (true !== $result) {
-            return json_encode(array("code" => 405, "msg" => $validate->getError()));
+            return json(array("code" => 405, "msg" => $validate->getError()));
         }
 
         //数据保存
-        $res = db("hotel")->insert($data);
+        try{
+            db("hotel")->insert($data);
 //        $hotel = model('Hotel');
 //        $res = $hotel->allowField(true)->save();
-        if(!$res){
-            return json_encode(array("code" => 403, "msg" => "保存出错，请再保存一次"));
+        } catch (\Exception $e) {
+            return json(array("code" => 403, "msg" => "保存出错，请再保存一次"));
         }
-        return json_encode(array("code" => 200,"data"=>array("code"=>$data["code"])));
+        return json(array("code" => 200,"data"=>array("code"=>$data["code"])));
 
     }
 
@@ -259,16 +260,17 @@ class Scenery extends HomeBase
         $validate = new \app\home\validate\View();
         $result = $validate->scene('add')->check($data);
         if (true !== $result) {
-            return json_encode(array("code" => 405, "msg" => $validate->getError()));
+            return json(array("code" => 405, "msg" => $validate->getError()));
         }
 
         $view = model('View');
         $view->data($data);
-        $res = $view->allowField(true)->save();// 过滤post数组中的非数据表字段数据
-        if(!$res){
-            return json_encode(array("code" => 403, "msg" => "保存出错，请再保存一次"));
+        try{
+            $view->allowField(true)->save();// 过滤post数组中的非数据表字段数据
+        } catch (\Exception $e) {
+            return json(array("code" => 403, "msg" => "保存出错，请再保存一次"));
         }
-        return json_encode(array("code" => 200,"data"=>array("code"=>$data["code"])));
+        return json(array("code" => 200,"data"=>array("code"=>$data["code"])));
     }
 
     //添加餐饮
@@ -289,16 +291,17 @@ class Scenery extends HomeBase
         $validate = new \app\home\validate\Meal();
         $result = $validate->scene('add')->check($data);
         if (true !== $result) {
-            return json_encode(array("code" => 405, "msg" => $validate->getError()));
+            return json(array("code" => 405, "msg" => $validate->getError()));
         }
 
         $meal = model('meal');
         $meal->data($data);
-        $res = $meal->allowField(true)->save();// 过滤post数组中的非数据表字段数据
-        if(!$res){
-            return json_encode(array("code" => 403, "msg" => "保存出错，请再保存一次"));
+        try{
+            $meal->allowField(true)->save();// 过滤post数组中的非数据表字段数据
+        } catch (\Exception $e) {
+            return json(array("code" => 403, "msg" => "保存出错，请再保存一次"));
         }
-        return json_encode(array("code" => 200,"data"=>array("code"=>$data["code"])));
+        return json(array("code" => 200,"data"=>array("code"=>$data["code"])));
     }
 
     //添加车队
@@ -319,16 +322,17 @@ class Scenery extends HomeBase
         $validate = new \app\home\validate\Vehicle();
         $result = $validate->scene('add')->check($data);
         if (true !== $result) {
-            return json_encode(array("code" => 405, "msg" => $validate->getError()));
+            return json(array("code" => 405, "msg" => $validate->getError()));
         }
 
         $vehicle = model('vehicle');
         $vehicle->data($data);
-        $res = $vehicle->allowField(true)->save();// 过滤post数组中的非数据表字段数据
-        if(!$res){
-            return json_encode(array("code" => 403, "msg" => "保存出错，请再保存一次"));
+        try{
+            $vehicle->allowField(true)->save();// 过滤post数组中的非数据表字段数据
+        } catch (\Exception $e) {
+            return json(array("code" => 403, "msg" => "保存出错，请再保存一次"));
         }
-        return json_encode(array("code" => 200,"data"=>array("code"=>$data["code"])));
+        return json(array("code" => 200,"data"=>array("code"=>$data["code"])));
     }
 
 
@@ -337,23 +341,23 @@ class Scenery extends HomeBase
     {
         $type = input("post.goodsType");
         if(empty($type)){
-            return json_encode(array("code" => 404, "msg" => "参数错误"));
+            return json(array("code" => 404, "msg" => "参数错误"));
         }
         $checkArray = array('hotel','view','meal','vehicle');
         if(!in_array($type,$checkArray)) {
-            return json_encode(array("code" => 403, "msg" => "参数错误"));
+            return json(array("code" => 403, "msg" => "参数错误"));
         }
 
         $imgLimit = config("imageUpLimit");
         $file = request()->file('file');
         if (empty($file)) {
-            return json_encode(array("code" => 404, "msg" => "参数错误"));
+            return json(array("code" => 404, "msg" => "参数错误"));
         }
         $info = $file->validate($imgLimit)->move(ROOT_PATH . 'public' . DS . 'image' . DS . $type);
         if ($info) {
-            return json_encode(array("code" => 200, "data" => array("name" => $type . DS . $info->getSaveName())));
+            return json(array("code" => 200, "data" => array("name" => $type . DS . $info->getSaveName())));
         } else {
-            return json_encode(array("code" => 403, "msg" => $file->getError()));
+            return json(array("code" => 403, "msg" => $file->getError()));
         }
     }
 
@@ -361,15 +365,15 @@ class Scenery extends HomeBase
     public function imageDel(){
         $type = input("post.goodsType");
         if(empty($type)){
-            return json_encode(array("code" => 404, "msg" => "参数错误"));
+            return json(array("code" => 404, "msg" => "参数错误"));
         }
         $checkArray = array('hotel','view','meal','vehicle');
         if(!in_array($type,$checkArray)) {
-            return json_encode(array("code" => 403, "msg" => "参数错误"));
+            return json(array("code" => 403, "msg" => "参数错误"));
         }
 
         $name = input("post.name");
-        return json_encode(array("code" => 200, "data" => $name));
+        return json(array("code" => 200, "data" => $name));
     }
 
     //处理图片数组(前端对象转字符串)
@@ -379,7 +383,7 @@ class Scenery extends HomeBase
         foreach ($fileList as $k) {
             $imageArray[] = $k["name"];
         }
-        return json_encode($imageArray);
+        return json($imageArray);
     }
 
     /**
