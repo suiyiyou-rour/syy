@@ -31,7 +31,8 @@ class Paynotify extends Base
         $xmldata["xml"]              =       "xxx";                           //微信返回的整个xml
 
         //记录添加
-        $record = db('pay_record')->insert($xmldata);
+        db('pay_record')->insert($xmldata);
+        $record = db('pay_record')->getLastInsID();
 //        if(!$record) return;
 
         $where = [

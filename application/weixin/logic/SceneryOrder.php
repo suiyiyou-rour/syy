@@ -37,7 +37,7 @@ class SceneryOrder extends Order
             return array('code' => 403, "msg" => "每单最少购买人数,不能小于" . $sceneryInfo["min_buy_num"] . "人");
         }
         if($sceneryInfo["max_buy_is_open"] == 1){     //购买数量限制开启
-            if($data['man_num'] > $sceneryInfo["max_buy_number"]){
+            if($data['man_num'] > $sceneryInfo["max_buy_num"]){
                 return array("code" => 403,"msg" => "每单最多购买人数,不能超过" . $sceneryInfo["max_buy_num"] . "人");
             }
         }
@@ -119,27 +119,27 @@ class SceneryOrder extends Order
 
     //数据接收
     private function data(){
-//        $gain = ['goodsCode','man_num','child_num','house_num','mobile','user_name','go_time','retail_code','user_code',"identification","charged_item","zfprice","identity_array","remark"];
-//        $data = Request::instance()->only($gain, 'post');//        $data = input('post.');
-//        $data['man_num']         = empty($data['man_num']) ? 0 : (int)$data['man_num']; //成人数量
-//        $data['identity_array'] = empty($data['identity_array']) ? "[]" : json_encode($data["identity_array"]); //身份数组
-//        $data['go_time']         =  strtotime($data['go_time']);            //出发时间
-//        if(empty($data['remark'])) $data['remark'] = "";    //备注信息
-//        if(empty($data['retail_code'])) $data['retail_code'] = "54";    //经销商编码 默认54 小游
+        $gain = ['goodsCode','man_num','child_num','house_num','mobile','user_name','go_time','retail_code','user_code',"identification","charged_item","zfprice","identity_array","remark"];
+        $data = Request::instance()->only($gain, 'post');//        $data = input('post.');
+        $data['man_num']         = empty($data['man_num']) ? 0 : (int)$data['man_num']; //成人数量
+        $data['identity_array'] = empty($data['identity_array']) ? "[]" : json_encode($data["identity_array"]); //身份数组
+        $data['go_time']         =  strtotime($data['go_time']);            //出发时间
+        if(empty($data['remark'])) $data['remark'] = "";    //备注信息
+        if(empty($data['retail_code'])) $data['retail_code'] = "54";    //经销商编码 默认54 小游
 
         // 模拟数据
-        $data['goodsCode']      =  "s0020003";           //产品code
-        $data['man_num']        =  1;                    //数量
-        $data['mobile']         =  "18060481803";        //主要联系人电话
-        $data['user_name']      =  "刘祖梁";              //主要联系人名称
-        $data['go_time']        =  "2018-04-18";         //出发日期
-        $data['retail_code']    =  "54";                 //经销商编码
+//        $data['goodsCode']      =  "s0020003";           //产品code
+//        $data['man_num']        =  1;                    //数量
+//        $data['mobile']         =  "18060481803";        //主要联系人电话
+//        $data['user_name']      =  "刘祖梁";              //主要联系人名称
+//        $data['go_time']        =  "2018-04-18";         //出发日期
+//        $data['retail_code']    =  "54";                 //经销商编码
         $data['user_code']      =  "100001";             //下单用户
-        $data["identification"] = "352201199303141637"; //主要联系人身份证
-        $data["identity_array"] = "[]";                     //身份数组 每个人的身份证
-        $data["remark"]          = "";                     //备注信息 100
-
-        $data['go_time'] = strtotime($data['go_time']);
+//        $data["identification"] = "352201199303141637"; //主要联系人身份证
+//        $data["identity_array"] = "[]";                     //身份数组 每个人的身份证
+//        $data["remark"]          = "";                     //备注信息 100
+//
+//        $data['go_time'] = strtotime($data['go_time']);
 
         return $data;
     }
@@ -158,8 +158,10 @@ class SceneryOrder extends Order
         if (empty($data['user_code'])) {
             return "你还没有登录";
         }
-        if (empty($data['identification']) || !is_Identification_card($data['identification'])) {
-            return "身份证错误";
+        if (!empty($data['identification'])) {
+            if(!is_Identification_card($data['identification'])){
+                return "身份证错误";
+            }
         }
         if(mb_strlen($data["remark"],"UTF8") > 100){
             return "备注信息不能大于100个字符";

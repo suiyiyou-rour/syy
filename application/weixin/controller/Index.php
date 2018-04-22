@@ -9,7 +9,7 @@ class Index extends WeixinBase
         $where = goodsOnlineWhere();       //上线条件
         $where["level"] = ["<>","4"];   //排除轮播
         $res = db('goods')
-            ->field("code,show_title,head_img")
+            ->field("code,show_title,head_img,goods_type")
             ->where($where)
             ->order("level desc,sales desc")
             ->limit(0,6)
@@ -25,7 +25,7 @@ class Index extends WeixinBase
         $where = goodsOnlineWhere();      //上线条件
         $where["level"] = 4;             //等级最高轮播
         $res = db('goods')
-            ->field("code,head_img")
+            ->field("code,head_img,goods_type")
             ->where($where)
             ->order("level desc,sales desc")
             ->limit(0,3)
