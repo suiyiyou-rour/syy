@@ -107,13 +107,11 @@ class AddTicket
             if ($checkRes !== true) {
                 return array("code" => 405, "msg" => $checkRes);
             }
-            $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
-            $groupRes = db('goods_ticket')->where(array("goods_code" => $goodsCode))->update($ticketData);
-            if ($goodsRes === false) {
+            try{
+                db('goods')->where(array("code" => $goodsCode))->update($goodsData);
+                db('goods_ticket')->where(array("goods_code" => $goodsCode))->update($ticketData);
+            } catch (\Exception $e) {
                 return array("code" => 403, "msg" => "保存出错，请稍后再试");
-            }
-            if ($groupRes === false) {
-                return array("code" => 403, "msg" => "保存错误，请稍后再试");
             }
             return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
         }
@@ -133,16 +131,16 @@ class AddTicket
         //补充表
         $supplyData["goods_code"]   =   $goodsCode;         //产品编号
 
-        $goodsRes = db('goods')->insert($goodsData);
-        $groupRes = db('goods_ticket')->insert($ticketData);
-        $supplyRes = db('goods_supply')->insert($supplyData);
-        if ($goodsRes && $groupRes && $supplyRes) {
+        try{
+            db('goods')->insert($goodsData);
+            db('goods_ticket')->insert($ticketData);
+            db('goods_supply')->insert($supplyData);
             db('goods_create')->insert(array('goods_code' => $goodsCode));  //插入页码表
             $this->delCreateRear();//删除多余的条数
-            return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
-        } else {
-            return array("code" => 403, "msg" => "数据保存出错，请再试一次");
+        } catch (\Exception $e) {
+            return array("code" => 403, "msg" => "保存出错，请稍后再试");
         }
+        return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
     }
 
     //购买使用说明 1
@@ -169,15 +167,12 @@ class AddTicket
         $ticketData["entrance_time"]     =   $data["entrance_time"];        //入园时间      (副)必须
         $ticketData["entrance_place"]    =   $data["entrance_place"];       //入园地址     (副)必须
 
-        $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
-        $ticketRes = db('goods_ticket')->where(array("goods_code" => $goodsCode))->update($ticketData);
-        if ($goodsRes === false) {
+        try{
+            db('goods')->where(array("code" => $goodsCode))->update($goodsData);
+            db('goods_ticket')->where(array("goods_code" => $goodsCode))->update($ticketData);
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "保存出错，请稍后再试");
         }
-        if ($ticketRes === false) {
-            return array("code" => 403, "msg" => "保存错误，请稍后再试");
-        }
-
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
 
     }
@@ -244,27 +239,21 @@ class AddTicket
         $indateData["settle_price"]     =   $data["settle_price"];  //结算价格   （indate）必须
         $indateData["market_price"]     =   $data["market_price"];  //市场价格   （indate）必须
 
-        $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
-        $ticketRes = db('goods_ticket')->where(array("goods_code" => $goodsCode))->update($ticketData);
-
-        $indateCheck = db('ticket_indate')->field("id")->where(array("goods_code" => $goodsCode))->find();
-        if($indateCheck){
-            $indateRes = db('ticket_indate')->where(array("goods_code" => $goodsCode))->update($indateData);
-        }else{
-            $indateData["goods_code"] = $goodsCode;
-            $indateRes = db('ticket_indate')->insert($indateData);
-        }
-
-        if ($goodsRes === false) {
+        try{
+            db('goods')->where(array("code" => $goodsCode))->update($goodsData);
+            db('goods_ticket')->where(array("goods_code" => $goodsCode))->update($ticketData);
+            $indateCheck = db('ticket_indate')->field("id")->where(array("goods_code" => $goodsCode))->find();
+            if($indateCheck){
+                db('ticket_indate')->where(array("goods_code" => $goodsCode))->update($indateData);
+            }else{
+                $indateData["goods_code"] = $goodsCode;
+                db('ticket_indate')->insert($indateData);
+            }
+            $this->saveGoodsTypeYx($goodsCode);//更改商品状态
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "保存出错，请稍后再试");
         }
-        if ($ticketRes === false) {
-            return array("code" => 403, "msg" => "保存错误，请稍后再试");
-        }
-        if ($indateRes === false) {
-            return array("code" => 403, "msg" => "保存错误，请稍后再试");
-        }
-        $this->saveGoodsTypeYx($goodsCode);//更改商品状态
+
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
     }
 
@@ -291,14 +280,13 @@ class AddTicket
         $ticketData["refund_info"]          =   $data["refund_info"];    //退款设置 (副)
         $ticketData["effective_days"]      =   $data["effective_days"]; //有效天数 (副)     --有效期模式没有
 
-        $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
-        $ticketRes = db('goods_ticket')->where(array("goods_code" => $goodsCode))->update($ticketData);
-        if ($goodsRes === false) {
+        try{
+            db('goods')->where(array("code" => $goodsCode))->update($goodsData);
+            db('goods_ticket')->where(array("goods_code" => $goodsCode))->update($ticketData);
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "保存出错，请稍后再试");
         }
-        if ($ticketRes === false) {
-            return array("code" => 403, "msg" => "保存错误，请稍后再试");
-        }
+
         //价格日历
         $calendarData["date"]                =   $data["date"];
         $calendarData["stock_num"]          =   $data["stock_num_day"]; //日库存    （calendar）必须
@@ -330,15 +318,17 @@ class AddTicket
             $data["market_price"]   =   $priData["market_price"]; //市场价格
             $res = db('ticket_calendar')->where(array("goods_code" => $goodsCode, "date" => $data["date"]))->find();
             if ($res) {//修改状态
-                $saveRes = db('ticket_calendar')->where(array("goods_code" => $goodsCode, "date" => $data["date"]))->update($data);
-                if ($saveRes === false) {
+                try{
+                    db('ticket_calendar')->where(array("goods_code" => $goodsCode, "date" => $data["date"]))->update($data);
+                } catch (\Exception $e) {
                     $bol = false;
                     $error .= $data["date"] . ",";
                 }
             } else {//添加状态
-                $data["goods_code"] = $goodsCode;
-                $AddRes = db('ticket_calendar')->insert($data);
-                if ($AddRes === false) {
+                try{
+                    $data["goods_code"] = $goodsCode;
+                    db('ticket_calendar')->insert($data);
+                } catch (\Exception $e) {
                     $bol = false;
                     $error .= $data["date"] . ",";
                 }

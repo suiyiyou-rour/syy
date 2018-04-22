@@ -120,13 +120,11 @@ class AddGroup
             if ($checkRes !== true) {
                 return array("code" => 405, "msg" => $checkRes);
             }
-            $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
-            $groupRes = db('goods_group')->where(array("goods_code" => $goodsCode))->update($groupData);
-            if ($goodsRes === false) {
+            try{
+                db('goods')->where(array("code" => $goodsCode))->update($goodsData);
+                db('goods_group')->where(array("goods_code" => $goodsCode))->update($groupData);
+            } catch (\Exception $e) {
                 return array("code" => 403, "msg" => "保存出错，请稍后再试");
-            }
-            if ($groupRes === false) {
-                return array("code" => 403, "msg" => "保存错误，请稍后再试");
             }
             return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
         }
@@ -148,16 +146,16 @@ class AddGroup
         //补充表
         $supplyData["goods_code"]       =   $goodsCode; //产品编号
 
-        $goodsRes = db('goods')->insert($goodsData);
-        $groupRes = db('goods_group')->insert($groupData);
-        $supplyRes = db('goods_supply')->insert($supplyData);
-        if ($goodsRes && $groupRes && $supplyRes) {
+        try{
+            db('goods')->insert($goodsData);
+            db('goods_group')->insert($groupData);
+            db('goods_supply')->insert($supplyData);
             db('goods_create')->insert(array('goods_code' => $goodsCode));  //插入页码表
             $this->delCreateRear();//删除多余的条数
-            return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
-        } else {
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "数据保存出错，请再试一次");
         }
+        return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
     }
 
     //行程信息添加 1
@@ -172,12 +170,12 @@ class AddGroup
             // 验证失败 输出错误信息
             return array("code" => 405, "msg" => $validate->getError());
         }
-        $groupRes = db('goods_group')->where(array("goods_code" => $goodsCode))->update($data);
-        if ($groupRes === false) {
+        try{
+            db('goods_group')->where(array("goods_code" => $goodsCode))->update($data);
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "数据保存出错，请再试一次");
         }
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
-
     }
 
     //产品特色添加 2
@@ -203,21 +201,14 @@ class AddGroup
         $supplyData["image"]            =  json_encode($imageArray);               //图片数组
         $groupData["feature_reasons"]  =  json_encode($data["feature_reasons"]);//推荐理由
 
-        $goodsRes  = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
-        $supplyRes = db('goods_supply')->where(array("goods_code" => $goodsCode))->update($supplyData);
-        $groupRes  = db('goods_group')->where(array("goods_code" => $goodsCode))->update($groupData);
-        if ($goodsRes === false) {
-            return array("code" => 403, "msg" => "首图保存出错，请稍后再试");
-        }
-        if ($supplyRes === false) {
-            return array("code" => 403, "msg" => "图片保存错误，请稍后再试");
-        }
-        if ($groupRes === false) {
-            return array("code" => 403, "msg" => "推荐理由保存错误，请稍后再试");
+        try{
+            db('goods')->where(array("code" => $goodsCode))->update($goodsData);
+            db('goods_supply')->where(array("goods_code" => $goodsCode))->update($supplyData);
+            db('goods_group')->where(array("goods_code" => $goodsCode))->update($groupData);
+        } catch (\Exception $e) {
+            return array("code" => 403, "msg" => "数据保存出错，请再试一次");
         }
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
-
-
     }
 
     //自费项目添加 3
@@ -230,9 +221,10 @@ class AddGroup
             $data["charged_item"] = array();
         }
         $groupData["charged_item"] = json_encode($data["charged_item"]);    //自费项目
-        $res = db('goods_group')->where(array("goods_code" => $goodsCode))->update($groupData);
-        if ($res === false) {
-            return array("code" => 403, "msg" => "推荐理由保存错误，请稍后再试");
+        try{
+            db('goods_group')->where(array("goods_code" => $goodsCode))->update($groupData);
+        } catch (\Exception $e) {
+            return array("code" => 403, "msg" => "数据保存出错，请再试一次");
         }
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
     }
@@ -250,9 +242,9 @@ class AddGroup
 //            // 验证失败 输出错误信息
 //            return array("code" => 405,"msg" => $validate->getError());
 //        }
-
-        $groupRes = db('goods_group')->where(array("goods_code" => $goodsCode))->update($data);
-        if ($groupRes === false) {
+        try{
+            db('goods_group')->where(array("goods_code" => $goodsCode))->update($data);
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "数据保存出错，请再试一次");
         }
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
@@ -272,8 +264,10 @@ class AddGroup
         $array = json_decode($cost_not_include, true);
         $data["single_supplement"] = $array["room"]["one"];     //单房差
         $data["cost_not_include"] = $cost_not_include;  //费用不包含
-        $groupRes = db('goods_group')->where(array("goods_code" => $goodsCode))->update($data);
-        if ($groupRes === false) {
+
+        try{
+            db('goods_group')->where(array("goods_code" => $goodsCode))->update($data);
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "数据保存出错，请再试一次");
         }
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
@@ -289,8 +283,10 @@ class AddGroup
         if (empty($data["crowd_limit"])) {
             return array("code" => 404, "msg" => "不能为空");
         }
-        $groupRes = db('goods_group')->where(array("goods_code" => $goodsCode))->update($data);
-        if ($groupRes === false) {
+
+        try{
+            db('goods_group')->where(array("goods_code" => $goodsCode))->update($data);
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "数据保存出错，请再试一次");
         }
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
@@ -307,8 +303,9 @@ class AddGroup
         if (empty($data["book_notice"])) {
             return array("code" => 404, "msg" => "不能为空");
         }
-        $groupRes = db('goods_group')->where(array("goods_code" => $goodsCode))->update($data);
-        if ($groupRes === false) {
+        try{
+            db('goods_group')->where(array("goods_code" => $goodsCode))->update($data);
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "数据保存出错，请再试一次");
         }
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
@@ -355,20 +352,21 @@ class AddGroup
             $data["child_is_open"] = 1; //儿童价开启
         }
 
-
         foreach ($dateArray as $k) {
             $data["date"] = strtotime($k);//时间戳;
             $res = db('group_calendar')->where(array("goods_code" => $goodsCode, "date" => $data["date"]))->find();
             if ($res) {//修改状态
-                $saveRes = db('group_calendar')->where(array("goods_code" => $goodsCode, "date" => $data["date"]))->update($data);
-                if ($saveRes === false) {
+                try{
+                    db('group_calendar')->where(array("goods_code" => $goodsCode, "date" => $data["date"]))->update($data);
+                } catch (\Exception $e) {
                     $bol = false;
                     $error .= $data["date"] . ",";
                 }
             } else {//添加状态
                 $data["goods_code"] = $goodsCode;
-                $AddRes = db('group_calendar')->insert($data);
-                if ($AddRes === false) {
+                try{
+                    db('group_calendar')->insert($data);
+                } catch (\Exception $e) {
                     $bol = false;
                     $error .= $data["date"] . ",";
                 }
@@ -530,8 +528,10 @@ class AddGroup
                 $playDay = $res["play_day"]."日";
             }
             $data["show_title"] = $mainPlace.$serviceType.$playDay."跟团游";
-            $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($data);
-            if($goodsRes === false){
+
+            try{
+                db('goods')->where(array("code" => $goodsCode))->update($data);
+            } catch (\Exception $e) {
                 echo json_encode(array("code" => 403, "msg" => "外部标题保存失败，请联系管理员"));
                 die;
             }

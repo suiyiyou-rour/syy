@@ -91,13 +91,11 @@ class AddScenery
             if ($checkRes !== true) {
                 return array("code" => 405, "msg" => $checkRes);
             }
-            $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
-            $sceneryRes = db('goods_scenery')->where(array("goods_code" => $goodsCode))->update($sceneryData);
-            if ($goodsRes === false) {
+            try{
+                db('goods')->where(array("code" => $goodsCode))->update($goodsData);
+                db('goods_scenery')->where(array("goods_code" => $goodsCode))->update($sceneryData);
+            } catch (\Exception $e) {
                 return array("code" => 403, "msg" => "保存出错，请稍后再试");
-            }
-            if ($sceneryRes === false) {
-                return array("code" => 403, "msg" => "保存错误，请稍后再试");
             }
             return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
         }
@@ -117,17 +115,16 @@ class AddScenery
         //补充表
         $supplyData["goods_code"]   =   $goodsCode;         //产品编号
 
-        $goodsRes   = db('goods')->insert($goodsData);      //主表
-        $sceneryRes = db('goods_scenery')->insert($sceneryData);//副表
-        $supplyRes = db('goods_supply')->insert($supplyData);//补充表
-
-        if ($goodsRes && $sceneryRes && $supplyRes) {
+        try{
+            db('goods')->insert($goodsData);            //主表
+            db('goods_scenery')->insert($sceneryData); //副表
+            db('goods_supply')->insert($supplyData);   //补充表
             db('goods_create')->insert(array('goods_code' => $goodsCode));  //插入页码表
             $this->delCreateRear(); //删除多余的未保存商品
-            return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
-        } else {
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "数据保存出错，请再试一次");
         }
+        return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
     }
 
     //打包内容 1
@@ -139,8 +136,9 @@ class AddScenery
         if (true !== $result) {
             return array("code" => 405, "msg" => $validate->getError());
         }
-        $sceneryRes = db('goods_scenery')->where(array("goods_code" => $goodsCode))->update($data);
-        if ($sceneryRes === false) {
+        try{
+            db('goods_scenery')->where(array("goods_code" => $goodsCode))->update($data);
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "保存出错，请稍后再试");
         }
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
@@ -162,8 +160,9 @@ class AddScenery
         if (true !== $result) {
             return array("code" => 405, "msg" => $validate->getError());
         }
-        $sceneryRes = db('goods_scenery')->where(array("goods_code" => $goodsCode))->update($data);
-        if ($sceneryRes === false) {
+        try{
+            db('goods_scenery')->where(array("goods_code" => $goodsCode))->update($data);
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "保存出错，请稍后再试");
         }
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
@@ -182,15 +181,17 @@ class AddScenery
             $data["date"] = strtotime($k);//时间戳;
             $res = db('scenery_calendar')->where(array("goods_code" => $goodsCode, "date" => $data["date"]))->find();
             if ($res) {//修改状态
-                $saveRes = db('scenery_calendar')->where(array("goods_code" => $goodsCode, "date" => $data["date"]))->update($data);
-                if ($saveRes === false) {
+                try{
+                    db('scenery_calendar')->where(array("goods_code" => $goodsCode, "date" => $data["date"]))->update($data);
+                } catch (\Exception $e) {
                     $bol = false;
                     $error .= $data["date"] . ",";
                 }
             } else {//添加状态
-                $data["goods_code"] = $goodsCode;
-                $AddRes = db('scenery_calendar')->insert($data);
-                if ($AddRes === false) {
+                try{
+                    $data["goods_code"] = $goodsCode;
+                    db('scenery_calendar')->insert($data);
+                } catch (\Exception $e) {
                     $bol = false;
                     $error .= $data["date"] . ",";
                 }
@@ -217,15 +218,12 @@ class AddScenery
         //副表添加数据
         unset($data["advance_time"]);
 
-        $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
-        $sceneryRes = db('goods_scenery')->where(array("goods_code" => $goodsCode))->update($data);
-        if ($goodsRes === false) {
+        try{
+            db('goods')->where(array("code" => $goodsCode))->update($goodsData);
+            db('goods_scenery')->where(array("goods_code" => $goodsCode))->update($data);
+        } catch (\Exception $e) {
             return array("code" => 403, "msg" => "保存出错，请稍后再试");
         }
-        if ($sceneryRes === false) {
-            return array("code" => 403, "msg" => "保存错误，请稍后再试");
-        }
-
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
     }
 
@@ -266,20 +264,15 @@ class AddScenery
         //补充表
         $supplyData["image"] = json_encode($imageArray);             //图片数组
 
-        $goodsRes = db('goods')->where(array("code" => $goodsCode))->update($goodsData);
-        $supplyRes = db('goods_supply')->where(array("goods_code" => $goodsCode))->update($supplyData);
-        $sceneryRes = db('goods_scenery')->where(array("goods_code" => $goodsCode))->update($sceneryData);
-        if ($goodsRes === false) {
-            return array("code" => 403, "msg" => "保存出错，请稍后再试001");
+        try{
+            db('goods')->where(array("code" => $goodsCode))->update($goodsData);
+            db('goods_supply')->where(array("goods_code" => $goodsCode))->update($supplyData);
+            db('goods_scenery')->where(array("goods_code" => $goodsCode))->update($sceneryData);
+            $this->saveGoodsUpdate($goodsCode);     //价格日历字段 更新主表
+            db('goods')->where(array("code" => $goodsCode))->update(array("check_type"=>1));
+        } catch (\Exception $e) {
+            return array("code" => 403, "msg" => "保存出错，请稍后再试");
         }
-        if ($supplyRes === false) {
-            return array("code" => 403, "msg" => "保存错误，请稍后再试002");
-        }
-        if ($sceneryRes === false) {
-            return array("code" => 403, "msg" => "保存错误，请稍后再试003");
-        }
-        $this->saveGoodsUpdate($goodsCode);     //价格日历字段 更新主表
-        db('goods')->where(array("code" => $goodsCode))->update(array("check_type"=>1));
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
     }
 
