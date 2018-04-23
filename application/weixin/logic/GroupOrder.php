@@ -129,8 +129,16 @@ class GroupOrder extends Order
         $data['charged_item']   = empty($data['charged_item']) ? "[]" : json_encode($data["charged_item"]); //自费项目
         $data['go_time']         =  strtotime($data['go_time']);            //出发时间
         if(empty($data['remark'])) $data['remark'] = "";    //备注信息
-        if(empty($data['retail_code'])) $data['retail_code'] = "54";    //经销商编码 默认54 小游
 
+        //判断经销商
+        if(isRetail()){
+            $data['user_type']   =  2;              //订单经销商
+            $data['retail_code'] = getUserCode();   //经销商code
+        }else{
+            $data['user_type']   =  1;              //用户
+            if(empty($data['retail_code'])) $data['retail_code'] = "54";    //经销商编码 默认54 小游
+        }
+        $data['user_code']  = getUserCode();//用户code
 //        // 模拟数据
 //        $data['goodsCode']      =  "g0020001";           //产品code
 //        $data['man_num']        =  2;                   //成人数量
@@ -140,7 +148,7 @@ class GroupOrder extends Order
 //        $data['user_name']      =  "刘祖梁";              //主要联系人名称
 //        $data['go_time']        =  "2018-04-19";         //出发日期
 //        $data['retail_code']    =  "54";                 //经销商编码
-        $data['user_code']      =  "100001";             //下单用户
+//        $data['user_code']      =  "100001";             //下单用户
 //        $data["identification"] = "352201199303141637"; //主要联系人身份证
 //        $data["charged_item"]   =   "[]";                   //自费项目
 //        $data["zfprice"]        =   0;                     //自费价格

@@ -1,4 +1,30 @@
 <?php
+/**
+ * 获取用户code
+ */
+function getUserCode(){
+    $array = cookie('user');
+    return $array["code"];
+}
+
+/**
+ * 获取获取用户type
+ */
+function getUserTpye(){
+    $array = cookie('user');
+    return $array["type"];
+}
+
+/**
+ * 判断是不是经销商
+ */
+function isRetail(){
+    $array = cookie('user');
+    if($array["isType"] == 2){
+        return true;
+    }
+    return false;
+}
 
 /**
  * 产品上线条件
