@@ -5,6 +5,16 @@ class Test extends Base
 {
     public function index()
     {
+//        phpinfo();
+        $data["num"] = "kkk";
+//        try{
+            $res = db("test1")->where(array("id"=>1))->update($data);
+        var_dump($res);
+//        var_dump($res);
+//        } catch (\Exception $e) {
+//            exception('异常消息', 100006);
+//        }
+
 //        $res =
 //        var_dump($res);
 //        echo onload();
@@ -15,9 +25,9 @@ class Test extends Base
 //        var_dump($res);
 //        $res = db('sp')->where(array('id'=>1))->find();
 //        var_dump($res);
-        $bc = 2;
-        $res = objSetArray($bc);
-        var_dump($res);
+//        $bc = 2;
+//        $res = objSetArray($bc);
+//        var_dump($res);
 
     }
 

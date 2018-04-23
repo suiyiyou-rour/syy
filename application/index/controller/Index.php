@@ -26,7 +26,12 @@ class Index extends Base
     }
 
     public function demo(){
-
+//             try{
+//                $db->update($data);
+//             } catch (\Exception $e) {
+//                return "更新失败";
+//             }
+//             return "更新成功";
     }
 
     /**

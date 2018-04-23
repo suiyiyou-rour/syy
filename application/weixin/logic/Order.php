@@ -2,11 +2,6 @@
 namespace app\weixin\logic;
 class Order
 {
-    //景酒
-    public function scenery($array){
-
-    }
-
     //生成订单号
     protected function createOrderSn()
     {

@@ -69,7 +69,8 @@ class Detail extends WeixinBase
         }
 
         //价格日历
-        $calendar = db('group_calendar')->field(['id','goods_code'],true)->where(array("goods_code" => $goods["code"]))->order("date asc")->select();
+        $date = strtotime(date("Y-m-d", time()));
+        $calendar = db('group_calendar')->field(['id','goods_code'],true)->where(array("goods_code" => $goods["code"],"date"=>[">=",$date]))->order("date asc")->select();
         if($calendar){
             foreach ($calendar as &$k){
                 $k["plat_price"]            = (float)$k["plat_price"];
@@ -107,9 +108,10 @@ class Detail extends WeixinBase
         foreach ($info["image"] as &$k){
             $k = config("img_url").$k;
         }
+        $date = strtotime(date("Y-m-d", time()));
         if ($goods["price_type"] == 1){
             //价格日历
-            $calendar = db('ticket_calendar')->field(['id','goods_code'],true)->where(array("goods_code" => $goods["code"]))->order("date asc")->select();
+            $calendar = db('ticket_calendar')->field(['id','goods_code'],true)->where(array("goods_code" => $goods["code"],"date"=>[">=",$date]))->order("date asc")->select();
             if($calendar){
                 foreach ($calendar as &$k){
                     $k["plat_price"]    = (float)$k["plat_price"];
@@ -133,6 +135,9 @@ class Detail extends WeixinBase
             $newIndate["stock_num"]       =   $indate["stock_num"];
             $newIndate["sales_num"]       =   $indate["sales_num"];
             $calendar    =   array();                  //日期数组
+            if($indate["begin_date"] <= $date){
+                $indate["begin_date"] = $date;
+            }
             for($i = $indate["begin_date"]; $i <= $indate["end_date"];$i += 86400)  //一天86400
             {
                 $newIndate["date"]    =  date('Y-m-d',$i);         //每天
@@ -165,8 +170,8 @@ class Detail extends WeixinBase
         foreach ($info["image"] as &$k){
             $k = config("img_url").$k;
         }
-
-        $calendar = db('scenery_calendar')->field(['id','goods_code'],true)->where(array("goods_code" => $goods["code"]))->order("date asc")->select();
+        $date = strtotime(date("Y-m-d", time()));
+        $calendar = db('scenery_calendar')->field(['id','goods_code'],true)->where(array("goods_code" => $goods["code"],"date"=>[">=",$date]))->order("date asc")->select();
         if($calendar){
             foreach ($calendar as &$k){
                 $k["plat_price"] = (float)$k["plat_price"];

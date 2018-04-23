@@ -171,8 +171,7 @@ class Order extends LoginBase
             default:
                 $body = array();
         }
-        $output["head"]  =  $res;
-        $output["body"]  =  $body;
+        $output = array_merge($res,$body);
         return json(array("code" => 200,"data" => $output));
     }
 
