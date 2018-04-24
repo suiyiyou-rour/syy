@@ -5,13 +5,9 @@ class Order extends LoginBase
 {
     public function index()
     {
-        $res =  isRetail();
-        if($res){
-            echo 1;
-        }else{
-            echo 2;
-        }
-//        var_dump();//getUserTpye isRetail
+        $str = '[{"name":"\u81ea\u8d39\u9879\u76ee\u540d\u79f0","place":"\u798f\u5efa","price":"20","detail":"dddddddd","num":"4"}]';
+        $array = json_decode($str,true);
+        var_dump($array);
     }
 
     //添加订单

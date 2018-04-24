@@ -30,7 +30,6 @@ class Login extends WeixinBase
             cookie("user" ,$res , 3600);
             return "设置 10001 用户成功";
         }else{
-            var_dump($user["isType"]);
             if($user["isType"] == 1){
                 cookie(null, 'user');
                 $res = array("code" => "54","type" => 3 ,"isType" => 2);//经销商
@@ -42,7 +41,6 @@ class Login extends WeixinBase
                 cookie("user" ,$res , 3600);
                 return "设置 10001 用户成功";
             }
-
         }
     }
 

@@ -67,6 +67,11 @@ class SceneryOrder extends Order
         //返佣总价
         $totalRebatePrice = $data['man_num'] * $rebate["money"];
 
+        //判断前端传过来的价格和计算的对比
+        if ((int)($totalPrice * 100) !== (int)($data['hotel_price'] * 100)) {
+            return array('code' => 403, "msg" => "金额计算异常");
+        }
+
         $orderSn = $this->createOrderSn();  //订单编号
 
         //主表数据
@@ -119,7 +124,7 @@ class SceneryOrder extends Order
 
     //数据接收
     private function data(){
-        $gain = ['goodsCode','man_num','child_num','house_num','mobile','user_name','go_time','retail_code','user_code',"identification","charged_item","zfprice","identity_array","remark"];
+        $gain = ['goodsCode','man_num','child_num','house_num','mobile','user_name','go_time','retail_code','user_code',"identification","charged_item","hotel_price","identity_array","remark"];
         $data = Request::instance()->only($gain, 'post');//        $data = input('post.');
         $data['man_num']         = empty($data['man_num']) ? 0 : (int)$data['man_num']; //成人数量
         $data['identity_array'] = empty($data['identity_array']) ? "[]" : json_encode($data["identity_array"]); //身份数组

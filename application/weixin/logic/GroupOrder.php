@@ -37,7 +37,7 @@ class GroupOrder extends Order
         if($price["stock_num"] != -1){      //库存不足判断
             $totalStockNum = $price["stock_num"] + $price["need_stock_num"];
             if ($totalNumber > $totalStockNum) {
-                return (array('code' => 403, "msg" => "库存已经不够，目前最多还剩" . $totalStockNum . "人"));
+                return array('code' => 403, "msg" => "库存已经不够，目前最多还剩" . $totalStockNum . "人");
             }
         }
 
@@ -53,14 +53,22 @@ class GroupOrder extends Order
             $price["settle_child_price"]    =  $price["settle_price"];
         }
 
+        //自费价格
+        $zfprice = $this->zfInfo($data["charged_item"]);
+
         //订单总价 = 成人数量 * 成人价格 +  儿童数量 * 儿童价格 + 单房差个数 * 单房差市场价 + 自费价格
-        $totalPrice = $data['man_num'] * $price["plat_price"] + $data['child_num'] * $price["plat_child_price"] + $data['house_num'] * $price["plat_house_price"] + $data["zfprice"];
+        $totalPrice = $data['man_num'] * $price["plat_price"] + $data['child_num'] * $price["plat_child_price"] + $data['house_num'] * $price["plat_house_price"] + $zfprice;
         //结算总价 = 成人数量 * 成人结算价格 +  儿童数量 * 儿童结算价格
         $totalSettlePrice = $data['man_num'] * $price["settle_price"] + $data['child_num'] * $price["settle_child_price"];
         //查看返佣设置
         $rebate = $this->rebateInfo($data['goodsCode'],$data['retail_code']);
         //返佣总价
         $totalRebatePrice = $data['man_num'] * $rebate["money"] + $data['child_num'] * $rebate["child_money"];
+
+        //判断前端传过来的价格和计算的对比
+        if ((int)($totalPrice * 100) !== (int)($data['route_price'] * 100)) {
+            return array('code' => 403, "msg" => "金额计算异常");
+        }
 
         $orderSn = $this->createOrderSn();  //订单编号
 
@@ -119,12 +127,13 @@ class GroupOrder extends Order
 
     //跟团数据接收
     private function data(){
-        $gain = ['goodsCode','man_num','child_num','house_num','mobile','user_name','go_time','retail_code','user_code',"identification","charged_item","zfprice","identity_array","remark"];
+        $gain = ['goodsCode','man_num','child_num','house_num','mobile','user_name','go_time','retail_code','user_code',"identification","charged_item","zfprice","identity_array","remark","route_price"];
         $data = Request::instance()->only($gain, 'post');//        $data = input('post.');
         $data['man_num']         = empty($data['man_num']) ? 0 : (int)$data['man_num']; //成人数量
         $data['child_num']       = empty($data['child_num']) ? 0 : (int)$data['child_num']; //儿童数量
         $data['house_num']       = empty($data['house_num']) ? 0 : (int)$data['house_num']; //单房差数量
         $data['zfprice']         = empty($data['zfprice']) ? 0 : (int)$data['zfprice']; //自费价格
+        $data['route_price']     = empty($data['route_price']) ? 0 : (int)$data['route_price']; //总价
         $data['identity_array'] = empty($data['identity_array']) ? "[]" : json_encode($data["identity_array"]); //身份数组
         $data['charged_item']   = empty($data['charged_item']) ? "[]" : json_encode($data["charged_item"]); //自费项目
         $data['go_time']         =  strtotime($data['go_time']);            //出发时间
