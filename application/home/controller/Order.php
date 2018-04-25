@@ -11,7 +11,12 @@ class Order extends HomeBase
 
     public function index()
     {
-        echo "home/Order/index";
+        $orderInfo["order_type"]= 1;
+        if($orderInfo["order_type"] != 2 && $orderInfo["order_type"] != 3){
+            echo "错了";
+        }else{
+            echo "对的";
+        }
     }
 
     //列表显示
@@ -105,7 +110,7 @@ class Order extends HomeBase
         $where["a.order_sn"]     = $orderSn;
 
         $join   =  [['sp b','a.sp_code = b.code']];
-        $field  =  "a.order_sn,a.goods_code,a.sp_code,a.goods_type,a.create_time,a.pay_time,a.go_time,a.sure_time,a.order_type,a.goods_name,a.total_price,a.total_settle_price,a.total_num,a.mobile,a.user_name,a.identification,a.remark";
+        $field  =  "a.order_sn,a.goods_code,a.sp_code,a.goods_type,a.create_time,a.pay_time,a.go_time,a.sure_time,a.order_type,a.goods_name,a.total_price,a.total_settle_price,a.total_num,a.mobile,a.user_name,a.identification,a.remark,b.com_name";
         if($spType){
             $join[] = ['retail c','a.retail_code = c.code'];
             $field  .= ",a.retail_code,a.user_type,a.user_code,a.rebate_type,a.rebate_total_money,c.name as retail_name";
@@ -116,10 +121,10 @@ class Order extends HomeBase
             return json(array("code" => 403,"msg" => "找不到订单或者已经被删除"));
         }
         //字段转换
-        $res["create_time"]         = date("Y-m-d",$res["create_time"]);
-        $res["go_time"]             = date("Y-m-d",$res["go_time"]);
-        $res["sure_time"]           = date("Y-m-d",$res["sure_time"]);
-        if($res["pay_time"])  $res["pay_time"] = date("Y-m-d",$res["pay_time"]);
+        $res["create_time"]         = date("Y-m-d H:i:s",$res["create_time"]);
+        $res["go_time"]             = date("Y-m-d H:i:s",$res["go_time"]);
+        $res["sure_time"] = $res["sure_time"] ? date("Y-m-d H:i:s",$res["sure_time"]) : "未确定出行订单";
+        $res["pay_time"] = $res["pay_time"] ? date("Y-m-d H:i:s",$res["pay_time"]) : "未支付";
         $res["total_price"]            = (float)$res["total_price"];
         $res["total_settle_price"]    =  (float)$res["total_settle_price"];
         if($spType){    //超级
@@ -167,7 +172,7 @@ class Order extends HomeBase
         }
 
         try{
-            db("order")->field("order_type")->where($where)->update(array("order_type"=>2));
+            db("order")->where($where)->update( array("order_type" => 2 ) );
         } catch (\Exception $e) {
             return json(array("code" => 403, "msg" => "保存出错，请再保存一次"));
         }
@@ -177,6 +182,7 @@ class Order extends HomeBase
     //订单出行
     public function trip(){
         $orderSn = input("order_sn");
+//        $orderSn = "201804171547199857727005";
         if(empty($orderSn)){
             return json(array("code" => 404,"msg" => "订单号不能为空"));
         }
@@ -184,19 +190,101 @@ class Order extends HomeBase
         $where["is_del"]         =  0;  //未删除
         $where["order_sn"]       =  $orderSn;
 
-        $orderInfo = db("order")->field("order_type")->where($where)->find();
+        $orderInfo = db("order")->field("*")->where($where)->find();
         if(!$orderInfo){
             return json(array("code" => 403,"msg" => "订单被删除或者不存在"));
         }
         if($orderInfo["order_type"] != 2){
             return json(array("code" => 403,"msg" => "不是已确认订单状态"));
         }
+        //验证供应商 分销商账户
+
+        //查看分销商是不是返利分销商
+        $reJoin   = [['retail_money b','a.code = b.retail_code']];
+        $reField  = "a.type,b.total_money,b.no_money";
+        $reWhere = array("a.code" => $orderInfo["retail_code"]);
+        $retailInfo = db("retail")->alias("a")->join($reJoin)->field($reField)->where($reWhere)->find();
+        if(!$retailInfo){
+            return json(array("code" => 403,"msg" => "分销商账户出现异常，请联系管理员"));
+        }
+        if($retailInfo["type"] == 3 && $orderInfo["rebate_type"] == 1){   //返利分销商
+            $yj = $orderInfo["total_price"] - $orderInfo["total_settle_price"] + $orderInfo["rebate_total_money"];  //佣金
+        }else{
+            //计算佣金
+            $yj = $orderInfo["total_price"] - $orderInfo["total_settle_price"]; //佣金
+        }
+
+        //更改订单状态
+        //供应商对账单
+        $spbData["sp_code"]                 =   $orderInfo["sp_code"];              //供应商标识
+        $spbData["order_sn"]                =   $orderInfo["order_sn"];             //订单编号
+        $spbData["goods_type"]              =   $orderInfo["goods_type"];           //商品类型
+        $spbData["begin_date"]              =   time();                              //账单开始时间
+        $spbData["end_date"]                =   strtotime("+7 day");                //账单结束时间
+        $spbData["total_price"]             =   $orderInfo["total_price"];          //订单总价
+        $spbData["total_settle_price"]     =   $orderInfo["total_settle_price"];   //结算总价
+        //经销商进账记录
+        $rebData["retail_code"]             =   $orderInfo["retail_code"];           //经销商标识
+        $rebData["order_sn"]                =   $orderInfo["order_sn"];               //订单编号
+        $rebData["bill_type"]               =   1;                                     //进账
+        $rebData["bill_balance"]            =   $retailInfo["no_money"];              //账户余额
+        $rebData["bill_money"]              =   $yj;                                   //金额
+        $rebData["bill_time"]               =   time();                                 //进账时间
+        //经销商金额添加
+        $remData["total_money"]            =   $retailInfo["total_money"] + $yj;        //总金额
+        $remData["no_money"]               =   $retailInfo["no_money"] + $yj;           //未提现金额
+
+
+        $db = db("");
+        $db->startTrans();   // 开启事务
+        try{
+            //更改订单状态
+            $db->table("syy_order")->where($where)->update(array("order_type" => 4));
+            //供应商对账单
+            $db->table("syy_sp_bill")->insert($spbData);
+            //经销商账单表
+            $db->table("syy_retail_bill")->insert($rebData);
+            //经销商金额添加
+            $db->table("syy_retail_money")->where(array("retail_code" => $orderInfo["retail_code"]))->update($remData);
+            // 提交事务
+            $db->commit();
+            return json(array("code" => 200,"msg" => "订单状态已出行"));
+        } catch (\Exception $e) {
+            // 回滚事务
+            $db->rollBack();
+            return json(array("code" => 403, "msg" => "确定订单出错，请联系管理员"));
+        }
+
+
+    }
+
+    //退款
+    public function refund(){
+        if(!getSpType()){                              //超级管理
+            return json(array("code"=>405,"msg"=>"只有超级管理才能点击结算"));
+        }
+        $orderSn = input("order_sn");
+        if(empty($orderSn)){
+            return json(array("code" => 404,"msg" => "订单号不能为空"));
+        }
+        $where["is_del"]         =  0;  //未删除
+        $where["order_sn"]       =  $orderSn;
+
+        $orderInfo = db("order")->field("order_type")->where($where)->find();
+        if(!$orderInfo){
+            return json(array("code" => 403,"msg" => "订单被删除或者不存在"));
+        }
+
+        if($orderInfo["order_type"] != 2 && $orderInfo["order_type"] != 3){
+            return json(array("code" => 403,"msg" => "订单不在未出行状态或者不在待确认订单状态"));
+        }
 
         try{
-            db("order")->field("order_type")->where($where)->update(array("order_type"=>4));
+            db("order")->where($where)->update( array("order_type" => 7 ) );
         } catch (\Exception $e) {
             return json(array("code" => 403, "msg" => "保存出错，请再保存一次"));
         }
-        return json(array("code" => 200,"msg" => "订单状态已出行"));
+        return json(array("code" => 200,"msg" => "订单已改成退款状态"));
+
     }
 }
