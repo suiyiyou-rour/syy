@@ -11,12 +11,19 @@ class Order extends HomeBase
 
     public function index()
     {
-        $orderInfo["order_type"]= 1;
-        if($orderInfo["order_type"] != 2 && $orderInfo["order_type"] != 3){
-            echo "错了";
-        }else{
-            echo "对的";
+        $page = input("post.page");                   //页码
+        if(empty($page)) $page = 1;
+
+        $join = [['retail_money b','a.code = b.retail_code']];
+        // 查找申请的和通过的
+        $count = db('retail')->alias("a")->join($join)->where('a.type','in','1,3')->count("a.id");
+        if(!$count){
+            return \json(array("code" => 200,"data" => array(),"count" => 0 ));
         }
+
+        $field = "a.*,b.total_money,b.no_money,b.already_money";
+        $retailData = db('retail')->alias("a")->join($join)->field($field)->where('a.type','in','1,3')->page($page,10)->order('a.reg_time','desc')->select();
+        return \json(array('code' => 200 ,'data' => $retailData ,'count' => $count));
     }
 
     //列表显示

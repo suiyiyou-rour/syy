@@ -16,11 +16,17 @@ class Retail extends HomeBase
      *  获取分销商列表 
      */
     public function getRetailList(){
-        $page = input('post.page')?1:input('post.page');
-        $page = ($page-1)*10;
+        $page = input("post.page");                   //页码
+        if(empty($page)) $page = 1;
+
+        $join = [['retail_money b','a.code = b.retail_code']];
         // 查找申请的和通过的
-        $count = db('retail')->where('type','in','1,3')->count();
-        $retailData = db('retail')->where('type','in','1,3')->limit($page.',10')->order('reg_time','desc')->select();
+        $count = db('retail')->alias("a")->join($join)->where('a.type','in','1,3')->count();
+        if(!$count){
+            return \json(array("code" => 200,"data" => array(),"count" => 0 ));
+        }
+
+        $retailData = db('retail')->alias("a")->join($join)->where('a.type','in','1,3')->page($page,10)->order('a.reg_time','desc')->select();
         return \json(array('code' => 200 ,'data' => $retailData ,'count' => $count));
     }
 
