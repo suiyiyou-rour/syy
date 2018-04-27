@@ -1,62 +1,59 @@
 <?php
-/**
- * 2017/12/04 LZL
- */
-namespace Weixin\Service;
-class WeiXinApiService {
+namespace app\weixin\service;
+class WxApi {
     private $APP_ID;
     private $APP_SECRET;
 
     public function __construct(){
-        $this->APP_ID = C("APP_ID");
-        $this->APP_SECRET = C("APP_SECRET");
+        $this->APP_ID       = config("app_id");
+        $this->APP_SECRET   = config("app_secret");
+    }
+
+    public function index(){
+        echo $this->APP_ID;
+        echo "<br/>";
+        echo $this->APP_SECRET;
     }
 
     /**
      * 获取AccessToken
      */
     public function getAccessToken(){
-        $result = S('WXAccessToken');
-//        $result = false;
+        $result = cache("WxAccessToken");
         if($result){
             return $result;
-        }else{
-            $url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid='.$this->APP_ID.'&secret='.$this->APP_SECRET;
-            $ACToken = $this->curl_get_contents($url);
-            $eq = json_decode($ACToken,true);
-            if($eq["access_token"] && $eq["expires_in"]){
-                S('WXAccessToken',$eq["access_token"],7150);
-                return $eq["access_token"];
-            }else{
-                return false;
-            }
         }
+
+        $url      = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid='.$this->APP_ID.'&secret='.$this->APP_SECRET;
+        $acToken  = $this->curl_get_contents($url);
+        $eq       = json_decode($acToken,true);
+        if($eq["access_token"] && $eq["expires_in"]){
+            cache('WXAccessToken', $eq["access_token"], 7150);
+            return $eq["access_token"];
+        }
+        return false;
     }
 
     /**
      * 获取api_ticket
      */
     public function get_jsapi_ticket(){
-        $result = S('WXJsapiTicket');
+        $result = cache("WxJsapiTicket");
         if($result){
             return $result;
-        }else{
-//            $url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=".$AccessToken."&type=wx_card";
-            $AccessToken = $this->getAccessToken();
-            $url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=$AccessToken";
-            $jdk=$this->curl_get_contents($url);
-            $eq= json_decode($jdk,true);
-//        var_dump($jdk);
-//        exit;
-            if($eq["ticket"] && $eq["expires_in"]){
-                S('WXJsapiTicket',$eq["ticket"],7150);
-//                var_dump($eq["ticket"]);
-//                exit;
-                return $eq["ticket"];
-            }else{
-                return false;
-            }
         }
+
+        $AccessToken = $this->getAccessToken();
+        $url  = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=$AccessToken";
+        $jdk  = $this->curl_get_contents($url);
+        $eq   = json_decode($jdk,true);
+        if($eq["ticket"] && $eq["expires_in"]){
+            cache('WXJsapiTicket', $eq["ticket"], 7150);
+            return $eq["ticket"];
+        }else{
+            return false;
+        }
+
     }
 
     /**
@@ -87,27 +84,6 @@ class WeiXinApiService {
 //            "rawString" => $string
         );
         return json_encode($signPackage);
-
-
-//        $noncestr = $this->getRandStr(16);
-//        $jsapi_ticket = $this->get_jsapi_ticket();
-//        $timestamp = time();
-//        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-//        $url = $protocol.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-////        $string = 'jsapi_ticket='.$jsapi_ticket.'&noncestr='.$noncestr.'&timestamp='.$timestamp.'&url='.$url;
-//        $string = "jsapi_ticket=$jsapi_ticket&noncestr=$noncestr&timestamp=$timestamp&url=$url";
-//        $signature = sha1($string);
-//
-//        $data["debug"] = true;
-//        $data["appId"] = $this->APP_ID;
-//        $data["timestamp"] = $timestamp;
-//        $data["nonceStr"] = $noncestr;
-//        $data["signature"] = $signature;
-
-//        $data["jsapi_ticket"] = $jsapi_ticket;
-//        $data["url"] = $url;
-//        print_r($data);exit;
-//        return json_encode($data);
 
     }
 

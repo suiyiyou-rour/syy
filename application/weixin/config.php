@@ -2,7 +2,11 @@
 
 return [
     // 图片地址
-    'img_url' => 'http://admin.suiyiyou.net/image/',
+    'img_url'       =>      'http://admin.suiyiyou.net/image/',
+    'app_url'       =>      'http://www.suiyiyou.net',                    //随意游主网站地址
+    'app_id'        =>      'wx61c3a83a4a91e4ef',                           //微信公众号appid
+    'app_secret'    =>      'f9f9de94ff1a6c6fa140b911d43b5e0e',           //秘钥
+    'token'         =>      'suiyiyousyy',                                  //微信TOKEN
 
     // 缓存设置
     'cache'                  => [
@@ -16,9 +20,7 @@ return [
         'expire' => 0,
     ],
 
-    // +----------------------------------------------------------------------
     // | 会话设置
-    // +----------------------------------------------------------------------
     'session'                => [
         'id'             => '',
         // SESSION_ID的提交变量,解决flash上传跨域
