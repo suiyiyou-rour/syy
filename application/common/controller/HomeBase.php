@@ -22,19 +22,19 @@ class HomeBase extends Base
         }
         // 权限控制
         $controller = strtolower( request()->controller() );
-
-        // $sp = array("id" => '1' , "code" => '1234567' ,"type" => '1');
-        // session('sp',$sp);
-//       $sp = session('sp','home');
-//       if(!empty($sp)){
-//           if( $controller == 'login' ) return false;
+        if( $controller !== 'login' ){
+            $sp = session('sp', '', 'home');
+            if(!$sp){
+                echo json_encode(array("code"=>499,"data"=>"登陆状态失效，请重新登陆"));
+                die;
+            }
 //           if($sp['type']==1) return false;
 //
 //           $auth =  \think\Loader::model('Auth','logic');
 //           $res = $auth->checkAuth($sp['code'],$controller);
 //
 //           if(!$res) return false;
-//       }
+        }
 
     }
 }

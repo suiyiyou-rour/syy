@@ -7,6 +7,10 @@ class Rebate extends HomeBase
     public function __construct()
     {
         parent::__construct();
+        if(!getSpType()){
+            echo json_encode(array("code"=>405,"msg"=>"只有超级管理员才有权限"));
+            die;
+        }
     }
 
     public function index()

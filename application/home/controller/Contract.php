@@ -12,7 +12,7 @@ class contract extends HomeBase
     //供应商列表
     public function showSp(){
         if(!getSpType()){
-            return json(array("code" => 404, "msg" => "只有超级管理才有权限"));
+            return json(array("code" => 200));
         }
         $list = db('sp')->field('code,com_name')->where(array('type' => '2'))->select();
         if(!$list){
