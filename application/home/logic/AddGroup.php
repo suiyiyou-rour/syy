@@ -584,18 +584,34 @@ class AddGroup
          */
         if($tab !== null && $tab < 7){
             //更新tab
-            if($state == 1){
-                if ($tab < 1) {
-                    db('goods_create')->where(array("goods_code" => $goodsCode))->update(array("tab" => 1));
-                };
-            }else if($state == 2){
-                if ($tab < 3) {
-                    db('goods_create')->where(array("goods_code" => $goodsCode))->update(array("tab" => 3));
-                };
-            }else if($state == 4){
-                if ($tab < 7) {
-                    db('goods_create')->where(array("goods_code" => $goodsCode))->update(array("tab" => 7));
-                };
+//            for($i = 1; $i<=7 ; $i++){
+//                if( $i <= $tab){
+//                    db('goods_create')->where(array("goods_code" => $goodsCode))->update(array("tab" => $i));
+//                    break;
+//                }
+//            }
+            switch ($state){
+                case 1;
+                    if ($tab < 1) db('goods_create')->where(array("goods_code" => $goodsCode))->update(array("tab" => 1));
+                    break;
+                case 2;
+                    if ($tab < 2) db('goods_create')->where(array("goods_code" => $goodsCode))->update(array("tab" => 2));
+                    break;
+                case 3;
+                    if ($tab < 3) db('goods_create')->where(array("goods_code" => $goodsCode))->update(array("tab" => 3));
+                    break;
+                case 4;
+                    if ($tab < 4) db('goods_create')->where(array("goods_code" => $goodsCode))->update(array("tab" => 4));
+                    break;
+                case 5;
+                    if ($tab < 5) db('goods_create')->where(array("goods_code" => $goodsCode))->update(array("tab" => 5));
+                    break;
+                case 6;
+                    if ($tab < 6) db('goods_create')->where(array("goods_code" => $goodsCode))->update(array("tab" => 6));
+                    break;
+                case 7;
+                    if ($tab < 7) db('goods_create')->where(array("goods_code" => $goodsCode))->update(array("tab" => 7));
+                    break;
             }
         }
     }

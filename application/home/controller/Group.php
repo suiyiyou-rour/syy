@@ -11,7 +11,6 @@ class Group extends HomeBase
     public function __construct()
     {
         parent::__construct();
-        cookie("name",335);
     }
 
     public function index()
