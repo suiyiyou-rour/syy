@@ -169,7 +169,7 @@ class ShowTicket
 
         if($output["price_type"] == 1){//1价格日历 2有效期
             $calendarRes = db('ticket_calendar')
-                ->field("FROM_UNIXTIME(date,'%Y-%c-%d') as date,stock_num,plat_price,settle_price,market_price,sales_num")
+                ->field("date,stock_num,plat_price,settle_price,market_price,sales_num")
                 ->where(array("goods_code" => $goodsCode))
                 ->order("date asc")
                 ->select();
@@ -178,6 +178,7 @@ class ShowTicket
                     $k["plat_price"] = (float)$k["plat_price"];
                     $k["settle_price"] = (float)$k["settle_price"];
                     $k["market_price"] = (float)$k["market_price"];
+                    $k["date"] = date("Y-m-d",$k["date"]);
                 }
             }
             unset($output["usable_date"]);
@@ -246,8 +247,7 @@ class ShowTicket
             return array("code" => 200,"data" => array("count" => 0));
         }
         $res = db('ticket_calendar')
-            ->field(['id','date'],true)
-            ->field("FROM_UNIXTIME(date,'%Y-%c-%d') as date")
+            ->field(['id'],true)
             ->where($where)
             ->order("date asc")
             ->page($page,10)
@@ -261,7 +261,7 @@ class ShowTicket
                 $k["plat_child_price"] = (float)$k["plat_child_price"];
                 $k["settle_child_price"] = (float)$k["settle_child_price"];
                 $k["plat_house_price"] = (float)$k["plat_house_price"];
-//                $k["date"] = date("Y-m-d",$k["date"]);
+                $k["date"] = date("Y-m-d",$k["date"]);
             }
         }
         $output["list"]  =  $res;

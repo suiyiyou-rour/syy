@@ -5,30 +5,8 @@ class Test extends Base
 {
     public function index()
     {
-//        phpinfo();
-        $data["num"] = "kkk";
-//        try{
-            $res = db("test1")->where(array("id"=>1))->update($data);
-        var_dump($res);
-//        var_dump($res);
-//        } catch (\Exception $e) {
-//            exception('异常消息', 100006);
-//        }
-
-//        $res =
-//        var_dump($res);
-//        echo onload();
-//        Loader::import('first.second.Foo');
-//        $foo = new \Foo();
-//        echo 1;
-//        $res = Db::query('select * from lmm_use');
-//        var_dump($res);
-//        $res = db('sp')->where(array('id'=>1))->find();
-//        var_dump($res);
-//        $bc = 2;
-//        $res = objSetArray($bc);
-//        var_dump($res);
-
+        $obj = \think\Loader::model('WxApi','service');
+        $obj->getAccessToken();
     }
 
     public function home(){

@@ -151,8 +151,7 @@ class ShowScenery
             return array("code" => 203,"data" => array("tab"=>$tab));
         }
         $res = db('scenery_calendar')
-            ->field(['id','date'],true)
-            ->field("FROM_UNIXTIME(date,'%Y-%c-%d') as date")
+            ->field(['id'],true)
             ->where(array("goods_code" => $goodsCode))
             ->order("date asc")
             ->select();
@@ -160,7 +159,7 @@ class ShowScenery
             foreach ($res as &$k){
                 $k["plat_price"] = (float)$k["plat_price"];
                 $k["settle_price"] = (float)$k["settle_price"];
-//                $k["date"] = date("Y-m-d",$k["date"]);
+                $k["date"] = date("Y-m-d",$k["date"]);
             }
             return array("code" => 200,"data" => $res);
         }

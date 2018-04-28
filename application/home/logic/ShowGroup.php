@@ -327,8 +327,8 @@ class ShowGroup
             return array("code" => 412,"msg" => "商品号不能为空");
         }
         $res = db('group_calendar')
-            ->field(['id','date'],true)
-            ->field("FROM_UNIXTIME(date,'%Y-%c-%d') as date")
+            ->field(['id'],true)
+//            ->field("FROM_UNIXTIME(date,'%Y-%c-%d') as date")
             ->where(array("goods_code" => $goodsCode))
             ->order("date asc")
             ->select();
@@ -341,7 +341,7 @@ class ShowGroup
                 $k["plat_child_price"] = (float)$k["plat_child_price"];
                 $k["settle_child_price"] = (float)$k["settle_child_price"];
                 $k["plat_house_price"] = (float)$k["plat_house_price"];
-//                $k["date"] = date("Y-m-d",$k["date"]);
+                $k["date"] = date("Y-m-d",$k["date"]);
             }
             return array("code" => 200,"data" => $res);
         }
@@ -377,8 +377,7 @@ class ShowGroup
             return array("code" => 200,"data" => array("count" => 0));
         }
         $res = db('group_calendar')
-            ->field(['id','date'],true)
-            ->field("FROM_UNIXTIME(date,'%Y-%c-%d') as date")
+            ->field(['id'],true)
             ->where($where)
             ->order("date asc")
             ->page($page,10)
@@ -392,7 +391,7 @@ class ShowGroup
                 $k["plat_child_price"] = (float)$k["plat_child_price"];
                 $k["settle_child_price"] = (float)$k["settle_child_price"];
                 $k["plat_house_price"] = (float)$k["plat_house_price"];
-//                $k["date"] = date("Y-m-d",$k["date"]);
+                $k["date"] = date("Y-m-d",$k["date"]);
             }
         }
         $output["list"]  =  $res;

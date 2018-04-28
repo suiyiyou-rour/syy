@@ -47,19 +47,21 @@ class Paynotify extends Base
         //三种产品分开处理
         switch ($orderInfo["goods_type"]){
             case 1:     //1跟团
-                $resdate = $this->group($orderInfo);
+                $resdata = $this->group($orderInfo);
                 break;
             case 2:     //2门票
-                $resdate = $this->ticket($orderInfo);
+                $resdata = $this->ticket($orderInfo);
                 break;
             case 3:     //3酒景
-                $resdate = $this->scenery($orderInfo);
+                $resdata = $this->scenery($orderInfo);
                 break;
+            default:
+                $resdata = array("bool" => 0,"error_info" => "产品类型异常");
         }
 
 
 
-        db('pay_record')->where(array("id" => $record))->update($resdate);
+        db('pay_record')->where(array("id" => $record))->update($resdata);
         die;
 
 
