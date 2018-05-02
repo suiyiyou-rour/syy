@@ -90,14 +90,14 @@ class AddTicket
             return array("code" => 404, "msg" => "图片参数上传参数错误");
         }
         $fileList = objSetArray($data["fileList"]);
-        if (empty($fileList[0]["name"])) {
-            return array("code" => 404, "msg" => "图片参数上传参数错误-首图丢失");
+        if (empty($fileList[0]["response"]["data"]["name"])) {
+            return array("code" => 404, "msg" => "图片信息上传参数错误:首图");
         }
         $imageArray = array();
         foreach ($fileList as $k) {
-            $imageArray[] = $k["name"];
+            $imageArray[] = $k["response"]["data"]["name"];
         }
-        $goodsData["head_img"] = $fileList[0]["name"];      //首图(主)
+        $goodsData["head_img"] = $fileList[0]["response"]["data"]["name"];      //首图(主)
         $supplyData["image"] = json_encode($imageArray);    //图片数组（补充）
 
         //有商品号（更新）

@@ -236,12 +236,12 @@ class AddScenery
             return array("code" => 404, "msg" => "图片信息上传参数错误");
         }
         $fileList = objSetArray($data["fileList"]);
-        if (empty($fileList[0]["name"])) {
+        if (empty($fileList[0]["response"]["data"]["name"])) {
             return array("code" => 404, "msg" => "图片信息上传参数错误:首图");
         }
         $imageArray = array();
         foreach ($fileList as $k) {
-            $imageArray[] = $k["name"];
+            $imageArray[] = $k["response"]["data"]["name"];
         }
 
         //普通数据验证
@@ -252,7 +252,7 @@ class AddScenery
         }
 
         //主表
-        $goodsData["head_img"]      =  $fileList[0]["name"];         //首图
+        $goodsData["head_img"]      =  $fileList[0]["response"]["data"]["name"];  //首图
         $goodsData["show_title"]    =  $data["show_title"];         //外部显示标题
         $goodsData["online_type"]   =  2;                            //默认指定日期上下线
         $goodsData["offline_type"]  =  2;                            //默认指定下架时间

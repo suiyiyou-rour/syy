@@ -381,7 +381,7 @@ class Scenery extends HomeBase
         $fileList = objSetArray($imageObj);
         $imageArray = array();
         foreach ($fileList as $k) {
-            $imageArray[] = $k["name"];
+            $imageArray[] = $k["response"]["data"]["name"];
         }
         return json($imageArray);
     }
