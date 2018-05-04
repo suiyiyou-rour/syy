@@ -77,6 +77,7 @@ class Weixin extends Base {
         }
     }
 
+    //菜单更新
     public function menu(){//菜单配置
         $wxService      =   \think\Loader::model('WxApi','service');;
         $ACCESS_TOKEN   =   $wxService->getAccessToken();
@@ -121,6 +122,11 @@ class Weixin extends Base {
                     "type":"view",
                     "name":"一分钱疯抢",
                     "url":"http://www.suiyiyou.net/index.php/weixin/index/laterOn"
+                },
+                {
+                    "type":"view",
+                    "name":"测试",
+                    "url":"http://wx.suiyiyou.net"
                 }
             ]
         },
@@ -153,7 +159,7 @@ class Weixin extends Base {
 }';
 
 //        var_dump($menu);
-        $re =   curl_post($url,$menu);
+        $re =   $this->curl_post($url,$menu);
         var_dump($re);
     }
 
@@ -162,16 +168,21 @@ class Weixin extends Base {
         echo $code;
     }
 
-    // {
-    //     "type":"view",
-    //     "name":"支付支付",
-    //     "url":"http://www.suiyiyou.net/index.php/Weixin/Jsapi/index"
-    // },,
-    // {
-    //     "type":"view",
-    //     "name":"清除",
-    //     "url":"http://www.suiyiyou.net/index.php/Weixin/Base/tee"
-    // }
+
+    function curl_post($url,$data){
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+        if (!empty($data)){
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS,$data);
+        }
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        $output = curl_exec($curl);
+        curl_close($curl);
+        return $output;
+    }
 
 
     //登陆

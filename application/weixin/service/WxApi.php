@@ -65,7 +65,7 @@ class WxApi {
         // 注意 URL 一定要动态获取，不能 hardcode.
 //        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 //        $url = "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-        $url = "http://wx.suiyiyou.net";
+        $url = "http://wx.suiyiyou.net/";
 
         $timestamp = time();
         $nonceStr = $this->getRandStr(16);
@@ -76,7 +76,7 @@ class WxApi {
         $signature = sha1($string);
 
         $signPackage = array(
-//            "debug"     => true,
+            "debug"     => true,
             "appId"     => $this->APP_ID,
             "nonceStr"  => $nonceStr,
             "timestamp" => $timestamp,
@@ -84,7 +84,7 @@ class WxApi {
             "signature" => $signature
 //            "rawString" => $string
         );
-        return json_encode($signPackage);
+        return $signPackage;
 
     }
 

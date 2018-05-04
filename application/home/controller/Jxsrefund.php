@@ -41,64 +41,49 @@ class Jxsrefund extends HomeBase
     //提现确定
     public function sure(){
         $id = input("post.id");
-//        $id = 1;
-        if(!$id){
-            return json(array("code" => 404,"msg" => "参数不能为空"));
-        }
-        $msg = input("remark_info");
-        $data["remark_info"] = $msg ? $msg : "";
-        $data["refund_type"] = 1;
-        $data["sure_time"]   = time();
+        if(!$id) return json(array("code" => 404,"msg" => "参数不能为空"));
 
+        //提现请求记录
+        $info  = db("retail_refund")->where(array("id" => $id))->find();
+        if(!$info) return json(array("code" => 403,"msg" => "找不到这条记录"));
+        if($info["refund_type"] != 0) return json(array("code" => 403,"msg" => "不在请求状态"));
 
-        $info  = db("retail_refund")->where(array("id"=>$id))->find();
-        if(!$info){
-            return json(array("code" => 403,"msg" => "找不到这条记录"));
-        }
-        if($info["refund_type"] != 0){
-            return json(array("code" => 403,"msg" => "不在请求状态"));
-        }
-        //改变提现状态
+        //经销商金额
+        $money = db("retail_money")->where(array("retail_code" => $info["retail_code"]))->find();
+        if(!$money) return json(array("code" => 403,"msg" => "经销商账户出错，请联系管理员"));
+
+        //提现记录表
+        $remark_info  = input("remark_info");
+        if($remark_info) $refundData["remark_info"] = $remark_info;
+        $refundData["refund_type"]   = 1;           //同意 1
+        $refundData["sure_time"]     = time();
+
+        //经销商账单记录表
         $billData["retail_code"]        = $info["retail_code"];
-        $billData["bill_type"]          =  1;
-        $billData["bill_balance"]       =  1;//账户余额
-        $billData["bill_money"]          =  $info["money"];//金额
+        $billData["bill_type"]          =  1;                        //进账
+        $billData["bill_balance"]       =  $money["no_money"];      //账户余额
+        $billData["bill_money"]         =  $info["money"];          //金额
         $billData["bill_time"]          = time();
 
-        $res = db("retail_refund")->where(array("id"=>$id))->update($data);
-//        db("retail_bill")->where(array(""));
-//        db("retail_bill")->insert();
-        if($res !== false){
-            return json(array("code" => 200,"msg" => "成功"));
+        //经销商账户表
+        $moneyData["total_money"]   = $money["total_money"] + $info["money"];
+        $moneyData["no_money"]      = $money["no_money"] + $info["money"];
+
+
+        $db = db("");
+        $db->startTrans();   // 开启事务
+        try{
+            $db->table("syy_retail_refund")->where(array("id" => $id))->update($refundData);
+            $db->table("syy_retail_bill")->insert($billData);
+            $db->table("syy_retail_money")->where(array("retail_code" => $info["retail_code"]))->update($moneyData);
+            // 提交事务
+            $db->commit();
+            return json(array("code" => 200 ,  'msg' => '操作成功'));
+        } catch (\Exception $e) {
+            // 回滚事务
+            $db->rollBack();
+            return json(array("code" => 403 , 'msg' => '操作失败，请联系管理员'));
         }
-        return json(array("code" => 200,"msg" => "失败，请再试一次"));
-
-
-//        DROP TABLE IF EXISTS `syy_retail_bill`;
-//CREATE TABLE `syy_retail_bill` (
-//        `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-//  `retail_code` varchar(24) NOT NULL COMMENT '经销商标识',
-//  `order_sn` varchar(24) DEFAULT NULL COMMENT '订单号 进账才有',
-//  `bill_type` enum('1','2','3') DEFAULT '1' COMMENT '状态 1进账 2提现 3退款 ',
-//  `bill_balance` decimal(10,2) NOT NULL COMMENT '账户余额',
-//  `bill_money` decimal(9,2) NOT NULL COMMENT '金额',
-//  `bill_time` int(11) NOT NULL COMMENT '时间',
-//  PRIMARY KEY (`id`),
-//  UNIQUE KEY `order_sn` (`order_sn`)
-//) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='经销商账单记录表';
-//
-//
-//DROP TABLE IF EXISTS `syy_retail_money`;
-//CREATE TABLE `syy_retail_money` (
-//        `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-//  `retail_code` varchar(24) NOT NULL COMMENT '经销商编码',
-//  `total_money` decimal(11,2) DEFAULT '0.00' COMMENT '总金额',
-//  `no_money` decimal(11,2) DEFAULT '0.00' COMMENT '未提现金额',
-//  `already_money` decimal(11,2) DEFAULT '0.00' COMMENT '已提现金额',
-//  `deal_money` decimal(11,2) DEFAULT '0.00' COMMENT '处理中金额',
-//  PRIMARY KEY (`id`),
-//  UNIQUE KEY `retail_code` (`retail_code`)
-//) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='经销商账户表';
     }
 
     //提现拒绝
@@ -108,8 +93,8 @@ class Jxsrefund extends HomeBase
             return json(array("code" => 404,"msg" => "参数不能为空"));
         }
 
-        $msg = input("remark_info");
-        $data["remark_info"] = $msg ? $msg : "";
+        $remark_info = input("remark_info");
+        if($remark_info) $data["remark_info"] = $remark_info;
         $data["refund_type"] = 2;
         $data["sure_time"]   = time();
 
