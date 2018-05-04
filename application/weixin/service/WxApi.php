@@ -70,7 +70,7 @@ class WxApi {
         $signature = sha1($string);
 
         $signPackage = array(
-            "debug"     => true,
+//            "debug"     => true,
             "appId"     => $this->APP_ID,
             "nonceStr"  => $nonceStr,
             "timestamp" => $timestamp,

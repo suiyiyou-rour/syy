@@ -19,7 +19,7 @@ class Retail extends HomeBase
         $page = input("post.page");                   //页码
         if(empty($page)) $page = 1;
 
-        $join = [['retail_money b','a.code = b.retail_code']];
+        $join = [['retail_money b','a.code = b.retail_code','LEFT']];
         // 查找申请的和通过的
         $count = db('retail')->alias("a")->join($join)->where('a.type','in','1,3')->count();
         if(!$count){
@@ -47,7 +47,13 @@ class Retail extends HomeBase
         if(!$res){
             return \json(array('code' => 404 ,'msg' => '操作失败！'));
         }
-        db('retail_money')->insert(['retail_code' => $code]);
+
+        try{
+            db('retail_money')->insert(['retail_code' => $code]);
+        } catch (\Exception $e) {
+            return json(array("code" => 403, "msg" => "金额表写入失败，请联系管理员"));
+        }
+
         return \json(array('code' => 200 ,'msg' => '操作成功！'));
     }
 
