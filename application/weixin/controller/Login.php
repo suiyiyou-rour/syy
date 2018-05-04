@@ -4,7 +4,62 @@ use app\common\controller\WeixinBase;
 class Login extends WeixinBase
 {
     public function index(){
-        var_dump(cookie("user"));
+        $com_name   = "123";
+        $mobile     = "18060481803";
+        $media_id   = "KExzDImXG9s7TAYOsk3MIFed4GprYiOxoJ9UwsTbXBHnqVB0FVUntenTcsF-ggMB";
+        if(!$com_name || !$mobile || !$media_id){
+            return json(array("code" => 404,"msg" => "参数不能为空"));
+        }
+        // 手机号码 不合格
+        if(!is_phone($mobile)){
+            return json(array("code" => 405,"msg" => "手机号码不正确"));
+        }
+
+        //获取用户信息
+        $usercode = 54;
+        $userinfo = db("user")->field("account,pwd,wx_code,head_img")->where(array("code" => $usercode))->find();
+        if(!$userinfo){
+            return json(array("code" => 403,"msg" => "您的当前登录状态异常，请重新登录后，再次申请"));
+        }
+
+        //判断提交申请
+        $checkRetail = db("retail")->field("check")->where(array("account_num" => $userinfo["account"]))->find();
+        if($checkRetail){
+            if($checkRetail["check"] == 0){
+                return json(array("code" => 403,"msg" => "您的账号，已经提交过申请，请等待结果"));
+            }else if($checkRetail["check"] == 1){
+                return json(array("code" => 403,"msg" => "您的账号，已经是经销商"));
+            }else{
+                return json(array("code" => 403,"msg" => "您的账号，已经提交过申请，但是没有通过，请联系管理员"));
+            }
+        }
+
+        //获取营业执照信息
+        $obj = \think\Loader::model('WxInfoApi','service');
+        $image = $obj->getMediaImg($media_id);
+        if($image == false){
+            return json(array("code" => 403,"msg" => "图片信息保存失败，请联系管理员"));
+        }
+
+
+        $data["account_num"]     =  $userinfo["account"];
+        $data["pwd"]              =  $userinfo["pwd"];
+        $data["type"]             =  1;
+        $data["wx_code"]          =  $userinfo["wx_code"];
+        $data["head_img"]         =  $userinfo["head_img"];
+        $data["file"]             =  $image;                    //营业执照
+        $data["code"]             =  $this->creatJxsCode();
+        $data["com_name"]         =  $com_name;                //
+        $data["mobile"]           =  $mobile;                  //联系手机
+        db('retail')->insert($data);
+//        var_dump($data);
+        die;
+        try{
+            db('retail')->insert($data);
+        } catch (\Exception $e) {
+            return json(array("code" => 403, "msg" => "提交申请失败，请联系管理员"));
+        }
+        return json(array("code" => 200, "msg" => "提交申请成功"));
 
     }
 
@@ -107,11 +162,12 @@ class Login extends WeixinBase
         }
 
         //获取用户信息
-        $openId = $this->getOpenid($wxcode);
+        $obj = \think\Loader::model('WxInfoApi','service');
+        $openId = $obj->getOpenid($wxcode);
         if($openId === false){
             return json(array("code" => 404,"msg" => "微信授权错误,请联系管理员"));
         }
-        $head_img = $this->getHeadImg($openId);
+        $head_img = $obj->getHeadImg($openId);
 
         $data["code"]           =  $this->creatUserCode();
         $data["account"]        =  $mobile;
@@ -178,27 +234,73 @@ class Login extends WeixinBase
 
     //经销商注册
     public function jxsRegister(){
+        if(empty(cookie("user"))){
+            return json(array("code" => 403,"msg" => "你还没有登陆，不能成为分销商"));
+        }
+        $com_name   = input("post.com_name");
+        $mobile     = input("post.mobile");
+        $media_id   = input("post.wxurl");
+        if(!$com_name || !$mobile || !$media_id){
+            return json(array("code" => 404,"msg" => "参数不能为空"));
+        }
+        // 手机号码 不合格
+        if(!is_phone($mobile)){
+            return json(array("code" => 405,"msg" => "手机号码不正确"));
+        }
 
-//        `code` varchar(16) NOT NULL COMMENT '商户标识',
-//  `type` int(1) NOT NULL COMMENT '用户类型  1经销商 2经销商员工 3返利经销商',
-//  `assgin_account` int(11) DEFAULT '0' COMMENT '上级供应商 经销商id',
-//  `account_num` varchar(20) NOT NULL COMMENT '商户账号',
-//  `pwd` varchar(64) NOT NULL COMMENT '密码',
-//  `com_name` varchar(32) DEFAULT NULL COMMENT '公司名称',
-//  `province` varchar(8) DEFAULT NULL COMMENT '公司所在地省',
-//  `city` varchar(8) DEFAULT NULL COMMENT '公司所在城市',
-//  `address` varchar(50) DEFAULT NULL COMMENT '公司地址',
-//  `name` varchar(32) DEFAULT NULL COMMENT '联系人姓名',
-//  `mobile` varchar(11) DEFAULT NULL COMMENT '手机号',
-//  `qq` varchar(12) DEFAULT NULL COMMENT 'qq号',
-//  `email` varchar(32) DEFAULT NULL COMMENT '邮箱',
-//  `file` text COMMENT '营业执照',
-//  `image` text,
-//  `wx_code` varchar(128) DEFAULT NULL,
-//  `check` int(1) DEFAULT '0' COMMENT '审核中 1通过 0未通过 2驳回',
-//  `open` int(1) DEFAULT '1' COMMENT '是否开启1 开启 0 关闭',
-//  `reg_time` int(11) unsigned DEFAULT NULL COMMENT '注册时间',
+        //获取用户信息
+        $usercode = getUserCode();
+        $userinfo = db("user")->field("account,pwd,wx_code,head_img")->where(array("code" => $usercode))->find();
+        if(!$userinfo){
+            return json(array("code" => 403,"msg" => "您的当前登录状态异常，请重新登录后，再次申请"));
+        }
+
+        //判断提交申请
+        $checkRetail = db("retail")->field("check")->where(array("account_num" => $userinfo["account"]))->find();
+        if($checkRetail){
+            if($checkRetail["check"] == 0){
+                return json(array("code" => 403,"msg" => "您的账号，已经提交过申请，请等待结果"));
+            }else if($checkRetail["check"] == 1){
+                return json(array("code" => 403,"msg" => "您的账号，已经是经销商"));
+            }else{
+                return json(array("code" => 403,"msg" => "您的账号，已经提交过申请，但是没有通过，请联系管理员"));
+            }
+        }
+
+        //获取营业执照信息
+        $obj = \think\Loader::model('WxInfoApi','service');
+        $image = $obj->getMediaImg($media_id);
+        if($image == false){
+            return json(array("code" => 403,"msg" => "图片信息保存失败，请联系管理员"));
+        }
+
+
+        $data["account_num"]     =  $userinfo["account"];
+        $data["pwd"]              =  $userinfo["pwd"];
+        $data["type"]             =  1;
+        $data["wx_code"]          =  $userinfo["wx_code"];
+        $data["head_img"]         =  $userinfo["head_img"];
+        $data["file"]             =  $image;                    //营业执照
+        $data["code"]              = $this->creatJxsCode();
+        $data["com_name"]          =  $com_name;                //
+        $data["mobile"]            =  $mobile;                  //联系手机
+
+        try{
+            db('retail')->insert($data);
+        } catch (\Exception $e) {
+            return json(array("code" => 403, "msg" => "提交申请失败，请联系管理员"));
+        }
+        return json(array("code" => 200, "msg" => "提交申请成功"));
     }
+
+
+    //获取用户code
+    private function creatJxsCode(){
+        $id = db('retail')->order("id desc")->value('id');
+        $id += 10001;
+        return $id;
+    }
+
 
 
 
@@ -244,29 +346,40 @@ class Login extends WeixinBase
         cookie(null, 'user');
     }
 
-    //获取用户头像
-    private function getHeadImg($openId){
-        header("Content-Type:text/html;charset=utf-8");
-        $obj = \think\Loader::model('WxApi','service');
-        $token = $obj->getAccessToken();
-        $url="https://api.weixin.qq.com/cgi-bin/user/info?access_token=$token&openid=$openId&lang=zh_CN";
-        $content = file_get_contents($url);
-        $content = json_decode($content,true);
-        return $content['headimgurl'];
-    }
 
-    //获取openid
-    private function getOpenid($code){
-        $appId      =   config("app_id");
-        $appSecret  =   config("app_secret");
-        $url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=" . $appId . "&secret=" . $appSecret . "&code=" . $code . "&grant_type=authorization_code";
-        $content = file_get_contents($url);
-        $ret = json_decode($content, true);
 
-        if (!isset($ret['openid'])) {
-            return false;
+
+
+    public function testid(){
+        $id = input("id");
+        if(empty($id)){
+            return json(array("code" => 404,"msg" => "参数不能为空"));
         }
-        return $ret['openid'];
+        $res = db("test123")->insert(array("name"=>$id));
+        return json(array("code" => 200,"msg" => "OK"));
     }
 
+
+    //    //获取用户头像
+//    private function getHeadImg($openId){
+//        header("Content-Type:text/html;charset=utf-8");
+//        $token   =  getAccessToken();
+//        $url     =  "https://api.weixin.qq.com/cgi-bin/user/info?access_token=$token&openid=$openId&lang=zh_CN";
+//        $content =  file_get_contents($url);
+//        $res     =  json_decode($content,true);
+//        return $res['headimgurl'];
+//    }
+//
+//    //获取openid
+//    private function getOpenid($code){
+//        $appId      =   config("app_id");
+//        $appSecret  =   config("app_secret");
+//        $url        =   "https://api.weixin.qq.com/sns/oauth2/access_token?appid=" . $appId . "&secret=" . $appSecret . "&code=" . $code . "&grant_type=authorization_code";
+//        $content    =   file_get_contents($url);
+//        $res        =   json_decode($content, true);
+//        if (!isset($res['openid'])) {
+//            return false;
+//        }
+//        return $res['openid'];
+//    }
 }

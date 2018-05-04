@@ -126,7 +126,7 @@ class Weixin extends Base {
                 {
                     "type":"view",
                     "name":"测试",
-                    "url":"http://wx.suiyiyou.net"
+                    "url":"http://wx.suiyiyou.net/#/home"
                 }
             ]
         },

@@ -75,6 +75,15 @@ function is_Identification_card($identity){
     return false;
 }
 
+/**
+ * 获取getAccessToken
+ */
+
+function getAccessToken(){
+    $obj = \think\Loader::model('WxApi','service');
+    $token = $obj->getAccessToken();
+    return $token;
+}
 
 /**
  * curl访问
@@ -82,7 +91,7 @@ function is_Identification_card($identity){
  * @param json数组
  * @param headers字符串
  */
-function curl_post($url,$data,$headers){
+function curl_post($url , $data = "", $headers = ""){
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -99,3 +108,6 @@ function curl_post($url,$data,$headers){
     curl_close($curl);
     return $output;
 }
+
+
+

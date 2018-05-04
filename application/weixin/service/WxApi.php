@@ -20,40 +20,34 @@ class WxApi {
      */
     public function getAccessToken(){
         $result = cache("WxAccessToken");
-        if($result){
-            return $result;
-        }
+        if($result) return $result;
 
         $url      = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid='.$this->APP_ID.'&secret='.$this->APP_SECRET;
         $acToken  = $this->curl_get_contents($url);
         $eq       = json_decode($acToken,true);
-        if($eq["access_token"] && $eq["expires_in"]){
-            cache('WXAccessToken', $eq["access_token"], 7150);
-            return $eq["access_token"];
+        if (!isset($eq['access_token'])) {
+            return false;
         }
-        return false;
+        cache('WxAccessToken', $eq["access_token"], 7150);
+        return $eq["access_token"];
     }
 
     /**
      * 获取api_ticket
      */
     public function get_jsapi_ticket(){
-        $result = cache("WxJsapiTicket");
-        if($result){
-            return $result;
-        }
+        $result = cache("WXJsapiTicket");
+        if($result) return $result;
 
         $AccessToken = $this->getAccessToken();
         $url  = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=$AccessToken";
         $jdk  = $this->curl_get_contents($url);
         $eq   = json_decode($jdk,true);
-        if($eq["ticket"] && $eq["expires_in"]){
-            cache('WXJsapiTicket', $eq["ticket"], 7150);
-            return $eq["ticket"];
-        }else{
+        if (!isset($eq['ticket'])) {
             return false;
         }
-
+        cache('WXJsapiTicket', $eq["ticket"], 7150);
+        return $eq["ticket"];
     }
 
     /**
