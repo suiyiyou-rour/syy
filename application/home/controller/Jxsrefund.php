@@ -18,7 +18,7 @@ class Jxsrefund extends HomeBase
         $retail_code = input("post.retail_code");
         if($retail_code) $where["a.retail_code"] = $retail_code;    //经销商编号
         $refund_type = input("post.refund_type");
-        if($refund_type) $where["a.refund_type"] = $refund_type;    //请求状态
+        if($refund_type !== false) $where["a.refund_type"] = $refund_type;    //请求状态
 
 
         $join = [['retail b','a.retail_code = b.code']];
