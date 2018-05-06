@@ -13,7 +13,8 @@ var entry = {
 var webpackConfig = {
     resolve: {
         alias: {
-            COMMON: path.resolve(__dirname, '../common')
+            COMMON: path.resolve(__dirname, '../common'),
+            URL: 'http://admin.suiyiyou.net/index.php'
         }
     },
     entry: entry,
@@ -36,6 +37,13 @@ var webpackConfig = {
             },{
                 test: /\.html$/,
                 use: ['html-loader']
+            },{
+                test: /\.js?$/,
+                exclude: /(node_modules|bower_components)/,
+                loader: 'babel-loader',
+                query: {
+                    presets: ['es2015']
+                }
             }
         ]
     },
