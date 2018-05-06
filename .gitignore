@@ -3,4 +3,4 @@ composer.lock
 *.log
 thinkphp
 /public/node_modules
-/public/static
+
