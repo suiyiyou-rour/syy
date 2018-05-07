@@ -20,19 +20,28 @@ class Pay extends WeixinBase
 
     public function go(){
         //todo 需要orderSn code 两个参数
-        $orderSn = input('orderSn');//订单号
-        if(empty($orderSn)){
-            return json(array("code" => 404 , "msg" => "订单号不能为空"));
+        $orderSn = input('order_sn');//订单号
+        $code = input('wxcode');
+        if(!$orderSn || !$code){
+            return json(array("code" => 404 , "msg" => "订单号不能为空或者微信code不能为空"));
         }
+
         $where = [
             "order_sn"     => $orderSn ,
             "is_del"       => 0 ,          //未删除
             "order_type"   => 1           //待付款
         ];
         $orderInfo = db("order")->field("goods_name,total_price")->where($where)->find();
-        if($orderInfo){
+        if(!$orderInfo){
             return json(array("code" => 405 , "msg" => "找不到待付款订单"));
         }
+        $wxpay = cookie("jsApiParameters");
+        if($wxpay && $wxpay["orderSn"] == $orderSn){
+            $jsApiParameters = json_decode($wxpay["code"],true);
+            return json(array("code"=>200,"data"=>$jsApiParameters));
+        }
+
+
         $orderName = $orderInfo["goods_name"];
         $orderPrice = $orderInfo["total_price"];
         $orderAttach = "syy";
@@ -40,7 +49,7 @@ class Pay extends WeixinBase
 
 
 //        $orderName = "asdsadsadsa";
-//        $orderSn = "201804171527066610168424";
+//        $orderSn = "201804171527066638859999";
 //        $orderAttach = "syy";
 //        $orderPrice = "1";
 //        $orderGoods_tag = "1232132";
@@ -53,8 +62,14 @@ class Pay extends WeixinBase
 
         //①、获取用户openid
         $tools = new \JsApiPay();
-        $openId = $tools->GetOpenid();
-//        $openId = $tools->GetOpenidFromMp($code); #todo 用前端code换取openid
+
+        #todo 用前端code换取openid
+        $wxInfoApi      =   \think\Loader::model('WxInfoApi','service');;
+        $openId          =   $wxInfoApi->getOpenid($code);
+        if(!$openId){
+            return json(array("code"=>403,"data"=>"授权失败"));
+        }
+//        $openId = $tools->GetOpenid();
 
         //②、统一下单
         $input = new \WxPayUnifiedOrder();
@@ -68,13 +83,20 @@ class Pay extends WeixinBase
         $input->SetTime_expire(date("YmdHis", time() + 600));//设置订单失效时间
         $input->SetGoods_tag($orderGoods_tag);//设置商品标记
 
-        $input->SetNotify_url("http://admin.suiyiyou.net/index.php/Weixin/Paynotify/home");//设置接收微信支付异步通知回调地址
+        $input->SetNotify_url("http://admin.suiyiyou.net/index.php/weixin/Paynotify/home");//设置接收微信支付异步通知回调地址
         $input->SetTrade_type("JSAPI");//
 
         $input->SetOpenid($openId);
         $order = \WxPayApi::unifiedOrder($input);
 
         $jsApiParameters = $tools->GetJsApiParameters($order);
+        //把订单号和前面存起来
+        $wxpaysdk["orderSn"] = $orderSn;
+        $wxpaysdk["code"] = $jsApiParameters;
+        cookie("jsApiParameters",$wxpaysdk,599);
+
+
+        $jsApiParameters = json_decode($jsApiParameters,true);
         return json(array("code"=>200,"data"=>$jsApiParameters));
     }
 
