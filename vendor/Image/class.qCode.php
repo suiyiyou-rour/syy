@@ -1,60 +1,9 @@
 <?php
 namespace Image;
-/**
- * 基于tp图像处理类，修改
- * 使用GD库处理图片,不支持gif图片
- */
-
-class Gd
+class Imagick
 {
-    /**
-     * 图像资源
-     * @var resource
-     */
-    private $img;
 
     /**
-     * 图像信息，包括width,height,type,mine,size
-     * @var array
-     */
-    private $info;
-
-    
-    /**
-     * 构造方法
-     * @param array  $imagePath 图像路径
-     */
-    public function __contruct($imagePath = null){
-        $this->open($imagePath); 
-    }
-
-    /**
-     * 打开图像
-     * 
-     */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /** 
      * 图片合成 左上方
      * @param string $bigImagePath   大图地址
      * @param string $qrCodePath     小图地址 
@@ -85,8 +34,6 @@ class Gd
         imagedestroy($bigImg); 
         imagedestroy($qrCodeImg); 
     }
-
-
     /**
     * 图片合成 右下方
     * @param string $bigImagePath   大图地址
