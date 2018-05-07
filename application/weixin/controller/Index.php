@@ -68,10 +68,6 @@ class Index extends WeixinBase
 
 
     }
-
-    //主页
-    public function home(){
-        return $this->fetch('index/home');
-    }
+    
 
 }

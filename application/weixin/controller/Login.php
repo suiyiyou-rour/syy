@@ -4,62 +4,6 @@ use app\common\controller\WeixinBase;
 class Login extends WeixinBase
 {
     public function index(){
-        $com_name   = "123";
-        $mobile     = "18060481803";
-        $media_id   = "KExzDImXG9s7TAYOsk3MIFed4GprYiOxoJ9UwsTbXBHnqVB0FVUntenTcsF-ggMB";
-        if(!$com_name || !$mobile || !$media_id){
-            return json(array("code" => 404,"msg" => "参数不能为空"));
-        }
-        // 手机号码 不合格
-        if(!is_phone($mobile)){
-            return json(array("code" => 405,"msg" => "手机号码不正确"));
-        }
-
-        //获取用户信息
-        $usercode = 54;
-        $userinfo = db("user")->field("account,pwd,wx_code,head_img")->where(array("code" => $usercode))->find();
-        if(!$userinfo){
-            return json(array("code" => 403,"msg" => "您的当前登录状态异常，请重新登录后，再次申请"));
-        }
-
-        //判断提交申请
-        $checkRetail = db("retail")->field("check")->where(array("account_num" => $userinfo["account"]))->find();
-        if($checkRetail){
-            if($checkRetail["check"] == 0){
-                return json(array("code" => 403,"msg" => "您的账号，已经提交过申请，请等待结果"));
-            }else if($checkRetail["check"] == 1){
-                return json(array("code" => 403,"msg" => "您的账号，已经是经销商"));
-            }else{
-                return json(array("code" => 403,"msg" => "您的账号，已经提交过申请，但是没有通过，请联系管理员"));
-            }
-        }
-
-        //获取营业执照信息
-        $obj = \think\Loader::model('WxInfoApi','service');
-        $image = $obj->getMediaImg($media_id);
-        if($image == false){
-            return json(array("code" => 403,"msg" => "图片信息保存失败，请联系管理员"));
-        }
-
-
-        $data["account_num"]     =  $userinfo["account"];
-        $data["pwd"]              =  $userinfo["pwd"];
-        $data["type"]             =  1;
-        $data["wx_code"]          =  $userinfo["wx_code"];
-        $data["head_img"]         =  $userinfo["head_img"];
-        $data["file"]             =  $image;                    //营业执照
-        $data["code"]             =  $this->creatJxsCode();
-        $data["com_name"]         =  $com_name;                //
-        $data["mobile"]           =  $mobile;                  //联系手机
-        db('retail')->insert($data);
-//        var_dump($data);
-        die;
-        try{
-            db('retail')->insert($data);
-        } catch (\Exception $e) {
-            return json(array("code" => 403, "msg" => "提交申请失败，请联系管理员"));
-        }
-        return json(array("code" => 200, "msg" => "提交申请成功"));
 
     }
 
