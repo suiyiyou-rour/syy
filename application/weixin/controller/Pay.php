@@ -47,7 +47,6 @@ class Pay extends WeixinBase
         $orderAttach = "syy";
         $orderGoods_tag = "随意游";
 
-
 //        $orderName = "asdsadsadsa";
 //        $orderSn = "201804171527066638859999";
 //        $orderAttach = "syy";
@@ -67,7 +66,7 @@ class Pay extends WeixinBase
         $wxInfoApi      =   \think\Loader::model('WxInfoApi','service');;
         $openId          =   $wxInfoApi->getOpenid($code);
         if(!$openId){
-            return json(array("code"=>403,"data"=>"授权失败"));
+            return json(array("code"=>403,"msg"=>"微信授权失败，请重新进入订单页面"));
         }
 //        $openId = $tools->GetOpenid();
 

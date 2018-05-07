@@ -77,6 +77,7 @@ class GroupOrder extends Order
         $order["goods_code"]            =   $data['goodsCode'];            //商品编号
         $order["sp_code"]               =   $info["sp_code"];              //供应商编号
         $order["user_code"]             =   $data['user_code'];            //下单用户
+        $order["user_type"]             =   $data['user_type'];            //下单用户类型
         $order["retail_code"]           =   $data['retail_code'];          //经销商code
         $order["goods_type"]            =   "1";                            //跟团
         $order["create_time"]           =   time();                         //订单创建时间
@@ -92,6 +93,7 @@ class GroupOrder extends Order
         $order["rate"]                  =   $info["rate"];                   //费率
         $order["rebate_type"]           =   $rebate["type"];                 //返利类型 1有 0没
         $order["rebate_total_money"]   =   $totalRebatePrice;                //返利总金额
+
 
         //副表数据
         $subOrder["order_sn"]                   =   $orderSn;//订单号
@@ -133,7 +135,7 @@ class GroupOrder extends Order
         $data['child_num']       = empty($data['child_num']) ? 0 : (int)$data['child_num']; //儿童数量
         $data['house_num']       = empty($data['house_num']) ? 0 : (int)$data['house_num']; //单房差数量
         $data['zfprice']         = empty($data['zfprice']) ? 0 : (int)$data['zfprice']; //自费价格
-        $data['route_price']     = empty($data['route_price']) ? 0 : (int)$data['route_price']; //总价
+        $data['route_price']     = empty($data['route_price']) ? 0 : $data['route_price']; //总价
         $data['identity_array'] = empty($data['identity_array']) ? "[]" : json_encode($data["identity_array"]); //身份数组
         $data['charged_item']   = empty($data['charged_item']) ? "[]" : json_encode($data["charged_item"]); //自费项目
         $data['go_time']         =  strtotime($data['go_time']);            //出发时间

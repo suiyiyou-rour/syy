@@ -78,6 +78,7 @@ class TicketOrder extends Order
         $order["goods_code"]            =   $data['goodsCode'];            //商品编号
         $order["sp_code"]               =   $info["sp_code"];              //供应商编号
         $order["user_code"]             =   $data['user_code'];            //下单用户
+        $order["user_type"]             =   $data['user_type'];            //下单用户类型
         $order["retail_code"]           =   $data['retail_code'];          //经销商code
         $order["goods_type"]            =   "2";                            //门票
         $order["create_time"]           =   time();                         //订单创建时间

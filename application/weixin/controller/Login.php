@@ -126,13 +126,22 @@ class Login extends WeixinBase
         } catch (\Exception $e) {
             return json(array("code" => 403, "msg" => "注册失败，请联系管理员"));
         }
-        $output["code"]       =  $data["code"];
-        $output["type"]       =  1;
-        $output["isType"]     =  1;
-        $output["head_img"]   =  $data["head_img"];
 
-        cookie("user" ,$output , 315360000);
-        return json(array("code" => 200,"data" => $output, "msg" => "注册成功"));
+        $arr = array(
+            "code"      => $data["code"],
+            "type"      => 1 ,
+            "head_img"  => $data["head_img"],
+            "name"      => "",
+            "mobile"    => $mobile,
+            "isType"    => 1
+        );
+//        $output["code"]       =  $data["code"];
+//        $output["type"]       =  1;
+//        $output["isType"]     =  1;
+//        $output["head_img"]   =  $data["head_img"];
+
+        cookie("user" ,$arr , 315360000);
+        return json(array("code" => 200,"data" => $arr, "msg" => "注册成功"));
     }
 
     //普通用户登陆
@@ -148,15 +157,29 @@ class Login extends WeixinBase
         if($type == 1){
             $user = db('user')->where(array('account' => $mobile,"pwd" => $pwd))->find();
             if(!$user) return json(array("code" => 403,"msg" => "账号或者密码错误"));
-
-            $arr = array("code" => $user["code"],"type" => $user["type"] , "head_img" => $user["head_img"] ,"isType" => 1);  //用户
+            //用户
+            $arr = array(
+                "code"      => $user["code"],
+                "type"      => $user["type"] ,
+                "head_img"  => $user["head_img"],
+                "name"      => "",
+                "mobile"    => $user["account"],
+                "isType"    => 1
+            );
         }else{
             $retail = db('retail')->where(array('account_num' => $mobile,"pwd" => $pwd))->find();
             if(!$retail) return json(array("code" => 403,"msg" => "账号或者密码错误"));
             if($retail["open"] == 0) return json(array("code" => 403,"msg" => "账户已经被关闭"));
             if($retail["check"] !== 1) return json(array("code" => 403,"msg" => "账户审核状态没有通过"));
-
-            $arr = array("code" => $retail["code"],"type" => $retail["type"] ,"head_img" => $retail["head_img"], "isType" => 2);  //经销商
+            //经销商
+            $arr = array(
+                "code"      => $retail["code"],
+                "type"      => $retail["type"] ,
+                "head_img"  => $retail["head_img"],
+                "name"      => $retail["com_name"],
+                "mobile"    => $retail["mobile"],
+                "isType"    => 2
+             );
         }
         cookie("user" ,$arr , 315360000);
         return json(array("code" => 200,"data" => $arr,"msg" => "登陆成功"));
@@ -288,9 +311,8 @@ class Login extends WeixinBase
     //注销
     public function logout(){
         cookie(null, 'user');
+        return json(array("code" => 200 ));
     }
-
-
 
 
 
@@ -304,26 +326,4 @@ class Login extends WeixinBase
     }
 
 
-    //    //获取用户头像
-//    private function getHeadImg($openId){
-//        header("Content-Type:text/html;charset=utf-8");
-//        $token   =  getAccessToken();
-//        $url     =  "https://api.weixin.qq.com/cgi-bin/user/info?access_token=$token&openid=$openId&lang=zh_CN";
-//        $content =  file_get_contents($url);
-//        $res     =  json_decode($content,true);
-//        return $res['headimgurl'];
-//    }
-//
-//    //获取openid
-//    private function getOpenid($code){
-//        $appId      =   config("app_id");
-//        $appSecret  =   config("app_secret");
-//        $url        =   "https://api.weixin.qq.com/sns/oauth2/access_token?appid=" . $appId . "&secret=" . $appSecret . "&code=" . $code . "&grant_type=authorization_code";
-//        $content    =   file_get_contents($url);
-//        $res        =   json_decode($content, true);
-//        if (!isset($res['openid'])) {
-//            return false;
-//        }
-//        return $res['openid'];
-//    }
 }

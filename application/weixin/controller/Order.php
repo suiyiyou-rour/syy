@@ -94,7 +94,7 @@ class Order extends LoginBase
         }
 
         $field = "a.order_sn,a.goods_code,a.goods_name,a.total_price,a.total_num,a.order_type,b.head_img";
-        if($isRetail) $field .= "total_settle_price";   //经销商显示结算总价
+        if($isRetail) $field .= ",a.total_settle_price";   //经销商显示结算总价
 
         $res = db("order")->alias("a")->join($join)->field($field)->where($where)->order("a.id desc")->page($page,10)->select();
         foreach ($res as &$k){

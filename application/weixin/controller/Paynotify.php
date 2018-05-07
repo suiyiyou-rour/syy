@@ -8,27 +8,27 @@ class Paynotify extends Base
     }
 
     public function home(){
-//        $xml = $GLOBALS['HTTP_RAW_POST_DATA']; //返回的xml
-//        if(empty($xml)){
-//            return;
-//        }
-//        libxml_disable_entity_loader(true);
-//        $postObj = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)));
-////        $postStr = file_get_contents("php://input");
-////        $postObj = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
-//
-//        $xmldata["order_sn"]         =       $postObj->out_trade_no;        //订单号
-//        $xmldata["openid"]           =       $postObj->openid;               //openid
-//        $xmldata["price"]            =       ($postObj->total_fee) / 100;    //价格
-//        $xmldata["tag"]              =       $postObj->attach;               //标记
-//        $xmldata["create_time"]     =       time();                         //添加时间
-//        $xmldata["xml"]              =       $xml;                           //微信返回的整个xml
-        $xmldata["order_sn"]         =       "201804181051104658447228";        //订单号
-        $xmldata["openid"]           =       "oojM_wqpt3w-GOcjAnWbLmZUWEhY";               //openid
-        $xmldata["price"]            =       "12.22";    //价格
-        $xmldata["tag"]              =       "syy";               //标记
+        $xml = $GLOBALS['HTTP_RAW_POST_DATA']; //返回的xml
+        if(empty($xml)){
+            return;
+        }
+        libxml_disable_entity_loader(true);
+        $postObj = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)));
+//        $postStr = file_get_contents("php://input");
+//        $postObj = simplexml_load_string($postStr, 'SimpleXMLElement', LIBXML_NOCDATA);
+
+        $xmldata["order_sn"]         =       $postObj->out_trade_no;        //订单号
+        $xmldata["openid"]           =       $postObj->openid;               //openid
+        $xmldata["price"]            =       ($postObj->total_fee) / 100;    //价格
+        $xmldata["tag"]              =       $postObj->attach;               //标记
         $xmldata["create_time"]     =       time();                         //添加时间
-        $xmldata["xml"]              =       "xxx";                           //微信返回的整个xml
+        $xmldata["xml"]              =       $xml;                           //微信返回的整个xml
+//        $xmldata["order_sn"]         =       "201804181051104658447228";        //订单号
+//        $xmldata["openid"]           =       "oojM_wqpt3w-GOcjAnWbLmZUWEhY";               //openid
+//        $xmldata["price"]            =       "12.22";    //价格
+//        $xmldata["tag"]              =       "syy";               //标记
+//        $xmldata["create_time"]     =       time();                         //添加时间
+//        $xmldata["xml"]              =       "xxx";                           //微信返回的整个xml
 
         //记录添加
         db('pay_record')->insert($xmldata);
