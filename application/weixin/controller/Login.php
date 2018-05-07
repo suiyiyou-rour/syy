@@ -199,6 +199,21 @@ class Login extends WeixinBase
         return json(array("code" => 200 , "data" => $jssdk));
     }
 
+    //注销
+    public function logout(){
+        cookie(null, 'user');
+        return json(array("code" => 200 ));
+    }
+
+    //获取用户
+    public function getUserInfo(){
+        $arr = cookie("user");
+        if($arr){
+            return json(array("code" => 200,"data" => $arr));
+        }
+        return json(array("code" => 404,"msg" => "登录状态已经失效，请重新登录"));
+    }
+
     //经销商注册
     public function jxsRegister(){
         if(empty(cookie("user"))){
@@ -308,11 +323,7 @@ class Login extends WeixinBase
         }
     }
 
-    //注销
-    public function logout(){
-        cookie(null, 'user');
-        return json(array("code" => 200 ));
-    }
+
 
 
 

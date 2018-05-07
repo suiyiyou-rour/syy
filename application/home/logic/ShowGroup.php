@@ -182,9 +182,9 @@ class ShowGroup
         $output["fileList"] = array();
         foreach ($imgArray as $k){
             $newArray = [
-                "name"  => $k ,
-                "url"  => config("img_url") . $k ,
-                "status"  => "success" ,
+                "url"           =>  config("img_url") . $k ,
+                "status"        =>  "success" ,
+                "response"      =>  array("data" => array("name" => $k))
             ];
             $output["fileList"][] = $newArray;
         }
