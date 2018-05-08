@@ -125,7 +125,7 @@ class TicketOrder extends Order
         $data = Request::instance()->only($gain, 'post');//        $data = input('post.');
         $data['man_num']         = empty($data['man_num']) ? 0 : (int)$data['man_num']; //成人数量
         $data['identity_array'] = empty($data['identity_array']) ? "[]" : json_encode($data["identity_array"]); //身份数组
-        $data['ticket_price']     = empty($data['ticket_price']) ? 0 : (int)$data['ticket_price']; //总价
+        $data['ticket_price']     = empty($data['ticket_price']) ? 0 : $data['ticket_price']; //总价
         $data['go_time']         =  strtotime($data['go_time']);            //出发时间
         if(empty($data['remark'])) $data['remark'] = "";    //备注信息
 

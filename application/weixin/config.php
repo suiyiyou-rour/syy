@@ -4,6 +4,7 @@
 return [
     // 图片地址
     'img_url'       =>      'http://admin.suiyiyou.net/image/',
+    'poster_url'    =>      'http://admin.suiyiyou.net/',
     'app_url'       =>      'http://www.suiyiyou.net',                    //随意游主网站地址
     'app_id'        =>      'wx61c3a83a4a91e4ef',                           //微信公众号appid
     'app_secret'    =>      'f9f9de94ff1a6c6fa140b911d43b5e0e',           //秘钥

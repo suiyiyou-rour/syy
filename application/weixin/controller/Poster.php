@@ -26,7 +26,7 @@ class Poster extends WeixinBase
         }
 
         $field = "a.goods_code,a.img_url";
-        $res = db("poster")->alias("a")->join($join)->field($field)->where($where)->order("a.id desc")->page($page,10)->select();
+        $res = db("poster")->alias("a")->join($join)->field($field)->where($where)->order("a.id desc")->page($page,6)->select();
         foreach ($res as &$k){
             $k["img_url"] = config("img_url").$k["img_url"];
         }
@@ -38,8 +38,6 @@ class Poster extends WeixinBase
     //获取海报
     public function getImage(){
         $goodsCode = input("post.goods_code");
-        $goodsCode = "g0020015";
-        $pid = "54";
         if(!$goodsCode){
             return json(array("code" => 404,"msg" => "商品号不能为空"));
         }
@@ -56,47 +54,54 @@ class Poster extends WeixinBase
         if(!$goodsObj){
             return json(array("code" => 405,"msg" => "商品找不到或者没有上线"));
         }
-//        var_dump($goodsObj["goods_type"]);
 
         $posterObj = db('poster')->field("img_url")->where(array("goods_code" => $goodsCode , "type" => 1))->find();
         if(!$posterObj){
             return json(array("code" => 405,"msg" => "没有这个产品的海报，或者被禁用了"));
         }
 
-        $poster_url = "image"."/".$posterObj['img_url'];      //原图路径
-        $goods_type = $goodsObj["goods_type"];
-//        var_dump($posterObj);
-        $imgUrl = $this->getPic($poster_url,$goodsCode,$goods_type,$pid);
-        var_dump($imgUrl);
+        $poster_url = "image"."/".$posterObj['img_url'];                           //原图路径
+        $imgUrl = $this->getPic($poster_url,$goodsCode,$goodsObj["goods_type"]);   //获取生成后的海报
+
+        return json(array("code" => 200,"data" => config("poster_url").$imgUrl));
     }
 
-    private function getPic($ImgPath='',$code='',$type='',$pid){
-        $qCodePath = $this->qrcode($type,$code);
+    //合成图片
+    private function getPic($ImgPath='',$goodsCode='',$goods_type=''){
+        //二维码生成
+        $qCodePath = $this->qrcode($goodsCode,$goods_type);
 
         // 二维码合成
         $bigImagePath = './image/qrcode/back.jpg';
         qCode($bigImagePath,$qCodePath,$qCodePath,12,12);
 
         // 图片合成
-        $savePath = "./image/qrcode/".$code.$type.".jpg";
+        $savePath = "./image/qrcode/".$goodsCode.$goods_type.".jpg";
         lowerRight($ImgPath,$qCodePath,$savePath,20,20);
         return $savePath.'?t='.time();
     }
 
 
-    private function qrcode($type='',$code=''){
-        $pid = cookie('pid');
+    //生成二维码
+    private function qrcode($goodsCode='',$goods_type=''){
+        $pid = "54";//cookie
 
-        if($type == 'tick'){
-            $page = 'p_ticket';
-        }elseif($type == 'group'){
-            $page = 'p_route';
-        }else {
-            $page = 'p_hotel';
+        switch ($goods_type) {
+            case '1':
+                $view = "route";
+                break;
+            case '2':
+                $view = "ticket";
+                break;
+            case '3':
+                $view = "hotel";
+                break;
+            default:
+                $view = "route";
         }
         $save_path = './image/qrcode/';
         $web_path = './image/qrcode/';
-        $qr_data = 'http://wx.suiyiyou.net/#/route/g0020001';
+        $qr_data = "http://wx.suiyiyou.net/#/$view/$goodsCode?pid=$pid";
         $qr_level = 'H';
         $qr_size = '4'; // 二维码图片大小
         $save_prefix = isset($_GET['save_prefix'])?$_GET['save_prefix']:'ZETA';

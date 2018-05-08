@@ -8,10 +8,9 @@ class Paynotify extends Base
     }
 
     public function home(){
+        if(!isset($GLOBALS['HTTP_RAW_POST_DATA'])) return;
         $xml = $GLOBALS['HTTP_RAW_POST_DATA']; //返回的xml
-        if(empty($xml)){
-            return;
-        }
+        if(empty($xml)) return;
         libxml_disable_entity_loader(true);
         $postObj = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)));
 //        $postStr = file_get_contents("php://input");
@@ -23,9 +22,9 @@ class Paynotify extends Base
         $xmldata["tag"]              =       $postObj->attach;               //标记
         $xmldata["create_time"]     =       time();                         //添加时间
         $xmldata["xml"]              =       $xml;                           //微信返回的整个xml
-//        $xmldata["order_sn"]         =       "201804181051104658447228";        //订单号
+//        $xmldata["order_sn"]         =       "201805081446433607291620";        //订单号
 //        $xmldata["openid"]           =       "oojM_wqpt3w-GOcjAnWbLmZUWEhY";               //openid
-//        $xmldata["price"]            =       "12.22";    //价格
+//        $xmldata["price"]            =       "0.02";    //价格
 //        $xmldata["tag"]              =       "syy";               //标记
 //        $xmldata["create_time"]     =       time();                         //添加时间
 //        $xmldata["xml"]              =       "xxx";                           //微信返回的整个xml
@@ -60,16 +59,7 @@ class Paynotify extends Base
         }
 
 
-
         db('pay_record')->where(array("id" => $record))->update($resdata);
-        die;
-
-
-
-
-
-
-
 
         /* 如果不回复这个xml  微信会给我们发送三次xml */
         $su = '<xml> <return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
@@ -136,7 +126,7 @@ class Paynotify extends Base
 
     //门票 todo 待测试
     private function ticket($orderInfo){
-        $goods = db('goods')->field("price_type,stock_type,stock_num")->where(array("code"=>$orderInfo['goods_code']))->find();
+        $goods = db('goods')->field("price_type,stock_type,stock_num,sales")->where(array("code"=>$orderInfo['goods_code']))->find();
         if (!$goods) return array("bool" =>0,"error_info"=>"没有商品数据");
 
         $orderDate["pay_time"]      = time();      //支付时间
@@ -156,9 +146,9 @@ class Paynotify extends Base
 
             $cData["sales_num"] = $calendar["sales_num"] + $num;    //价格日历销量
             if($goods["stock_type"] == 2){//总库存
-                $gData["stock_num"] = $goods["stock_num"] - $num >= 0 ? $goods["stock_num"] - $num : 0;//主表库存
+                $gData["stock_num"] = ($goods["stock_num"] - $num) >= 0 ? $goods["stock_num"] - $num : 0;//主表库存
             }else if($goods["stock_type"] == 3){ //3日库存
-                $cData["stock_num"] = $calendar["stock_num"] - $num >= 0 ? $calendar["stock_num"] - $num : 0;//价格日历库存
+                $cData["stock_num"] = ($calendar["stock_num"] - $num) >= 0 ? $calendar["stock_num"] - $num : 0;//价格日历库存
             }
             try{
                 db("ticket_calendar")->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))->update($cData);
@@ -166,16 +156,16 @@ class Paynotify extends Base
                 return array("bool" => 3, "error_info" => "价格日历数据异常");
             }
         }else{//有效期
-            $indate = db("ticket_indate")->field("stock_num,sales_num")->where(array("goods_code"=>$orderInfo['goodsCode']))->find();
+            $indate = db("ticket_indate")->field("stock_num,sales_num")->where(array("goods_code"=>$orderInfo['goods_code']))->find();
             if (!$indate) return array("bool" =>0,"error_info"=>"有效期没有数据");
 
             $iData["sales_num"] = $indate["sales_num"] + $num;    //有效期表销量
             if($goods["stock_type"] == 2){ //总库存
-                $gData["stock_num"] =  $goods["stock_num"] - $num >= 0 ? $goods["stock_num"] - $num : 0;    //主表库存
-                $iData["stock_num"] = $indate["stock_num"] - $num >= 0 ? $indate["stock_num"] - $num : 0;    //有效期表销量
+                $gData["stock_num"] =  ($goods["stock_num"] - $num) >= 0 ? $goods["stock_num"] - $num : 0;    //主表库存
+                $iData["stock_num"] = ($indate["stock_num"] - $num) >= 0 ? $indate["stock_num"] - $num : 0;    //有效期表销量
             }
             try{
-                db("ticket_indate")->where(array("goods_code"=>$orderInfo['goodsCode']))->update($iData);
+                db("ticket_indate")->where(array("goods_code"=>$orderInfo['goods_code']))->update($iData);
             } catch (\Exception $e) {
                 return array("bool" => 3, "error_info" => "有效期数据异常");
             }
@@ -183,7 +173,7 @@ class Paynotify extends Base
 
         //主表数据
         try{
-            $gData["sales_num"] = $goods["sales_num"] + $num;
+            $gData["sales"] = $goods["sales"] + $num;
             db('goods')->where(array("code"=>$orderInfo['goods_code']))->update($gData);
         } catch (\Exception $e) {
             return array("bool" => 4,"error_info" => "主表库存-销量数据保存异常");

@@ -266,6 +266,7 @@ class Login extends WeixinBase
         $data["code"]              = $this->creatJxsCode();
         $data["com_name"]          =  $com_name;                //
         $data["mobile"]            =  $mobile;                  //联系手机
+        $data["reg_time"]   =  time();
 
         try{
             db('retail')->insert($data);
