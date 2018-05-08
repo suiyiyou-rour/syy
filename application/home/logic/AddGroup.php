@@ -512,7 +512,7 @@ class AddGroup
 
     //外部显示标题拼接 主
     private function getShowTitle($goodsCode){
-        $allField = "a.code,b.main_place,b.service_type,b.play_day";
+        $allField = "a.code,b.main_place,b.service_type,b.play_day,b.begin_address";
         $alias = array("syy_goods" => "a","syy_goods_group" => "b");
         $join = [['syy_goods_group','a.code = b.goods_code']];
         $where = [
@@ -527,7 +527,7 @@ class AddGroup
             if($res["play_day"]){
                 $playDay = $res["play_day"]."日";
             }
-            $data["show_title"] = $mainPlace.$serviceType.$playDay."跟团游";
+            $data["show_title"] = "【".$res["begin_address"]."出发】".$mainPlace.$serviceType.$playDay."跟团游";
 
             try{
                 db('goods')->where(array("code" => $goodsCode))->update($data);

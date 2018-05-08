@@ -4,9 +4,21 @@ use app\common\controller\WeixinBase;
 
 class Jxscash extends WeixinBase
 {
+    public function __construct()
+    {
+        parent::__construct();
+        if(empty(cookie("user"))){
+            echo json_encode(array("code" => 499,"msg" => "你的登录状态已经失效，请重新登录"));
+            die;
+        }
+        if(!isRetail()){
+            echo json_encode(array("code" => 499,"msg" => "请成为经销商，才能提现"));
+            die;
+        }
+    }
     //获取经销商余额
     public function getBalance(){
-        $code = "54"; //todo cookie 拿
+        $code = getUserCode();
         $res = db("retail_money")->field("no_money")->where(array("retail_code" => $code))->find();
         if(!$res){
             return json(array("code" => 403,"msg" => "余额查询出错，请联系管理员"));
@@ -22,7 +34,7 @@ class Jxscash extends WeixinBase
         if($money < 100) return json(array('code' => 405, "msg" => "提现金额不能小于100"));
         if($money > 100000) return json(array('code' => 405, "msg" => "提现金额不能大于100000"));
 
-        $code = "54";//todo cookie 拿
+        $code = getUserCode();//todo cookie 拿
 
         $res = db("retail_money")->field("no_money")->where(array("retail_code" => $code))->find();
         if(!$res) return json(array("code" => 403,"msg" => "余额查询出错，请联系管理员"));
@@ -69,7 +81,7 @@ class Jxscash extends WeixinBase
         $bill_type = input('type');
         if(empty($page)) $page = 1;
 
-        $code = "54";
+        $code = getUserCode();
 
         $where["retail_code"]   =   $code;
         if($bill_type) $where['bill_type'] = $bill_type;//状态值
@@ -98,7 +110,7 @@ class Jxscash extends WeixinBase
         $bill_type = input('type');
         if(empty($page)) $page = 1;
 
-        $code = "54";
+        $code = getUserCode();
 
         $where["retail_code"]   =   $code;
         if($bill_type) $where['bill_type'] = $bill_type;//状态值
