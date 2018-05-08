@@ -120,7 +120,7 @@ class Order extends HomeBase
         $field  =  "a.order_sn,a.goods_code,a.sp_code,a.goods_type,a.create_time,a.pay_time,a.go_time,a.sure_time,a.order_type,a.goods_name,a.total_price,a.total_settle_price,a.total_num,a.mobile,a.user_name,a.identification,a.remark,b.com_name";
         if($spType){
             $join[] = ['retail c','a.retail_code = c.code'];
-            $field  .= ",a.retail_code,a.user_type,a.user_code,a.rebate_type,a.rebate_total_money,c.name as retail_name";
+            $field  .= ",a.retail_code,a.user_type,a.user_code,a.rebate_type,a.rebate_total_money,c.com_name as retail_name";
         }
 
         $res = db("order")->alias("a")->join($join)->field($field)->where($where)->find();

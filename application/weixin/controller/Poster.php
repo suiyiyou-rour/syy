@@ -84,7 +84,7 @@ class Poster extends WeixinBase
 
     //生成二维码
     private function qrcode($goodsCode='',$goods_type=''){
-        $pid = "54";//cookie
+        $pid = getPid();//cookie
 
         switch ($goods_type) {
             case '1':

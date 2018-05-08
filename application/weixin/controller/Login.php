@@ -3,10 +3,6 @@ namespace app\weixin\controller;
 use app\common\controller\WeixinBase;
 class Login extends WeixinBase
 {
-    public function index(){
-
-    }
-
     //发送短信验证码
     public function useSendSms()
     {
@@ -144,7 +140,7 @@ class Login extends WeixinBase
         return json(array("code" => 200,"data" => $arr, "msg" => "注册成功"));
     }
 
-    //普通用户登陆
+    //用户登陆
     public function userLogin(){
         $mobile = input('mobile');
         $pwd    = input('password');
@@ -205,13 +201,13 @@ class Login extends WeixinBase
         return json(array("code" => 200 ));
     }
 
-    //获取用户
+    //获取用户 检查登录
     public function getUserInfo(){
         $arr = cookie("user");
         if($arr){
             return json(array("code" => 200,"data" => $arr));
         }
-        return json(array("code" => 404,"msg" => "登录状态已经失效，请重新登录"));
+        return json(array("code" => 404));
     }
 
     //经销商注册
@@ -276,65 +272,22 @@ class Login extends WeixinBase
         return json(array("code" => 200, "msg" => "提交申请成功"));
     }
 
+    //获取经销商信息
+    public function jxsInfo(){
+        $code = getPid();
+        $res = db('retail')->field("head_img,com_name,mobile")->where(array('code' => $code))->find();
+        if(!$res){
+            return json(array("code" => 404,"msg" => "经销商信息拉取失败，经销商请重新登录，游客请从正常链接进入"));
+        }
+        return json(array("code" => 200,"data" => $res));
 
-    //获取用户code
+    }
+
+    //获取新用户code
     private function creatJxsCode(){
         $id = db('retail')->order("id desc")->value('id');
         $id += 10001;
         return $id;
-    }
-
-
-
-
-    public function rootUserLogin(){
-        $res = array("code" => "100001","type" => 1 ,"isType" => 1);//用户
-//        $res = array("code" => "54","type" => 3 ,"isType" => 2);
-        cookie("user" ,$res , 604800);
-        return json(array("code" => 200,"data" => cookie("user")));
-    }
-
-    //检查登录
-    public function checkLogin(){
-        if(empty(cookie("user"))){
-            return json(array("code" => 403,"msg" => "你的登录状态已经失效，请重新登录"));
-        }
-        return json(array("code" => 200,"data" => cookie("user")));
-    }
-
-    //测试使用
-    public function switchRoles(){
-        $user = cookie("user");
-        if(empty($user)){
-            $res = array("code" => "100001","type" => 1 ,"isType" => 1);//用户
-            cookie("user" ,$res , 3600);
-            return "设置 10001 用户成功";
-        }else{
-            if($user["isType"] == 1){
-                cookie(null, 'user');
-                $res = array("code" => "54","type" => 3 ,"isType" => 2);//经销商
-                cookie("user" ,$res , 3600);
-                return "设置 54 返佣型经销商成功";
-            }else{
-                cookie(null, 'user');
-                $res = array("code" => "100001","type" => 1 ,"isType" => 1);//用户
-                cookie("user" ,$res , 3600);
-                return "设置 10001 用户成功";
-            }
-        }
-    }
-
-
-
-
-
-    public function testid(){
-        $id = input("id");
-        if(empty($id)){
-            return json(array("code" => 404,"msg" => "参数不能为空"));
-        }
-        $res = db("test123")->insert(array("name"=>$id));
-        return json(array("code" => 200,"msg" => "OK"));
     }
 
 

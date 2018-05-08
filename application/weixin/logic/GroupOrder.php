@@ -129,7 +129,7 @@ class GroupOrder extends Order
 
     //跟团数据接收
     private function data(){
-        $gain = ['goodsCode','man_num','child_num','house_num','mobile','user_name','go_time','retail_code','user_code',"identification","charged_item","zfprice","identity_array","remark","route_price"];
+        $gain = ['goodsCode','man_num','child_num','house_num','mobile','user_name','go_time','user_code',"identification","charged_item","zfprice","identity_array","remark","route_price"];
         $data = Request::instance()->only($gain, 'post');//        $data = input('post.');
         $data['man_num']         = empty($data['man_num']) ? 0 : (int)$data['man_num']; //成人数量
         $data['child_num']       = empty($data['child_num']) ? 0 : (int)$data['child_num']; //儿童数量
@@ -147,7 +147,7 @@ class GroupOrder extends Order
             $data['retail_code'] = getUserCode();   //经销商code
         }else{
             $data['user_type']   =  1;              //用户
-            if(empty($data['retail_code'])) $data['retail_code'] = "54";    //经销商编码 默认54 小游
+            $data['retail_code'] = getPid();        //经销商code
         }
         $data['user_code']  = getUserCode();//用户code
 //        // 模拟数据

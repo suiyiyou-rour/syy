@@ -27,6 +27,18 @@ function isRetail(){
 }
 
 /**
+ * 游客获取 自己经销商
+ */
+function getPid(){
+    if(isset($_COOKIE["pid"])){
+        $pid = $_COOKIE["pid"];
+    }else{
+        $pid = "10070";//随意游客服 李逢
+    }
+    return $pid;
+}
+
+/**
  * 产品上线条件
  */
 function goodsOnlineWhere(){
