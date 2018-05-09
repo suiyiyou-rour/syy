@@ -1,12 +1,23 @@
 <?php
 namespace app\home\controller;
-//use app\common\controller\HomeBase;
+use app\common\controller\HomeBase;
 
 /**
  * 供应商管理
  */
-class Spcreate extends Admin
+class Spcreate extends HomeBase
 {
+    public function __construct()
+    {
+        parent::__construct();
+//        $action = strtolower( request()->action() );
+//        if( $action !== 'spupload'){
+//            if(!getSpType()){
+//                echo json_encode(array("code"=>405,"msg"=>"只有超级管理员才有权限"));
+//                die;
+//            }
+//        }
+    }
     /**
      *   供应商  凭证图片上传
      */
@@ -24,7 +35,7 @@ class Spcreate extends Admin
         if(!$info){ 
             return \json(array('code'=>404,'msg' => $file->getError()));
          }
-         return \json(array('code'=>200,'msg' => '上传成功' , 'data' => array('name' =>'spImage'.DS.$info->getSaveName()) ));
+         return \json(array('code'=>200,'msg' => '上传成功' , 'data' => array("name" => 'spImage' . DS . $info->getSaveName()) ));
     }
 
     /**
@@ -94,15 +105,23 @@ class Spcreate extends Admin
      * 权限
      */
     public function getAuth(){
+        $code = input("post.code");
         $auth =  \think\Loader::model('Auth','logic');
         $res = $auth->spAuth();
-        return \json(array('code' => 200 , 'data' => $res));
+        $auth = db("auth")->field("fid")->where(array("user_code" => $code))->select();
+        $arr = array();
+        if ($auth){
+            foreach ($auth as $k){
+                $arr[] = $k["fid"];
+            }
+        }
+        return \json(array('code' => 200 , 'data' => array("all" => $res,"auth" => $arr)));
     }
 
     /**
      * 供应商 code 生成
      */
-     private function getCode(){
+    private function getCode(){
        
         $code = cache('sp_code');
         $num = 1000000;
@@ -114,10 +133,11 @@ class Spcreate extends Admin
         cache('sp_code',$num);
         return $num;
      }
+
      /**
       * 供应商列表
       */
-      public function getSpList(){
+    public function getSpList(){
         $auth = input('id');
         if(empty($auth)){
             return \json(array('code' => 404 , 'msg' => '无权限访问'));

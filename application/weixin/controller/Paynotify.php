@@ -58,6 +58,17 @@ class Paynotify extends Base
                 $resdata = array("bool" => 0,"error_info" => "产品类型异常");
         }
 
+        if($resdata["bool"] != 0){
+            if(mb_strlen($orderInfo["goods_name"],'utf8') > 16){
+                $orderInfo["goods_name"] = msubstr($orderInfo["goods_name"], 0, 16, 'utf-8', true);
+            }
+            $resdata["user_sms"] = $this->userSms($orderInfo["mobile"],$orderInfo["goods_name"],$orderInfo["user_name"],date("Y-m-d H:i:s"));
+            $spmobile = $this->getSpmobile($orderInfo["sp_code"]);
+            if($spmobile){
+                $resdata["sp_sms"] = $this->spSms($spmobile,$orderInfo["goods_name"],$orderInfo["user_name"],date("Y-m-d H:i:s"));
+            }
+        }
+
 
         db('pay_record')->where(array("id" => $record))->update($resdata);
 
@@ -244,6 +255,76 @@ class Paynotify extends Base
         return true;
     }
 
+    //供应商短信
+    private function spSms($mobile,$productName,$userName,$time){
+        if(!$mobile || !$productName || !$userName || !$time){
+            return 0;
+        }
 
+        // 配置阿里云短信 -- 模板参数
+        $arr =  array(
+            'accessKeyId' =>config('aliyun')['sms_accessKeyId'],
+            'accessKeySecret' => config('aliyun')['sms_accessKeySecret']
+        );
+        $smsObj = new \Aliyun\Sms($arr);
 
+        // 配置阿里云短信 -- 模板参数
+        $params["PhoneNumbers"] =  $mobile;
+        $params["SignName"] = "随意游网络";
+        $params["TemplateCode"] = "SMS_134311330";
+        $params['TemplateParam'] = Array (
+            "productName" => $productName,
+            "userName" => $userName,
+            "time" => $time,
+        );
+
+        $result = $smsObj->sendVerify($params);
+        if($result){
+            return 1;
+        }else{
+            return 0;
+        }
+
+    }
+
+    //用户短信
+    private function userSms($mobile,$productName,$userName,$time){
+        // 配置阿里云短信 -- 模板参数
+        $arr =  array(
+            'accessKeyId' =>config('aliyun')['sms_accessKeyId'],
+            'accessKeySecret' => config('aliyun')['sms_accessKeySecret']
+        );
+        $smsObj = new \Aliyun\Sms($arr);
+
+        if(!$mobile || !$productName || !$userName || !$time){
+            return 0;
+        }
+
+        // 配置阿里云短信 -- 模板参数
+        $params["PhoneNumbers"] =  $mobile;
+        $params["SignName"] = "随意游网络";
+        $params["TemplateCode"] = "SMS_129760825";
+        $params['TemplateParam'] = Array (
+            "productName" => $productName,
+            "userName" => $userName,
+            "time" => $time,
+        );
+
+        $result = $smsObj->sendVerify($params);
+        if($result){
+            return 1;
+        }else{
+            return 0;
+        }
+
+    }
+
+    //供应商电话
+    private function getSpmobile($code){
+        $res = db("sp")->field("mobile")->where(array("code" => $code))->find();
+        if($res){
+            return $res["mobile"];
+        }
+        return false;
+    }
 }

@@ -91,62 +91,42 @@ class Weixin extends Base {
                 {
                     "type":"view",
                     "name":"商城首页",
-                    "url":"http://www.suiyiyou.net/index.php/weixin/index/home"
-                },
-                {
-                    "type":"view",
-                    "name":"景区门票",
-                    "url":"http://www.suiyiyou.net/index.php/weixin/index/s_ticket"
+                    "url":"http://wx.suiyiyou.net/#/home"
                 },
                 {
                     "type":"view",
                     "name":"跟团线路",
-                    "url":"http://www.suiyiyou.net/index.php/weixin/index/s_route"
+                    "url":"http://wx.suiyiyou.net/#/search/0"
+                },
+                {
+                    "type":"view",
+                    "name":"景区门票",
+                    "url":"http://wx.suiyiyou.net/#/search/1"
+                },
+                {
+                    "type":"view",
+                    "name":"特惠酒店",
+                    "url":"http://wx.suiyiyou.net/#/search/2"
                 }
             ]
         },
         {
-            "name":"专属福利",
+            "name":"随意游推荐",
             "sub_button":[
                 {
                     "type":"view",
-                    "name":"新人专享",
-                    "url":"https://hd.webportal.cc/15711502/5dAj7uy7xjIoOziSd3q8Vg/load.html?style=13"
-                },
-                {
-                    "type":"view",
-                    "name":"冬至大派送",
-                    "url":"https://hd.faisco.cn/14229940/bfF8R9_jIgppxSpiGdpLVw/load.html?style=60"
-                },
-                {
-                    "type":"view",
-                    "name":"一分钱疯抢",
-                    "url":"http://www.suiyiyou.net/index.php/weixin/index/laterOn"
-                },
-                {
-                    "type":"view",
-                    "name":"测试",
-                    "url":"http://wx.suiyiyou.net/#/home"
+                    "name":"海报推广",
+                    "url":"http://wx.suiyiyou.net/#/poster"
                 }
             ]
         },
         {
-            "name":"我",
+            "name":"会员之家",
             "sub_button":[
                 {
                     "type":"click",
                     "name":"商务合作",
                     "key":"BusinessCooperation"
-                },
-                {
-                    "type":"view",
-                    "name":"我要登陆",
-                    "url":"http://www.suiyiyou.net/index.php/weixin/index/checkLogin"
-                },
-                {
-                    "type":"view",
-                    "name":"我的订单",
-                    "url":"http://www.suiyiyou.net/index.php/weixin/index/order"
                 },
                 {
                     "type":"view",

@@ -25,8 +25,8 @@ class HomeBase extends Base
         if( $controller !== 'login' ){
             $sp = session('sp', '', 'home');
             if(!$sp){
-//                echo json_encode(array("code"=>499,"data"=>"登陆状态失效，请重新登陆"));
-//                die;
+                echo json_encode(array("code"=>499,"data"=>"登陆状态失效，请重新登陆"));
+                die;
             }
 //           if($sp['type']==1) return false;
 //

@@ -224,7 +224,6 @@ class ShowScenery
             return array("code" => 403,"msg" => "商品不存在或者商品被删除，请联系管理员");
         }
 
-        $data["recommend_account"] = json_decode($data["recommend_account"],true);
         $data["class_label"] = json_decode($data["class_label"],true);
         //图片处理
         $imgArray = json_decode($data["image"],true);
