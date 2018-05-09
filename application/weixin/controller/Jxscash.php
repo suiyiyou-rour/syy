@@ -1,16 +1,12 @@
 <?php
 namespace app\weixin\controller;
-use app\common\controller\WeixinBase;
+//use app\common\controller\WeixinBase;
 
-class Jxscash extends WeixinBase
+class Jxscash extends LoginBase
 {
     public function __construct()
     {
         parent::__construct();
-        if(empty(cookie("user"))){
-            echo json_encode(array("code" => 499,"msg" => "你的登录状态已经失效，请重新登录"));
-            die;
-        }
         if(!isRetail()){
             echo json_encode(array("code" => 499,"msg" => "请成为经销商，才能提现"));
             die;

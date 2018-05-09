@@ -5,16 +5,6 @@ class Pay extends WeixinBase
 {
     public function index()
     {
-        $outputdata["order_sn"]         =      "201804171527066610168424";        //订单号
-        $outputdata["openid"]           =       "oojM_wqpt3w-GOcjAnWbLmZUWEhY";   //openid
-        $outputdata["price"]            =       (500) / 100;    //价格
-        $outputdata["tag"]              =       "syy";               //标记
-        $outputdata["create_time"]     =       time();                         //添加时间
-        $outputdata["xml"]              =       "xxx";                           //微信返回的整个xml
-
-        //记录添加
-        $res = db('pay_record')->insert($outputdata);
-        var_dump($res);
 
     }
 

@@ -64,6 +64,7 @@ class AddScenery
     //基本信息添加 0
     public function basicInfo()
     {
+        if(getSpType()) return array("code" => 403, "msg" => "超级管理员不能添加新产品以及不能编辑第一页");
         //数据验证
         $gain = ['contact_code', 'add_type', 'settlement_type','inside_code'];
         $data = Request::instance()->only($gain, 'post');

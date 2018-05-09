@@ -77,6 +77,7 @@ class AddGroup
     //基本信息添加 0
     public function basicInfo()
     {
+        if(getSpType()) return array("code" => 403, "msg" => "超级管理员不能添加新产品以及不能编辑第一页");
         //数据验证
         $data = $this->basicInfoData();
         $validate = new \app\home\validate\Group();

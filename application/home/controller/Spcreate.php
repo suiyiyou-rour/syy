@@ -235,7 +235,7 @@ class Spcreate extends HomeBase
             }
             $res2 = db('auth')->insertAll($authData);
             // 插入返回
-            if($res1 && $res2){
+            if($res1 !==false && $res2 !==false){
                 return \json(array("code" => 200, "msg" => '添加成功'));
             }else{
                 return \json(array("code" => 404, "msg" => '添加失败'));
