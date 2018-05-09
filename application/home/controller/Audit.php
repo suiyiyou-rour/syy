@@ -1,21 +1,12 @@
 <?php
 namespace app\home\controller;
-use app\common\controller\HomeBase;
+//use app\common\controller\HomeBase;
 
 /**
  * 产品审核
  */
-class Audit extends HomeBase
+class Audit extends Admin
 {
-    public function __construct()
-    {
-        parent::__construct();
-        if(!getSpType()){
-            echo json_encode(array("code"=>405,"msg"=>"只有超级管理员才有权限"));
-            die;
-        }
-    }
-
     //审核产品列表显示
     public function showList(){
         $page = input("post.page");        //页码

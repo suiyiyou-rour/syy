@@ -1,21 +1,12 @@
 <?php
 namespace app\home\controller;
-use app\common\controller\HomeBase;
+//use app\common\controller\HomeBase;
 
 /**
  * 销量优先级
  */
-class Goods extends HomeBase
+class Goods extends Admin
 {
-    public function __construct()
-    {
-        parent::__construct();
-        if(!getSpType()){
-            echo json_encode(array("code"=>405,"msg"=>"只有超级管理员才有权限"));
-            die;
-        }
-    }
-
     //已经上线的商品列表
     public function goodsList(){
         $page = input("post.page");                    //页码

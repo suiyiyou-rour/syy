@@ -1,21 +1,12 @@
 <?php
 namespace app\home\controller;
-use app\common\controller\HomeBase;
+//use app\common\controller\HomeBase;
 
 /**
  * 经销商账单
  */
-class Retailbill extends HomeBase
+class Retailbill extends Admin
 {
-    public function __construct()
-    {
-        parent::__construct();
-        if(!getSpType()){
-            echo json_encode(array("code"=>405,"msg"=>"只有超级管理员才有权限"));
-            die;
-        }
-    }
-
     //经销商进出账记录
     public function showList(){
         $where = array();

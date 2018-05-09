@@ -1,21 +1,12 @@
 <?php
 namespace app\home\controller;
-use app\common\controller\HomeBase;
+//use app\common\controller\HomeBase;
 
 /**
  * 返利设置
  */
-class Rebate extends HomeBase
+class Rebate extends Admin
 {
-    public function __construct()
-    {
-        parent::__construct();
-        if(!getSpType()){
-            echo json_encode(array("code"=>405,"msg"=>"只有超级管理员才有权限"));
-            die;
-        }
-    }
-
     //经销商列表
     public function retailList(){
         $res = db('retail')->field("code,com_name")->where(array("type"=>3))->select();

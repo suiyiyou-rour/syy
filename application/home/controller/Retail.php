@@ -1,20 +1,12 @@
 <?php
 namespace app\home\controller;
-use  app\common\controller\HomeBase;
+//use  app\common\controller\HomeBase;
 
 /**
  * 经销商管理
  */
-class Retail extends HomeBase
+class Retail extends Admin
 {
-    public function __construct(){
-        parent::__construct();
-        if(!getSpType()){
-            echo json_encode(array("code" => 404, "msg" => "只有超级管理才有权限"));
-            die;
-        }
-    }
-
     /**
      *  获取分销商列表 
      */
