@@ -1,6 +1,10 @@
 <?php
 namespace app\home\controller;
 use app\common\controller\HomeBase;
+
+/**
+ * 海报
+ */
 class Poster extends HomeBase
 {
     /**

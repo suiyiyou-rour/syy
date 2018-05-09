@@ -1,6 +1,10 @@
 <?php
 namespace app\home\controller;
 use app\common\controller\HomeBase;
+
+/**
+ * 供应商管理
+ */
 class Spcreate extends HomeBase
 {
     public function __construct(){

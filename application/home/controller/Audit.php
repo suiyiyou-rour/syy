@@ -2,6 +2,9 @@
 namespace app\home\controller;
 use app\common\controller\HomeBase;
 
+/**
+ * 产品审核
+ */
 class Audit extends HomeBase
 {
     public function __construct()
@@ -11,11 +14,6 @@ class Audit extends HomeBase
             echo json_encode(array("code"=>405,"msg"=>"只有超级管理员才有权限"));
             die;
         }
-    }
-
-    public function index()
-    {
-        echo "home/audit/index";
     }
 
     //审核产品列表显示

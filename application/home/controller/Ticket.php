@@ -5,6 +5,9 @@
 namespace app\home\controller;
 use app\common\controller\HomeBase;
 
+/**
+ * 门票
+ */
 class Ticket extends HomeBase
 {
     //商品添加

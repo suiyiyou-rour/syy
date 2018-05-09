@@ -2,12 +2,11 @@
 namespace app\home\controller;
 use app\common\controller\HomeBase;
 
+/**
+ * 订单
+ */
 class Order extends HomeBase
 {
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     public function index()
     {

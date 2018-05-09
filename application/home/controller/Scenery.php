@@ -1,11 +1,13 @@
 <?php
 namespace app\home\controller;
 use app\common\controller\HomeBase;
-use think\console\Input;
+
+/**
+ * 景酒
+ */
 
 class Scenery extends HomeBase
 {
-
     //商品添加
     public function add(){
         $this->dispatcher();

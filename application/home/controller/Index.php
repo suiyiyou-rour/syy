@@ -11,7 +11,6 @@ class Index extends HomeBase
 
     public function index()
     {
-        echo "common/homeBase/index";
-        echo "home/index/index";
+        echo "syy";
     }
 }

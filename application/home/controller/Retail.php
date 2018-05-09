@@ -1,7 +1,10 @@
 <?php
-// 分销商管理
 namespace app\home\controller;
 use  app\common\controller\HomeBase;
+
+/**
+ * 经销商管理
+ */
 class Retail extends HomeBase
 {
     public function __construct(){

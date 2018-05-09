@@ -1,11 +1,10 @@
 <?php
-/**
- * 跟团游
- */
 namespace app\home\controller;
 use app\common\controller\HomeBase;
-//use think\Request;
-//use \think\Validate;
+
+/**
+ * 登陆
+ */
 class Login extends HomeBase
 {   
     /**

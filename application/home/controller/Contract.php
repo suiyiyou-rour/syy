@@ -2,13 +2,11 @@
 namespace app\home\controller;
 use app\common\controller\HomeBase;
 
+/**
+ * 合同
+ */
 class contract extends HomeBase
 {
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     //供应商列表
     public function showSp(){
         if(!getSpType()){

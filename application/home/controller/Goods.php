@@ -2,6 +2,9 @@
 namespace app\home\controller;
 use app\common\controller\HomeBase;
 
+/**
+ * 销量优先级
+ */
 class Goods extends HomeBase
 {
     public function __construct()
@@ -11,11 +14,6 @@ class Goods extends HomeBase
             echo json_encode(array("code"=>405,"msg"=>"只有超级管理员才有权限"));
             die;
         }
-    }
-
-    public function index()
-    {
-        echo "home/Goods/index";
     }
 
     //已经上线的商品列表

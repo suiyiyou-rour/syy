@@ -1,20 +1,11 @@
 <?php
 namespace app\home\controller;
 use app\common\controller\HomeBase;
-
+/**
+ * 对账记录
+ */
 class Bill extends HomeBase
 {
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    public function index()
-    {
-        echo "common/homeBase/index";
-        echo "home/index/index";
-    }
-
     //显示对账列表
     public function showList(){
         $where = array();

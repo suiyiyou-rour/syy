@@ -1,23 +1,12 @@
 <?php
+namespace app\home\controller;
+use app\common\controller\HomeBase;
+
 /**
  * 跟团游
  */
-namespace app\home\controller;
-use app\common\controller\HomeBase;
-use think\Request;
-//use \think\Validate;
 class Group extends HomeBase
 {
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    public function index()
-    {
-
-    }
-
     //商品添加
     public function add(){
         $this->dispatcher();
