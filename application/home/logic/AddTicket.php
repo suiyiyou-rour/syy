@@ -109,6 +109,7 @@ class AddTicket
                 return array("code" => 405, "msg" => $checkRes);
             }
             try{
+                db('goods_supply')->where(array("goods_code" => $goodsCode))->update($supplyData);
                 db('goods')->where(array("code" => $goodsCode))->update($goodsData);
                 db('goods_ticket')->where(array("goods_code" => $goodsCode))->update($ticketData);
             } catch (\Exception $e) {

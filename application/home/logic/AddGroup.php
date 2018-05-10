@@ -59,6 +59,10 @@ class AddGroup
                 //价格库存
                 $output = $this->ratesInventory();
                 break;
+            case '12':
+                //删除价格日历
+                $output = $this->delcalendar();
+                break;
             case '100':
                 //图片上传
                 $output = $this->imageUpload();
@@ -379,6 +383,11 @@ class AddGroup
         $this->saveGoodsType($goodsCode);//更改商品上线状态
         return array("code" => 200, "msg" => "保存成功");
 
+    }
+
+    //价格日历删除 12
+    public function delcalendar(){
+        return 0;
     }
 
     //异步上传图片 100

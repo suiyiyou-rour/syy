@@ -29,6 +29,9 @@ class WxInfoApi {
         $url     =  "https://api.weixin.qq.com/cgi-bin/user/info?access_token=$token&openid=$openId&lang=zh_CN";
         $content =  file_get_contents($url);
         $res     =  json_decode($content,true);
+        if (!isset($res['headimgurl'])) {
+            return false;
+        }
         return $res['headimgurl'];
     }
 
