@@ -47,21 +47,16 @@ class Poster extends HomeBase
      * 获取商品列表
      */
     public function getGoodList(){
-        $userType = getSpType();
-        
-        $where = ['is_del'=> 0];
-        $userType ? '' : $where['sp_code'] = getSpCode();
+        $userType = getSpType();    //供应商类型
         // 超管全部获取  个人拿自己的
         if($userType){
-            $notIn = db('poster')
-                    ->field('goods_code')
-                    ->select();
+            $notIn = db('poster')->field('goods_code')->select();
         }else{
             $notIn = db('poster')
-                    ->field('syy_poster.goods_code')
-                    ->join('syy_goods','syy_goods.code=syy_poster.goods_code')
-                    ->where(['syy_poster.type'=> ['neq'=>3]])
-                    ->select();
+                ->field('syy_poster.goods_code')
+                ->join('syy_goods','syy_goods.code=syy_poster.goods_code')
+                ->where(['syy_poster.type'=> ['neq',3]])
+                ->select();
         }
         // $notIn = $userType ?db('poster')->field('goods_code')->select():db('poster')->field('syy_poster.goods_code')->join('syy_goods','syy_goods.code=syy_poster.goods_code')->where(['syy_poster.type'=> ['neq'=>3]])->select();
         $notInData = [];
@@ -70,6 +65,9 @@ class Poster extends HomeBase
                 $notInData[] = $v['goods_code'];
             }
         }
+
+        $where = ['is_del'=> 0];
+        $userType ? '' : $where['sp_code'] = getSpCode();
         $data = db('goods')->field('code,show_title')->where('check_type','in','2,3,5,6')->where('code','not in',$notInData)->where($where)->select();
         return \json(array('code' => 200 , 'data' => $data));
     }

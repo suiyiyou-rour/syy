@@ -54,7 +54,7 @@ class Index extends WeixinBase
         }
 
         $res = db('goods')
-            ->field("code,show_title,head_img,plat_price,settle_price,sales")
+            ->field("code,show_title,head_img,plat_price,settle_price,level,sales")
             ->where($where)
             ->order("level desc,sales desc")
             ->page($page,10)
