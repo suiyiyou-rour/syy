@@ -32,7 +32,7 @@ class Goods extends Admin
         if(!$count){
             return json(array("code" => 200,"data" => array("count"=>0)));
         }
-        $res = db('goods')->field("code,show_title,level,sales")->where($where)->order("level desc,sales desc")->page($page,10)->select();
+        $res = db('goods')->field("code,show_title,level,sales")->where($where)->order("level desc,sales desc,id desc")->page($page,10)->select();
         $output["list"]  =  $res;
         $output["count"]  =  $count;
         return json(array("code" => 200,"data" => $output));

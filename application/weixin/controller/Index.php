@@ -9,9 +9,9 @@ class Index extends WeixinBase
         $where = goodsOnlineWhere();       //上线条件
         $where["level"] = ["<>","4"];   //排除轮播
         $res = db('goods')
-            ->field("code,show_title,head_img,goods_type")
+            ->field("code,head_img,goods_type,show_title")
             ->where($where)
-            ->order("level desc,sales desc")
+            ->order("level desc,sales desc,id desc")
             ->limit(0,6)
             ->select();
         foreach ($res as &$k){
@@ -25,9 +25,9 @@ class Index extends WeixinBase
         $where = goodsOnlineWhere();      //上线条件
         $where["level"] = 4;             //等级最高轮播
         $res = db('goods')
-            ->field("id,level as goodslevel,code,head_img,goods_type")
+            ->field("code,head_img,goods_type")
             ->where($where)
-            ->order("goodslevel desc,sales desc,id desc")
+            ->order("level desc,sales desc,id desc")
             ->limit(0,3)
             ->select();
         foreach ($res as &$k){
@@ -54,9 +54,9 @@ class Index extends WeixinBase
         }
 
         $res = db('goods')
-            ->field("id,code,show_title,head_img,plat_price,settle_price,level as goodslevel,sales")
+            ->field("code,show_title,head_img,plat_price,settle_price,sales")
             ->where($where)
-            ->order("goodslevel desc,sales desc,id desc")
+            ->order("level desc,sales desc,id desc")
             ->page($page,10)
             ->select();
         foreach ($res as &$k){
