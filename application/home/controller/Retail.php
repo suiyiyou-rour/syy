@@ -11,17 +11,33 @@ class Retail extends Admin
      *  获取分销商列表 
      */
     public function getRetailList(){
-        $page = input("post.page");                   //页码
+        $page = input("post.page");             //页码
         if(empty($page)) $page = 1;
+
+        $type = input("post.type");              //类型
+        if($type) $where["a.type"] = $type;
+
+
+        $com_name = input("post.com_name");              //公司名称
+        if($com_name) $where["a.com_name"] = ['like',"%".$com_name."%"];
+
+        $check = input("post.check");              //审核状态
+        if($check !== "" && $check !== null) $where["a.check"] = $check;
+
+        $open = input("post.open");              //开启关闭
+        if($open !== "" && $open !== null) $where["a.open"] = $open;
+
+
+        $where["a.type"] = ["<>","2"];
 
         $join = [['retail_money b','a.code = b.retail_code','LEFT']];
         // 查找申请的和通过的
-        $count = db('retail')->alias("a")->join($join)->where('a.type','in','1,3')->count();
+        $count = db('retail')->alias("a")->join($join)->where($where)->count();
         if(!$count){
             return \json(array("code" => 200,"data" => array(),"count" => 0 ));
         }
 
-        $retailData = db('retail')->alias("a")->join($join)->where('a.type','in','1,3')->page($page,10)->order('a.reg_time','desc')->select();
+        $retailData = db('retail')->alias("a")->join($join)->where($where)->page($page,10)->order('a.reg_time','desc')->select();
         return \json(array('code' => 200 ,'data' => $retailData ,'count' => $count));
     }
 

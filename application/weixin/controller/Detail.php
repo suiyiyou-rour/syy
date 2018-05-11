@@ -124,8 +124,7 @@ class Detail extends WeixinBase
             $calendarWhere = [
                 "goods_code"     =>  $goods["code"],
                 "date"           =>  [">=",$date],
-                "stock_is_open" =>  1,
-                "stock_num"     =>  ["<>",0],
+                "stock_is_open" =>  1
             ];
             $calendar = db('ticket_calendar')->field(['id','goods_code'],true)->where($calendarWhere)->order("date asc")->select();
             if($calendar){
@@ -151,18 +150,17 @@ class Detail extends WeixinBase
             $newIndate["stock_num"]       =   $indate["stock_num"];
             $newIndate["sales_num"]       =   $indate["sales_num"];
             $calendar    =   array();//日期数组
-            if($newIndate["stock_num"] != 0){
-                if($indate["begin_date"] <= $date){
-                    $indate["begin_date"] = $date;
-                }
-                for($i = $indate["begin_date"]; $i <= $indate["end_date"];$i += 86400)  //一天86400
-                {
-                    $newIndate["date"]    =  date('Y-m-d',$i);         //每天
-                    array_push($calendar,$newIndate);
-                }
-                $info["begin_date"]     =  $indate["begin_date"];
-                $info["end_date"]       =  $indate["end_date"];
+            if($indate["begin_date"] <= $date){
+                $indate["begin_date"] = $date;
             }
+            for($i = $indate["begin_date"]; $i <= $indate["end_date"];$i += 86400)  //一天86400
+            {
+                $newIndate["date"]    =  date('Y-m-d',$i);         //每天
+                array_push($calendar,$newIndate);
+            }
+            $info["begin_date"]     =  $indate["begin_date"];
+            $info["end_date"]       =  $indate["end_date"];
+
         };
         $output["info"] = $info;
         $output["date"] = $calendar;
