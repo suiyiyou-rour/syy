@@ -23,7 +23,8 @@ class HomeBase extends Base
         // 权限控制
         $controller = strtolower( request()->controller() );
         if( $controller !== 'login' ){
-            $sp = session('sp', '', 'home');
+//            $sp = session('sp', '', 'home');
+            $sp = cookie('sp');
             if(!$sp){
                 echo json_encode(array("code"=>499,"data"=>"登陆状态失效，请重新登陆"));
                 die;

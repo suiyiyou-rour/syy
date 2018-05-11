@@ -41,8 +41,10 @@ class Login extends HomeBase
         }
         $menu['spInfo'] = array('id' => $data['id'], 'code' => $data['code'],'type' => $data['type']);
         // 记录
-        session('sp',array('id' => $data['id'], 'code' => $data['code'],'type' => $data['type']));
-        session('menu',$menu);
+        cookie("sp" ,array('id' => $data['id'], 'code' => $data['code'],'type' => $data['type']) , 604800);
+//        cookie("menu" ,$menu , 604800);
+//        session('sp',array('id' => $data['id'], 'code' => $data['code'],'type' => $data['type']));
+        session('menu',$menu);  //之前别人留下不知道有什么用
         return json($menu);
     }
 
@@ -52,6 +54,8 @@ class Login extends HomeBase
     public function logout(){
         session('sp',null);
         session('menu',null);
+        cookie('sp', null);
+        cookie('menu',null);
         return json(array('code' => 200,'msg' => '注销成功'));
     }    
 

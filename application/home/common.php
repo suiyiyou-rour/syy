@@ -4,23 +4,30 @@
  * 获取商户id
  */
 function getSpId(){
-    $id = session('sp.id');
-    return $id;
+//    $id = session('sp.id');
+//    return $id;
+    $array = cookie('sp');
+    return $array["id"];
+
 }
 
 /**
  * 获取商户code
  */
 function getSpCode(){
-    $code = session('sp.code');
-    return $code;
+//    $code = session('sp.code');
+//    return $code;
+    $array = cookie('sp');
+    return $array["code"];
 }
 
 /**
  * 判断是不是超级管理
  */
 function getSpType(){
-    $type = session('sp.type');
+//    $type = session('sp.type');
+    $array = cookie('sp');
+    $type = $array["type"];
     if($type == 1){
         return true;
     }
