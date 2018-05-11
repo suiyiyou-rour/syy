@@ -13,8 +13,8 @@ class Ticket extends Validate
         'ticket_type'       =>   'require|max:16',       //门票票种  （副）必须
         'show_title'        =>   'require|max:150',      //产品名称(外部标题) （主）必须
         'include_cost'      =>   'require',               //费用包含 （副）必须
-        'include_cost_info' =>  'max:200',               //费用包含补充说明（副）
-        'not_include_info'  =>  'max:150',               //费用不包含（副）
+        'include_cost_info' =>  'max:300',               //费用包含补充说明（副）
+        'not_include_info'  =>  'max:300',               //费用不包含（副）
         'safe_server'       =>   'require|max:1|number',//保险服务 1 0 （副）必须
         'safe_server_info' =>   'max:30',                //保险说明  (副)
         'service_tel'       =>   'require|max:128',     //客服电话 （副）必须
@@ -71,8 +71,8 @@ class Ticket extends Validate
         'show_title.require'        =>  '产品名称是必须的',
         'show_title.max'            =>  '产品名称不能超过150个字符',
         'include_cost.require'      =>  '费用包含是必须的',
-        'include_cost_info.max'     =>  '产品名称不能超过200个字符',
-        'not_include_info.max'      =>  '产品名称不能超过150个字符',
+        'include_cost_info.max'     =>  '产品名称不能超过300个字符',
+        'not_include_info.max'      =>  '产品名称不能超过300个字符',
         'safe_server.require'       =>  '保险服务是必须的',
         'safe_server.max'           =>  '保险服务格式错误',
         'safe_server.number'        =>  '保险服务格式错误',

@@ -12,7 +12,7 @@ class AddGroup
     {
         //需要商品code
         $goodsCode = input('post.goodsCode');
-        if ($state != '0' && $state != '11') {
+        if ($state != '0' && $state != '11' && $state != '12') {
             if (empty($goodsCode)) {
                 return array("code" => 412, "msg" => "添加商品，商品号不能为空");
             }
@@ -387,7 +387,22 @@ class AddGroup
 
     //价格日历删除 12
     public function delcalendar(){
-        return 0;
+        $postData = input('post.');
+        $goodsCode = $postData["goodsCode"];
+        if(empty($goodsCode)){
+            return array("code" => 412, "msg" => "商品号不能为空");
+        }
+
+        $dateArray = $postData["date"];
+        if (empty($dateArray)) {
+            return array("code" => 404, "msg" => "上传参数不能为空");
+        }
+
+        foreach ($dateArray as $k) {
+            $data["date"] = strtotime($k);//时间戳;
+            db('group_calendar')->where(array("goods_code" => $goodsCode, "date" => $data["date"]))->delete();
+        }
+        return array("code" => 200);
     }
 
     //异步上传图片 100

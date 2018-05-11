@@ -46,6 +46,10 @@ class AddScenery
                 //商品信息
                 $output = $this->productInfo();
                 break;
+            case '12':
+                //删除价格日历
+                $output = $this->delcalendar();
+                break;
             case '100':
                 //图片上传
                 $output = $this->imageUpload();
@@ -277,6 +281,26 @@ class AddScenery
         return array("code" => 200, "data" => array("goodsCode" => $goodsCode));
     }
 
+    //价格日历删除 12
+    public function delcalendar(){
+        $postData = input('post.');
+        $goodsCode = $postData["goodsCode"];
+        if(empty($goodsCode)){
+            return array("code" => 412, "msg" => "商品号不能为空");
+        }
+
+        $dateArray = $postData["date"];
+        if (empty($dateArray)) {
+            return array("code" => 404, "msg" => "上传参数不能为空");
+        }
+
+        foreach ($dateArray as $k) {
+            $data["date"] = strtotime($k);//时间戳;
+            db('scenery_calendar')->where(array("goods_code" => $goodsCode, "date" => $data["date"]))->delete();
+        }
+        return array("code" => 200);
+    }
+
     //----  图片处理
 
     //异步上传图片 100
@@ -362,7 +386,7 @@ class AddScenery
         if(empty($data['class_label'])){
             $data['class_label'] = "";
         }
-        $data["recommend_account"] = json_encode($data["recommend_account"]);
+        $data["recommend_account"] = $data["recommend_account"];
         $data["class_label"] = json_encode($data["class_label"]);
         return $data;
 

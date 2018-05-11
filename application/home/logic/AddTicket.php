@@ -40,6 +40,10 @@ class AddTicket
                 //价格库存
                 $output = $this->ratesInventory();
                 break;
+            case '12':
+                //删除价格日历
+                $output = $this->delcalendar();
+                break;
             case '100':
                 //图片异步上传
                 $output = $this->imageUpload();
@@ -346,6 +350,26 @@ class AddTicket
     public function ratesInventory()
     {
         return "ratesInventory";
+    }
+
+    //价格日历删除 12
+    public function delcalendar(){
+        $postData = input('post.');
+        $goodsCode = $postData["goodsCode"];
+        if(empty($goodsCode)){
+            return array("code" => 412, "msg" => "商品号不能为空");
+        }
+
+        $dateArray = $postData["date"];
+        if (empty($dateArray)) {
+            return array("code" => 404, "msg" => "上传参数不能为空");
+        }
+
+        foreach ($dateArray as $k) {
+            $data["date"] = strtotime($k);//时间戳;
+            db('ticket_calendar')->where(array("goods_code" => $goodsCode, "date" => $data["date"]))->delete();
+        }
+        return array("code" => 200);
     }
 
     //异步上传图片 100
