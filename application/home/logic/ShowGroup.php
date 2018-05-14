@@ -213,7 +213,7 @@ class ShowGroup
         $array = json_decode($data["charged_item"],true);
         if(is_array($array)){
             foreach ($array as &$k){
-                $k["place"] = (float)$k["place"];
+                $k["price"] = (float)$k["price"];
             }
         }
         $output["charged_item"] = $array;
