@@ -12,7 +12,7 @@ class AddGroup
     {
         //需要商品code
         $goodsCode = input('post.goodsCode');
-        if ($state != '0' && $state != '11' && $state != '12') {
+        if ($state != '0' && $state != '11' ) {
             if (empty($goodsCode)) {
                 return array("code" => 412, "msg" => "添加商品，商品号不能为空");
             }

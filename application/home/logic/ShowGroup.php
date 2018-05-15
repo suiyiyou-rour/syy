@@ -366,7 +366,7 @@ class ShowGroup
         if($dateTime && count($dateTime) >= 2){
             $where["date"] = [[ '>=' , strtotime($dateTime[0])], [ '<=' , strtotime($dateTime[1])], "and"];
         }else{
-            $where["date"] = [ '>=' , time()];
+            $where["date"] = [ '>=' , strtotime(date("Y-m-d"))];
         }
         $where["goods_code"] = $goodsCode;
 

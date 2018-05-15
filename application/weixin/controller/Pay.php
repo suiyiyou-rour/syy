@@ -21,10 +21,22 @@ class Pay extends WeixinBase
             "is_del"       => 0 ,          //未删除
             "order_type"   => 1           //待付款
         ];
-        $orderInfo = db("order")->field("goods_name,total_price")->where($where)->find();
+        $orderInfo = db("order")->field("create_time,goods_name,total_price")->where($where)->find();
         if(!$orderInfo){
             return json(array("code" => 405 , "msg" => "找不到待付款订单"));
         }
+
+        //订单半小时
+        if(time() > $orderInfo["create_time"] + 1800){
+            try{
+                db('order')->where(array("order_sn" => $orderSn))->update(array("order_type"=>5));
+            } catch (\Exception $e) {
+
+            }
+            return json(array("code" => 405 , "msg" => "订单超过支付时间，请在半小时内支付"));
+        }
+
+
         $wxpay = cookie("jsApiParameters");
         if($wxpay && $wxpay["orderSn"] == $orderSn){
             $jsApiParameters = json_decode($wxpay["code"],true);
