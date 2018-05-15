@@ -136,7 +136,7 @@ class Order extends LoginBase
         if(!$res){
             return json(array("code" => 403,"msg" => "找不到订单或者已经被删除"));
         }
-        $res["create_time"]         = date("Y-m-d",$res["create_time"]);
+        $res["create_time"]         = date("Y-m-d H:i:s",$res["create_time"]);
         if($res["pay_time"]){
             $res["pay_time"]            = date("Y-m-d",$res["pay_time"]);
         }

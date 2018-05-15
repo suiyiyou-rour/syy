@@ -116,7 +116,7 @@ class Weixin extends Base {
                 {
                     "type":"view",
                     "name":"海报推广",
-                    "url":"http://wx.suiyiyou.net/#/poster"
+                    "url":"http://wx.suiyiyou.net/#/poster/0"
                 }
             ]
         },

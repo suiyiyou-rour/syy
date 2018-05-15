@@ -290,5 +290,103 @@ class Login extends WeixinBase
         return $id;
     }
 
+    //修改密码 短信验证码
+    public function userPwdSms()
+    {
+        $mobile = input('mobile');
 
+        // 手机号码验证
+        if(!is_phone($mobile)){
+            return json(array("code" => 405,"msg" => "手机号码不正确"));
+        }
+
+        $isUser = db('user')->where(array('account' => $mobile))->find();
+        $isRetail = db('retail')->where(array('account' => $mobile))->find();
+        if(!$isUser && !$isRetail){
+            return json(array("code" => 405,"msg" => "该手机号没有注册不能修改密码"));
+        }
+
+        $isSend = db('sms_pwdcode')->where(array('mobile' => $mobile))->find();
+        if(!$isSend){
+            $requestNum = 0;
+        }else{
+            if ($isSend['num'] > 10) {
+                return json(array("code" => 405,"msg" => "发送次数上限"));
+            }elseif($isSend['time'] + 60 > time()){
+                return json(array("code" => 403,"msg" => "不能重复发送"));
+            }
+            $requestNum = $isSend['num'];
+        }
+
+        // 配置阿里云短信 -- 模板参数
+        $arr =  array(
+            'accessKeyId' =>config('aliyun')['sms_accessKeyId'],
+            'accessKeySecret' => config('aliyun')['sms_accessKeySecret']
+        );
+        $smsObj = new \Aliyun\Sms($arr);
+
+        $code = rand(100000, 999999);
+        $params["PhoneNumbers"] =  $mobile;
+        $params["SignName"]     = "随意游网络";
+        $params["TemplateCode"] = "SMS_109705431";
+        $params['TemplateParam'] = Array (
+            "code" => $code
+        );
+
+        $result = $smsObj->sendVerify($params);
+
+        if ($result) {
+            $data['code']   =  $code;
+            $data['mobile'] =  $mobile;
+            $data['time']   =  time();
+            $data['num']   =  $requestNum + 1;
+            if($isSend){
+                db('sms_pwdcode') -> where(array('mobile' => $mobile))->update($data);
+            }else{
+                db('sms_pwdcode') ->insert($data);
+            }
+            return json(array('code' => 200, 'msg' => '发送成功'));
+        } else {
+            return json(array('code' => 403, 'msg' => '发送失败'));
+        }
+    }
+
+    //修改密码
+    public function changePwd(){
+        $mobile = input('mobile');
+        $pwd    = input('password');
+        $verify = input('verify');
+        $type   = input("type");
+        if(!$mobile || !$pwd || !$type || !$verify){
+            return json(array("code" => 404,"msg" => "参数不能为空"));
+        }
+        $pwd = md5($pwd);
+
+        // 验证码 失效
+        $isSend = db('sms_pwdcode')->where(array('mobile' => $mobile))->find();
+        if($isSend['time'] + 60 * 15 < time()){
+            return json(array("code" => 405,"msg" => "验证码已失效，请重新发送。"));
+        }
+
+        if($type == 1){
+            $user = db('user')->where(array('account' => $mobile))->find();
+            if(!$user) return json(array("code" => 403,"msg" => "用户账号不存在"));
+            try{
+                db('user')->where(array('account' => $mobile))->update(array("pwd"=>$pwd));
+            } catch (\Exception $e) {
+                return json(array("code" => 403, "msg" => "修改失败，请联系管理员"));
+            }
+            return json(array("code" => 200, "msg" => "修改成功"));
+
+        }else{
+            $retail = db('retail')->where(array('account_num' => $mobile))->find();
+            if(!$retail) return json(array("code" => 403,"msg" => "经销商账号不存在"));
+            try{
+                db('retail')->where(array('account_num' => $mobile))->update(array("pwd"=>$pwd));
+            } catch (\Exception $e) {
+                return json(array("code" => 403, "msg" => "修改失败，请联系管理员"));
+            }
+            return json(array("code" => 200, "msg" => "修改成功"));
+        }
+    }
 }
