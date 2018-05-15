@@ -301,7 +301,7 @@ class Login extends WeixinBase
         }
 
         $isUser = db('user')->where(array('account' => $mobile))->find();
-        $isRetail = db('retail')->where(array('account' => $mobile))->find();
+        $isRetail = db('retail')->where(array('account_num' => $mobile))->find();
         if(!$isUser && !$isRetail){
             return json(array("code" => 405,"msg" => "该手机号没有注册不能修改密码"));
         }
