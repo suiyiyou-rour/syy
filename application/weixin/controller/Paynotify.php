@@ -198,40 +198,40 @@ class Paynotify extends Base
             ->field("stock_is_open,stock_num,reserve_is_open,reserve_time,reserve_num,sales_num")
             ->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))
             ->find();
-        if(!$price){
-            return array("bool" => 0, "error_info" => "没有价格日历数据");
-        }
-        $num          = $orderInfo["total_num"];  //总人数
-        $stockNum     = $price["stock_num"];       //库存
-        if($num <= $stockNum){       //正常库存判断
-            $priceDate["stock_num"] = $stockNum - $num;
-            $orderDate["order_type"] = 2;                               // 2已付款，未出行(正常订单)
-        }else{
-            $priceDate["stock_num"] = 0;
-            //库存保留房库存判断
-            if($price["reserve_is_open"] == 1){ //保留房库存
-                $priceDate["reserve_num"] = $price - ($num - $stockNum);
+        if(!$price) return array("bool" => 0, "error_info" => "没有价格日历数据");
 
-                $todayTime = strtotime(date("Y-m-d"),time());
-                if($orderInfo['go_time'] == $todayTime && (time() - $todayTime) > $price["reserve_time"]){  //保留房时间不够
-                    $orderDate["order_type"] = 3;                               // 3待确认订单
-                }else{
-                    $orderDate["order_type"] = 2;                               // 2已付款，未出行(正常订单)
-                }
-            }else{
-                $orderDate["order_type"] = 3;                                    // 3待确认订单
-            }
-        }
-
-        $priceDate["sales_num"] = $price["sales_num"] + $num;                          //价格日历销量
-        $orderDate["pay_time"]  = time();                                      //支付时间
-
+        $orderDate["pay_time"]      = time();      //支付时间
+        $orderDate["order_type"]    = 3;           // 景酒全部待确认订单
+        //修改订单
         try{
-            //修改订单
             db('order')->where(array("order_sn" => $orderInfo["order_sn"]))->update($orderDate);
         } catch (\Exception $e) {
             return array("bool" => 2, "error_info" => "订单状态保存失败");
         }
+
+        $num           =  $orderInfo["total_num"];  //总人数
+        $all           =  $price["stock_num"] + $price["reserve_num"];//总库存
+
+        if($num >= $all){
+            $priceDate["stock_num"]   = 0;
+            $priceDate["reserve_num"] = 0;
+        }else{
+            //库存保留房库存判断
+            if($price["reserve_is_open"] == 1){ //保留房库存
+                $todayTime = strtotime(date("Y-m-d"),time());
+                if($orderInfo['go_time'] == $todayTime && (time() - $todayTime) > $price["reserve_time"]){  //保留房时间不够
+                    $priceDate["stock_num"] = ($num >= $price["stock_num"]) ? 0 : $price["stock_num"] - $num;//库存
+                }else{
+                    $priceDate["reserve_num"] = ($num >= $price["reserve_num"]) ? 0 : $price["reserve_num"] - $num;//保留房库存
+                    if($num > $price["reserve_num"]) $priceDate["stock_num"] = $price["stock_num"] - ($num - $price["reserve_num"]);//库存
+                }
+            }else{
+                $priceDate["stock_num"] = ($num >= $price["stock_num"]) ? 0 : $price["stock_num"] - $num;//库存
+            }
+        }
+
+        $priceDate["sales_num"] = $price["sales_num"] + $num;                          //价格日历销量
+
         try{
             //价格日历
             db("scenery_calendar")->where(array("goods_code"=>$orderInfo['goods_code'],"date"=> $orderInfo['go_time']))->update($priceDate);
