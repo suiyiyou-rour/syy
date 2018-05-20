@@ -127,7 +127,7 @@ class Order extends LoginBase
             ['goods b','a.goods_code = b.code'],
             ['retail c','a.retail_code = c.code'],
         ];
-        $field  =  "a.order_sn,a.goods_code,a.user_code,a.user_type,a.retail_code,a.create_time,a.pay_time,a.goods_type,a.go_time,a.order_type,a.goods_name,a.total_price,a.total_num,a.mobile,a.user_name,a.identification,a.remark,b.head_img,c.name as retail_name";
+        $field  =  "a.order_sn,a.goods_code,a.user_code,a.user_type,a.retail_code,a.create_time,a.pay_time,a.goods_type,a.go_time,a.order_type,a.goods_name,a.total_price,a.total_num,a.mobile,a.user_name,a.identification,a.remark,b.head_img,c.name as retail_name,c.mobile as retail_mobile";
         if($user_type == 2){    //分销商
             $field.= ",a.rebate_type,a.rebate_total_money,a.total_settle_price";
         }
