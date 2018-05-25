@@ -186,9 +186,24 @@ class AddTicket
     //价格库存有效期 规则设置2
     public function rulesSet(){
         $priceType = input('post.price_type');
+
+        //日期模式判断
         if($priceType != "1" && $priceType != "2"){//1价格日历 2有效期
             return array("code" => 403, "msg" => "日期模式错误");
         }
+
+        //日期模式不让更改
+        $join = [['goods_create b','a.code = b.goods_code']];
+        $where = [
+            "a.code"         => input('post.goodsCode'),
+            "a.goods_type"  => 2,
+            "a.is_del"       =>  ["<>","1"]
+        ];
+
+        $output = db('goods')->alias("a")->join($join)->field("a.price_type,b.tab")->where($where)->find();
+        if(!$output) return array("code" => 403,"msg" => "商品不存在或者商品被删除，请联系管理员");
+        if($output["tab"] == 2 && $output["price_type"] != $priceType) return array("code" => 403,"msg" => "商品价格模式不能修改");
+
         if($priceType == "2"){
             return $this->rulesSetIndate();
         }else{
