@@ -63,7 +63,7 @@ class Jxsrefund extends Admin
         $billData["bill_time"]          = time();
 
         //经销商账户表
-        $moneyData["total_money"]   = $money["total_money"] + abs($info["money"]);
+        $moneyData["already_money"]   = $money["already_money"] + abs($info["money"]);
 
 
         $db = db("");
