@@ -91,6 +91,7 @@ class Detail extends WeixinBase
                 $k["settle_child_price"]    = (float)$k["settle_child_price"];
                 $k["plat_house_price"]      = (float)$k["plat_house_price"];
                 $k["date"]                   =  date("Y-m-d",$k["date"]);
+                $k["stock_num"]             = $k["stock_num"] + $k["need_stock_num"];
             }
         }
         $output["info"] = $info;
