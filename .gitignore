@@ -1,6 +1,7 @@
 .idea
 composer.lock
 *.log
+vendor
 thinkphp
 /public/node_modules
 
