@@ -54,13 +54,19 @@ class Retail extends Admin
             return \json(array('code' => 404 ,'msg' => '出错啦！请重新刷新'));
         }
 
-        $res = db('retail')->where(['code' => $code])->update(['check' =>  $check ]);
-        if(!$res){
+        try{
+            db('retail')->where(['code' => $code])->update(['check' =>  $check ]);
+        } catch (\Exception $e) {
             return \json(array('code' => 404 ,'msg' => '操作失败！'));
         }
 
         try{
-            db('retail_money')->insert(['retail_code' => $code]);
+            if($check == 1){
+                $resr = db('retail_money')->where(['retail_code' => $code])->find();
+                if(!$resr){
+                    db('retail_money')->insert(['retail_code' => $code]);
+                }
+            }
         } catch (\Exception $e) {
             return json(array("code" => 403, "msg" => "金额表写入失败，请联系管理员"));
         }
