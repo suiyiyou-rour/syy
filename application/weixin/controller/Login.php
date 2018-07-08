@@ -277,7 +277,8 @@ class Login extends WeixinBase
         $code = getPid();
         $res = db('retail')->field("head_img,com_name,mobile")->where(array('code' => $code))->find();
         if(!$res){
-            return json(array("code" => 404,"msg" => "经销商信息拉取失败，经销商请重新登录，游客请从正常链接进入"));
+            $k = setcookie('pid','',time()-3600,"/",".suiyiyou.net");
+            return json(array("code" => 404,"msg" => "经销商信息拉取失败，经销商请重新登录，游客请从正常链接进入","k"=>$k,"cookie"=>$_COOKIE));
         }
         return json(array("code" => 200,"data" => $res));
 
